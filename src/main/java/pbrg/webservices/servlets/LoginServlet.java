@@ -22,8 +22,26 @@ public class LoginServlet extends HttpServlet {
         doPost(request,response);
     }
 
+    private boolean validateLogin(HttpServletRequest request) {
+        if (request == null) {
+            System.out.println("request empty");
+            return false;
+        }
+
+        if (request.getParameter("uid") == null) {
+            System.out.println("uid empty");
+            return false;
+        }
+
+        return true;
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        if (!validateLogin(request)) {
+            return;
+        }
 
         int uid = Integer.parseInt(request.getParameter("uid"));
         String pwd = request.getParameter("pwd");
