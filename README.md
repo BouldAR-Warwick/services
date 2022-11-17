@@ -2,7 +2,7 @@
 
  
 ##compile commands:
-mvn clean
-mvn package
+mvn clean 
+mvn package 
 
-Then copy the war file in generated target dir to tomcat webapps dir
+Then copy the war file in generated target dir to tomcat webapps dir 
