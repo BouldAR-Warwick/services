@@ -1,7 +1,6 @@
 # Web services for project pbrg
 
- 
-##compile commands:<br/>
+##compile commands:
 mvn clean<br/>
 mvn package<br/>
 <br/>
