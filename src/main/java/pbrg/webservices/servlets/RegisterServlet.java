@@ -22,10 +22,11 @@ import java.util.*;
 import java.io.*;
 import java.net.URLDecoder;
 
+
 import pbrg.webservices.servlets.models.LoggedInUser;
 
-@WebServlet(name = "LoginServlet", urlPatterns = "/Login")
-public class LoginServlet extends MyHttpServlet {
+@WebServlet(name = "RegisterServlet", urlPatterns = "/Register")
+public class RegisterServlet extends MyHttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doPost(request,response);
@@ -39,36 +40,30 @@ public class LoginServlet extends MyHttpServlet {
 
         String username = jObj.getString("username");
         String pwd = jObj.getString("password");
-        Boolean stayLoggedIn = jObj.getBoolean("stayLoggedIn");
+        String email = jObj.getString("email");
         PrintWriter out = response.getWriter();
 
         try
-        {
+        {   
             // get a database connection from connection pool
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
             Connection conn = ds.getConnection();
-            PreparedStatement pst = conn.prepareStatement("SELECT * FROM USERS WHERE username=?;");
+            PreparedStatement pst = conn.prepareStatement("INSERT INTO USERS (Username, Email, Password) VALUES (?,?,?)");
+            pst.setString(1, username);
+            pst.setString(2, email);
+            pst.setString(3, pwd);
+            pst.executeUpdate();
+            pst.close();
+
+            pst = conn.prepareStatement("SELECT * FROM USERS WHERE username=?");
             pst.setString(1, username);
             ResultSet rs = pst.executeQuery();
             LoggedInUser user = new LoggedInUser(0,null);
             if(rs.next()) {
+                user = new LoggedInUser(rs.getInt("uid"),rs.getString("username"));
                 HttpSession session = request.getSession();
                 session.setAttribute("uid",rs.getInt("uid"));
-                if (pwd.equals(rs.getString("password"))) {
-                    user = new LoggedInUser(rs.getInt("uid"),rs.getString("username"));
-                    if (stayLoggedIn) {
-                        // create cookie and store logged in user info in cookie
-                        Cookie cookie1 = new Cookie("username", rs.getString("username"));
-                        Cookie cookie2 = new Cookie("uid", String.valueOf(rs.getInt("uid")));
-                        // set expired time to 7 days
-                        cookie1.setMaxAge(302400); 
-                        cookie2.setMaxAge(302400);
-                        // send cookie back to client for authentication next time
-                        response.addCookie(cookie1);
-                        response.addCookie(cookie2);
-                    }
-                }
             }
             
             String json = new Gson().toJson(user);
