@@ -34,12 +34,12 @@ public class LoginServlet extends MyHttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+        // get json object in the request body
         JSONObject jObj = new JSONObject(getBody(request));
-        Iterator<String> it = jObj.keys();
-
         String username = jObj.getString("username");
         String pwd = jObj.getString("password");
         Boolean stayLoggedIn = jObj.getBoolean("stayLoggedIn");
+
         PrintWriter out = response.getWriter();
 
         try

@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class MyHttpServlet extends HttpServlet {
+
+    // add a function to get json object in the request body
     public static String getBody(HttpServletRequest request)  {
 
         String body = null;
