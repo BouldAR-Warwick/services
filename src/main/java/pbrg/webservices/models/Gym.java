@@ -1,4 +1,4 @@
-package pbrg.webservices.models;
+package pbrg.webservices.servlets.models;
 
 public class Gym {
     private int gid;

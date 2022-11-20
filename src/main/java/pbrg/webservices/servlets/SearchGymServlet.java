@@ -19,6 +19,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.*;
 
+import pbrg.webservices.servlets.models.GymList;
+
 @WebServlet(name = "SearchGymServlet", urlPatterns = "/SearchGym")
 public class SearchGymServlet extends MyHttpServlet {
     @Override
@@ -54,13 +56,13 @@ public class SearchGymServlet extends MyHttpServlet {
             pst.setString(2, "%"+queryword+"%");
             ResultSet rs = pst.executeQuery();
 
-            JSONArray gyms = new JSONArray();
+            ArrayList<String> gyms = new ArrayList<String>();
             while(rs.next()) {
-                gyms.put(rs.getString("Gymname"));
+                gyms.add(rs.getString("Gymname"));
             }
-            JSONObject queryResult = new JSONObject();
-            queryResult.put("queryResult",gyms);
-            String json = new Gson().toJson(queryResult);
+            String[] gymArray = gyms.toArray(new String[0]);
+            GymList gymList = new GymList(gymArray);
+            String json = new Gson().toJson(gymList);
 
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
