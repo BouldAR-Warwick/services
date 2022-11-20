@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import com.google.gson.Gson;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.*;
 
@@ -53,13 +54,14 @@ public class SearchGymServlet extends MyHttpServlet {
             pst.setString(2, "%"+queryword+"%");
             ResultSet rs = pst.executeQuery();
 
-            ArrayList<String> gyms = new ArrayList<String>();
+            JSONArray gyms = new JSONArray();
             while(rs.next()) {
-                gyms.add(rs.getString("Gymname"));
+                gyms.put(rs.getString("Gymname"));
             }
+            JSONObject queryResult = new JSONObject();
+            queryResult.put("queryResult",gyms);
+            String json = new Gson().toJson(queryResult);
 
-            String[] gymArray= gyms.toArray(new String[0]);
-            String json = new Gson().toJson(gymArray);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(json);
