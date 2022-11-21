@@ -28,7 +28,7 @@ public class GetPrimaryGymServlet extends MyHttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
+        HttpSession session = getSession(request);
 
         // return unauthorized error message if session is not exist
         if (session==null) {

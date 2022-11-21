@@ -1,7 +1,6 @@
 package pbrg.webservices.servlets;
 
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,4 +44,29 @@ public class MyHttpServlet extends HttpServlet {
         body = stringBuilder.toString();
         return body;
     }
+
+    // add a function to get session and handle authentication
+    public static HttpSession getSession(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+
+        // return unauthorized error message if session is not exist
+        if (session==null) {
+            // check cookie for user information
+            String uid = "";
+            Cookie[] cookies = request.getCookies();
+            for (Cookie cookie : cookies) {
+                if ("uid".equals(cookie.getName())) {
+                    uid = cookie.getValue();
+                }
+            }
+            if (!uid.isEmpty()) {
+                // create a new session for stay logged-in user
+                int id = Integer.valueOf(uid);
+                session = request.getSession();
+                session.setAttribute("uid", id);
+            }
+        }
+        return session;
+    }
+
 }
