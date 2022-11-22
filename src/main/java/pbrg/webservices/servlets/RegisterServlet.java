@@ -23,7 +23,7 @@ import java.io.*;
 import java.net.URLDecoder;
 
 
-import pbrg.webservices.servlets.models.LoggedInUser;
+import pbrg.webservices.models.LoggedInUser;
 
 @WebServlet(name = "RegisterServlet", urlPatterns = "/Register")
 public class RegisterServlet extends MyHttpServlet {

@@ -18,7 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
-import pbrg.webservices.servlets.models.Gym;
+import pbrg.webservices.models.Gym;
 
 @WebServlet(name = "GetGymServlet", urlPatterns = "/GetGym")
 public class GetGymServlet extends MyHttpServlet {
@@ -30,10 +30,14 @@ public class GetGymServlet extends MyHttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        HttpSession session = getSession(request);
+        if (request == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
-        // return unauthorized error message if session is not exist
-        if (session==null) {
+        // get session or return unauthorized error message
+        HttpSession session = request.getSession(false);
+        if (session == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

@@ -16,7 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import pbrg.webservices.servlets.models.Gym;
+import pbrg.webservices.models.Gym;
 
 @WebServlet(name = "GetPrimaryGymServlet", urlPatterns = "/GetPrimaryGym")
 public class GetPrimaryGymServlet extends MyHttpServlet {

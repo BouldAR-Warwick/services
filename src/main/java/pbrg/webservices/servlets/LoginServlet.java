@@ -22,7 +22,7 @@ import java.util.*;
 import java.io.*;
 import java.net.URLDecoder;
 
-import pbrg.webservices.servlets.models.LoggedInUser;
+import pbrg.webservices.models.LoggedInUser;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")
 public class LoginServlet extends MyHttpServlet {

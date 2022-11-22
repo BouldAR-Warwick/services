@@ -1,4 +1,4 @@
-package pbrg.webservices.servlets.models;
+package pbrg.webservices.models;
 
 public class GymList {
     private String[] gyms;

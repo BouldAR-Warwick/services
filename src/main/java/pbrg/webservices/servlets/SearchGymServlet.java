@@ -19,7 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.*;
 
-import pbrg.webservices.servlets.models.GymList;
+import pbrg.webservices.models.GymList;
 
 @WebServlet(name = "SearchGymServlet", urlPatterns = "/SearchGym")
 public class SearchGymServlet extends MyHttpServlet {
