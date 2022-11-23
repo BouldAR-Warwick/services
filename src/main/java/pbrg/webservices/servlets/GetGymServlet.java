@@ -54,7 +54,7 @@ public class GetGymServlet extends MyHttpServlet {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
             Connection conn = ds.getConnection();
-            PreparedStatement pst = conn.prepareStatement("SELECT (GID, Gymname) FROM GYMS WHERE Gymname = ?");
+            PreparedStatement pst = conn.prepareStatement("SELECT (GID, Gymname) FROM gyms WHERE Gymname = ?");
             pst.setString(1, gymname);
             ResultSet rs = pst.executeQuery();
 

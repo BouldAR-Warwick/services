@@ -51,7 +51,7 @@ public class SearchGymServlet extends MyHttpServlet {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
             Connection conn = ds.getConnection();
-            PreparedStatement pst = conn.prepareStatement("SELECT Gymname FROM GYMS WHERE GymLocation LIKE ? OR Gymname LIKE ?");
+            PreparedStatement pst = conn.prepareStatement("SELECT Gymname FROM gyms WHERE GymLocation LIKE ? OR Gymname LIKE ?");
             pst.setString(1, "%"+queryword+"%");
             pst.setString(2, "%"+queryword+"%");
             ResultSet rs = pst.executeQuery();

@@ -49,7 +49,7 @@ public class RegisterServlet extends MyHttpServlet {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
             Connection conn = ds.getConnection();
-            PreparedStatement pst = conn.prepareStatement("INSERT INTO USERS (Username, Email, Password) VALUES (?,?,?)");
+            PreparedStatement pst = conn.prepareStatement("INSERT INTO users (Username, Email, Password) VALUES (?,?,?)");
             pst.setString(1, username);
             pst.setString(2, email);
             pst.setString(3, pwd);

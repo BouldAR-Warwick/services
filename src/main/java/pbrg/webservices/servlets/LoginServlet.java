@@ -48,7 +48,7 @@ public class LoginServlet extends MyHttpServlet {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
             Connection conn = ds.getConnection();
-            PreparedStatement pst = conn.prepareStatement("SELECT * FROM USERS WHERE username=?;");
+            PreparedStatement pst = conn.prepareStatement("SELECT * FROM users WHERE username=?;");
             pst.setString(1, username);
             ResultSet rs = pst.executeQuery();
             LoggedInUser user = new LoggedInUser(0,null);

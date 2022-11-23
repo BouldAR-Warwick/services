@@ -2,6 +2,8 @@ package pbrg.webservices;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -15,6 +17,24 @@ public final class Singleton {
     private static Context ctx;
     private static DataSource ds;
     private static Connection conn;
+
+    public static String wallImagePath = "~/wall-images/";   
+
+    private static Map<String, String> contentTypeLookup = new HashMap<String, String>() {{
+        put("jpg", "image/jpeg");
+        put("jpeg", "image/jpeg");
+        put("pbg", "image/png");
+
+        /* 
+        unsupported:
+            image/gif   
+            image/tiff    
+            image/vnd.microsoft.icon    
+            image/x-icon   
+            image/vnd.djvu   
+            image/svg+xml   
+        */
+    }};
 
     static {
         try {
@@ -35,6 +55,10 @@ public final class Singleton {
         }
         
         return Singleton.INSTANCE;
+    }
+
+    public static String getContentType(String imageFormat) {
+        return Singleton.contentTypeLookup.get(imageFormat);
     }
 
     /** Instantiate DB */

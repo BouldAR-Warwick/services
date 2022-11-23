@@ -55,17 +55,17 @@ public class GetRoutesServerlet extends MyHttpServlet {
         Connection conn = Singleton.getDbConnection();
 
         try (PreparedStatement pst = conn.prepareStatement(
-            "SELECT ROUTES.RID " + 
-            "FROM ROUTES " + 
-            "INNER JOIN WALLS ON ROUTES.WID = WALLS.WID " +
-            "INNER JOIN GYMS ON WALLS.GID = GYMS.GID " +
-            "WHERE GYMS.GID = ?"
+            "SELECT routes.RID " + 
+            "FROM routes " + 
+            "INNER JOIN walls ON routes.WID = walls.WID " +
+            "INNER JOIN gyms ON walls.GID = gyms.GID " +
+            "WHERE gyms.GID = ?"
         )) {
             pst.setString(1, "%"+gymID+"%");
 
             ResultSet rs = pst.executeQuery();
 
-            ArrayList<String> routeIDs = new ArrayList<String>();
+            List<String> routeIDs = new ArrayList<>();
             while(rs.next()) {
                 routeIDs.add(rs.getString("RID"));
             }
