@@ -56,7 +56,7 @@ public class RegisterServlet extends MyHttpServlet {
             pst.executeUpdate();
             pst.close();
 
-            pst = conn.prepareStatement("SELECT * FROM USERS WHERE username=?");
+            pst = conn.prepareStatement("SELECT * FROM users WHERE username=?");
             pst.setString(1, username);
             ResultSet rs = pst.executeQuery();
             LoggedInUser user = new LoggedInUser(0,null);
