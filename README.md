@@ -1,9 +1,9 @@
 # Web services for project pbrg
 
 ## compile commands:
-mvn clean<br/>
-mvn package<br/>
-<br/>
+```
+mvn clean package
+```
 Then copy the war file in generated target dir to tomcat webapps dir 
 
 ## login to database and apply schema:
