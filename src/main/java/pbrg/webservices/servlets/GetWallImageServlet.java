@@ -23,6 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/* For parsing file extensions */
 import org.apache.commons.io.FilenameUtils;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
@@ -35,7 +36,8 @@ public class GetWallImageServlet extends MyHttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException 
+    {
 
         HttpSession session = getSession(request);
 
@@ -58,10 +60,9 @@ public class GetWallImageServlet extends MyHttpServlet {
         Connection conn = Singleton.getDbConnection();
 
         try (PreparedStatement pst = conn.prepareStatement(
-            "SELECT (walls.image_file_name) " + 
-            "FROM walls " + 
-            "WHERE GID = ?"
-        )) {
+                "SELECT (walls.image_file_name) " +
+                        "FROM walls " +
+                        "WHERE GID = ?")) {
             pst.setInt(1, gymID);
             ResultSet rs = pst.executeQuery();
 

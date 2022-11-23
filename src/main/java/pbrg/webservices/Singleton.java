@@ -20,11 +20,10 @@ public final class Singleton {
 
     public static String wallImagePath = "~/wall-images/";   
 
-    private static Map<String, String> contentTypeLookup = new HashMap<String, String>() {{
-        put("jpg", "image/jpeg");
-        put("jpeg", "image/jpeg");
-        put("pbg", "image/png");
-
+    private static Map<String, String> contentTypeLookup = Map.ofEntries(
+        Map.entry("jpg", "image/jpeg"),
+        Map.entry("jpeg", "image/jpeg"),
+        Map.entry("pbg", "image/png")
         /* 
         unsupported:
             image/gif   
@@ -34,7 +33,7 @@ public final class Singleton {
             image/vnd.djvu   
             image/svg+xml   
         */
-    }};
+    );
 
     static {
         try {
