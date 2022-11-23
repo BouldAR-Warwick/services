@@ -38,10 +38,13 @@ public class GetWallImageServlet extends MyHttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException 
     {
+        if (request == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
+        // get session, error if request is unauthorized
         HttpSession session = getSession(request);
-
-        // return unauthorized error message if session is not exist
         if (session == null) {
             // return unauthorized error message
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);

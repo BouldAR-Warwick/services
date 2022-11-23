@@ -18,7 +18,7 @@ public final class Singleton {
     private static DataSource ds;
     private static Connection conn;
 
-    public static String wallImagePath = "~/wall-images/";   
+    public static String wallImagePath = System.getProperty("user.home") + "/wall-images/";   
 
     private static Map<String, String> contentTypeLookup = Map.ofEntries(
         Map.entry("jpg", "image/jpeg"),

@@ -7,16 +7,15 @@ if [ ! -d ~/tomcat-10.0.27/ ]; then
 fi
 
 # remove war files from server
-rm -r ~/tomcat-10.0.27/webapps/webservices-1.0-SNAPSHOT
-rm ~/tomcat-10.0.27/webapps/webservices-1.0-SNAPSHOT.war
+rm -rv ~/tomcat-10.0.27/webapps/webservices-1.0-SNAPSHOT
+rm -v ~/tomcat-10.0.27/webapps/webservices-1.0-SNAPSHOT.war
 
 # clean and make war
-cd ~/Projects/pbrg_services/;
-mvn clean package;
-chmod 755 ~/Projects/pbrg_services/target/webservices-1.0-SNAPSHOT.war
+mvn --file ~/Projects/pbrg_services/pom.xml clean package
+# chmod 755 ~/Projects/pbrg_services/target/webservices-1.0-SNAPSHOT.war
 
 # migrate war to tomcat server
 mv ~/Projects/pbrg_services/target/webservices-1.0-SNAPSHOT.war ~/tomcat-10.0.27/webapps/
 
 # run tomcat startup (ensure refresh)
-source ~/tomcat-10.0.27/bin/startup.sh
+# source ~/tomcat-10.0.27/bin/startup.sh
