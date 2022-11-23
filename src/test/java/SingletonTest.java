@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -6,13 +7,16 @@ import pbrg.webservices.Singleton;
 
 @Disabled
 public class SingletonTest {
-
-    static {
+    
+    @BeforeAll
+    public static void init(){
         Singleton.getInstance();
     }
 
     @Test
     void testFilePath() {
-        System.out.println(String.format("Wall image path: {0}", Singleton.wallImagePath));
+        assert true;
+        // String wallPath = Singleton.wallImagePath;
+        // System.out.println(String.format("Wall image path: {%s}", wallPath));
     }
 }

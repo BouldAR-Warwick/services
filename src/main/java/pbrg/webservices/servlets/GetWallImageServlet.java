@@ -28,6 +28,7 @@ import org.apache.commons.io.FilenameUtils;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
 public class GetWallImageServlet extends MyHttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -58,46 +59,54 @@ public class GetWallImageServlet extends MyHttpServlet {
 
         int gymID = (int) session.getAttribute("gid");
 
-        PrintWriter out = response.getWriter();
-
         Connection conn = Singleton.getDbConnection();
 
+        byte[] imageData = new byte[0];
+        String image_file_name = "";
+
         try (PreparedStatement pst = conn.prepareStatement(
-                "SELECT (walls.image_file_name) " +
-                        "FROM walls " +
-                        "WHERE GID = ?")) {
+            "SELECT (walls.image_file_name) " +
+            "FROM walls " +
+            "WHERE GID = ?"
+        )) {
             pst.setInt(1, gymID);
             ResultSet rs = pst.executeQuery();
 
             // get name of wall image
-            String image_file_name = "";
             if (rs.next()) {
                 image_file_name = rs.getString("image_file_name");
             }
             pst.close();
-            conn.close();
-
-            // get the file extension, lookup content type
-            String ext = FilenameUtils.getExtension(image_file_name);
-            String contentType = Singleton.getContentType(ext);
-
-            // image directory
-            FileInputStream fis = new FileInputStream(Singleton.wallImagePath + image_file_name);
-
-            // get file size
-            int size = fis.available();
-            byte imageData[] = new byte[size];
-            fis.read(imageData);
-            fis.close();
-
-            // set response to image type
-            response.setContentType(contentType);
-            OutputStream os = response.getOutputStream();
-            os.write(imageData);
-            os.flush();
-            os.close();
         } catch (IllegalArgumentException | SQLException e) {
+            PrintWriter out = response.getWriter();
             out.println(e.getMessage());
         }
+
+        if (image_file_name == null) {
+            // case gym has no wall! - TODO
+            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+            return;
+        }
+
+        Singleton.closeDbConnection();
+
+        // get the file extension, lookup & set content type
+        String ext = FilenameUtils.getExtension(image_file_name);
+        String contentType = Singleton.getContentType(ext);
+        response.setContentType(contentType);
+
+        // image directory
+        FileInputStream fis = new FileInputStream(Singleton.wallImagePath + image_file_name);
+
+        // get file size
+        int size = fis.available();
+        imageData = new byte[size];
+        fis.read(imageData);
+        fis.close();
+
+        OutputStream outputStream = response.getOutputStream();
+        outputStream.write(imageData);
+        outputStream.flush();
+        outputStream.close();
     }
 }
