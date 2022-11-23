@@ -60,7 +60,7 @@ public class GetWallImageServlet extends MyHttpServlet {
         try (PreparedStatement pst = conn.prepareStatement(
             "SELECT (walls.image_file_name) " + 
             "FROM walls " + 
-            "WHERE GID = ?;"
+            "WHERE GID = ?"
         )) {
             pst.setInt(1, gymID);
             ResultSet rs = pst.executeQuery();
