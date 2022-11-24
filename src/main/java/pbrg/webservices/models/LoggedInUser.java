@@ -8,4 +8,12 @@ public class LoggedInUser {
         this.uid = uid;
         this.username = username;
     }
+
+    public int get_uid() {
+        return this.uid;
+    }
+
+    public String get_username() {
+        return this.username;
+    }
 }

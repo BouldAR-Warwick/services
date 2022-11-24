@@ -16,12 +16,17 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import com.google.gson.Gson;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.*;
 import java.io.*;
 import java.net.URLDecoder;
 
+import pbrg.webservices.Singleton;
 import pbrg.webservices.models.LoggedInUser;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")
@@ -34,54 +39,83 @@ public class LoginServlet extends MyHttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // get json object in the request body
-        JSONObject jObj = new JSONObject(getBody(request));
-        String username = jObj.getString("username");
-        String pwd = jObj.getString("password");
-        Boolean stayLoggedIn = jObj.getBoolean("stayLoggedIn");
+        // convert request body to json object
+        JSONObject credentials;
+        try {
+            credentials = new JSONObject(getBody(request));
+        } catch (JSONException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
-        PrintWriter out = response.getWriter();
+        // ensure request has all credentials
+        String[] requiredCredentials = {"username", "password", "stayLoggedIn"};
+        if (!Arrays.stream(requiredCredentials).allMatch(
+            (String credential) -> credentials.has(credential)
+        )) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
-        try
-        {
-            // get a database connection from connection pool
-            Context ctx = new InitialContext();
-            DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
-            Connection conn = ds.getConnection();
-            PreparedStatement pst = conn.prepareStatement("SELECT * FROM users WHERE username=?");
+        // collect credentials
+        String username = credentials.getString("username");
+        String password = credentials.getString("password");
+        Boolean stayLoggedIn = credentials.getBoolean("stayLoggedIn");
+
+        LoggedInUser user = null;
+
+        Connection conn = Singleton.getDbConnection();
+
+        try {
+            PreparedStatement pst = conn.prepareStatement(
+                "SELECT * FROM users WHERE username=? AND password=?"
+            );
             pst.setString(1, username);
+            pst.setString(2, password);
             ResultSet rs = pst.executeQuery();
-            LoggedInUser user = new LoggedInUser(0,null);
-            if(rs.next()) {
-                HttpSession session = request.getSession();
-                session.setAttribute("uid",rs.getInt("uid"));
-                if (pwd.equals(rs.getString("password"))) {
-                    user = new LoggedInUser(rs.getInt("uid"),rs.getString("username"));
-                    if (stayLoggedIn) {
-                        // create cookie and store logged in user info in cookie
-                        Cookie cookie1 = new Cookie("username", rs.getString("username"));
-                        Cookie cookie2 = new Cookie("uid", String.valueOf(rs.getInt("uid")));
-                        // set expired time to 7 days
-                        cookie1.setMaxAge(302400); 
-                        cookie2.setMaxAge(302400);
-                        // send cookie back to client for authentication next time
-                        response.addCookie(cookie1);
-                        response.addCookie(cookie2);
-                    }
-                }
-            }
             
-            String json = new Gson().toJson(user);
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(json);
+            if(rs.next()) {
+                user = new LoggedInUser(
+                    rs.getInt("uid"),
+                    rs.getString("username")
+                );
+            }
 
             pst.close();
-            conn.close();
+        } catch (SQLException e) {
+            response.getWriter().println(e.getMessage());
+            return;
         }
-        catch(Exception e)
-        {
-            out.println(e.getMessage());
+
+        Singleton.closeDbConnection();
+
+        // case one -> the user has not been authenticated (wrong credentials)
+        if (user == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
+
+        // user is authenticated
+        HttpSession session = request.getSession();
+        session.setAttribute("uid", user.get_uid());
+
+        // TODO: store primary gym id in session?
+        
+        if (stayLoggedIn) {
+            // create cookie and store logged in user info in cookie
+            Cookie cookie1 = new Cookie("username", user.get_username());
+            Cookie cookie2 = new Cookie("uid", String.valueOf(user.get_uid()));
+            // set expired time to 7 days
+            cookie1.setMaxAge(302400); 
+            cookie2.setMaxAge(302400);
+            // send cookie back to client for authentication next time
+            response.addCookie(cookie1);
+            response.addCookie(cookie2);
+        }
+
+        String json = new Gson().toJson(user);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(json);
     }
 }
