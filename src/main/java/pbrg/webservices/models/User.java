@@ -1,10 +1,10 @@
 package pbrg.webservices.models;
 
-public class LoggedInUser {
+public class User {
     private final int uid;
     private final String username;
 
-    public LoggedInUser (int uid, String username) {
+    public User (int uid, String username) {
         this.uid = uid;
         this.username = username;
     }

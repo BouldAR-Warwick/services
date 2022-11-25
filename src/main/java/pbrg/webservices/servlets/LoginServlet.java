@@ -8,8 +8,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.google.gson.Gson;
@@ -20,7 +18,8 @@ import java.util.*;
 import java.io.*;
 
 import pbrg.webservices.Singleton;
-import pbrg.webservices.models.LoggedInUser;
+import pbrg.webservices.models.User;
+import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")
 public class LoginServlet extends MyHttpServlet {
@@ -53,26 +52,12 @@ public class LoginServlet extends MyHttpServlet {
         String password = credentials.getString("password");
         boolean stayLoggedIn = credentials.getBoolean("stayLoggedIn");
 
-        LoggedInUser user = null;
-
         Connection conn = Singleton.getDbConnection();
 
+        // select user
+        User user = null;
         try {
-            PreparedStatement pst = conn.prepareStatement(
-                "SELECT * FROM users WHERE username=? AND password=?"
-            );
-            pst.setString(1, username);
-            pst.setString(2, password);
-            ResultSet rs = pst.executeQuery();
-            
-            if(rs.next()) {
-                user = new LoggedInUser(
-                    rs.getInt("uid"),
-                    rs.getString("username")
-                );
-            }
-
-            pst.close();
+            user = Database.sign_in(username, password, conn);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;
@@ -81,7 +66,8 @@ public class LoginServlet extends MyHttpServlet {
         Singleton.closeDbConnection();
 
         // case one -> the user has not been authenticated (wrong credentials)
-        if (user == null) {
+        boolean userLoggedIn = (user != null);
+        if (!userLoggedIn) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

@@ -9,9 +9,9 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+/** For services sorage - e.g., db */
 public final class Singleton {
     private static Singleton INSTANCE;
-    private final String info = "For services storage, db";
 
     private static Context ctx;
     private static DataSource ds;

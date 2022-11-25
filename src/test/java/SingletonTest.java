@@ -16,7 +16,7 @@ public class SingletonTest {
     @Test
     void testFilePath() {
         assert true;
-        // String wallPath = Singleton.wallImagePath;
-        // System.out.println(String.format("Wall image path: {%s}", wallPath));
+        String wallPath = Singleton.wallImagePath;
+        System.out.println(String.format("Wall image path: {%s}", wallPath));
     }
 }

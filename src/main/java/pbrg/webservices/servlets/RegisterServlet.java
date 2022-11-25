@@ -6,19 +6,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import com.google.gson.Gson;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.*;
 import java.io.*;
 
-
-import pbrg.webservices.models.LoggedInUser;
+import pbrg.webservices.Singleton;
+import pbrg.webservices.models.User;
+import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "RegisterServlet", urlPatterns = "/Register")
 public class RegisterServlet extends MyHttpServlet {
@@ -30,48 +30,69 @@ public class RegisterServlet extends MyHttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        JSONObject jObj = new JSONObject(getBody(request));
-        Iterator<String> it = jObj.keys();
-
-        String username = jObj.getString("username");
-        String pwd = jObj.getString("password");
-        String email = jObj.getString("email");
-        PrintWriter out = response.getWriter();
-
-        try
-        {   
-            // get a database connection from connection pool
-            Context ctx = new InitialContext();
-            DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
-            Connection conn = ds.getConnection();
-            PreparedStatement pst = conn.prepareStatement("INSERT INTO users (Username, Email, Password) VALUES (?,?,?)");
-            pst.setString(1, username);
-            pst.setString(2, email);
-            pst.setString(3, pwd);
-            pst.executeUpdate();
-            pst.close();
-
-            pst = conn.prepareStatement("SELECT * FROM users WHERE username=?");
-            pst.setString(1, username);
-            ResultSet rs = pst.executeQuery();
-            LoggedInUser user = new LoggedInUser(0,null);
-            if(rs.next()) {
-                user = new LoggedInUser(rs.getInt("uid"),rs.getString("username"));
-                HttpSession session = request.getSession();
-                session.setAttribute("uid",rs.getInt("uid"));
-            }
-            
-            String json = new Gson().toJson(user);
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(json);
-
-            pst.close();
-            conn.close();
+        // parse credentials
+        JSONObject credentials;
+        try {
+            credentials = new JSONObject(getBody(request));
+            // Iterator<String> it = credentials.keys();
+        } catch (JSONException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
-        catch(Exception e)
-        {
-            out.println(e.getMessage());
+
+        // ensure request has all credentials
+        String[] requiredCredentials = {"username", "email", "password"};
+        if (!Arrays.stream(requiredCredentials).allMatch(credentials::has)) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
+
+        // store credentials
+        String username = credentials.getString("username");
+        String email = credentials.getString("email");
+        String password = credentials.getString("password");
+
+        Connection connection = Singleton.getDbConnection();
+
+        // create new user
+        boolean added = false;
+        try {
+            added = Database.sign_up(username, email, password, connection);
+        } catch(SQLException e){
+            response.getWriter().println(e.getMessage());
+        }
+
+        // ensure user was added
+        if (!added) {
+            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+            return;
+        }
+
+        // select user
+        User user = null;
+        try {
+            user = Database.sign_in(username, password, connection);
+        } catch(Exception e){
+            response.getWriter().println(e.getMessage());
+        }
+
+        Singleton.closeDbConnection();
+
+        // case one -> the user has not been authenticated (wrong credentials)
+        boolean userLoggedIn = (user != null);
+        if (!userLoggedIn) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        // case two -> user is authenticated
+
+        HttpSession session = request.getSession();
+        session.setAttribute("uid", user.get_uid());
+
+        String json = new Gson().toJson(user);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(json);
     }
 }
