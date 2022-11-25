@@ -2,17 +2,11 @@ package pbrg.webservices.servlets;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,7 +18,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.*;
 import java.io.*;
-import java.net.URLDecoder;
 
 import pbrg.webservices.Singleton;
 import pbrg.webservices.models.LoggedInUser;
@@ -50,9 +43,7 @@ public class LoginServlet extends MyHttpServlet {
 
         // ensure request has all credentials
         String[] requiredCredentials = {"username", "password", "stayLoggedIn"};
-        if (!Arrays.stream(requiredCredentials).allMatch(
-            (String credential) -> credentials.has(credential)
-        )) {
+        if (!Arrays.stream(requiredCredentials).allMatch(credentials::has)) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -60,7 +51,7 @@ public class LoginServlet extends MyHttpServlet {
         // collect credentials
         String username = credentials.getString("username");
         String password = credentials.getString("password");
-        Boolean stayLoggedIn = credentials.getBoolean("stayLoggedIn");
+        boolean stayLoggedIn = credentials.getBoolean("stayLoggedIn");
 
         LoggedInUser user = null;
 
@@ -102,7 +93,7 @@ public class LoginServlet extends MyHttpServlet {
         // TODO: store primary gym id in session?
         
         if (stayLoggedIn) {
-            // create cookie and store logged in user info in cookie
+            // create cookie and store logged-in user info in cookie
             Cookie cookie1 = new Cookie("username", user.get_username());
             Cookie cookie2 = new Cookie("uid", String.valueOf(user.get_uid()));
             // set expired time to 7 days

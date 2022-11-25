@@ -1,19 +1,12 @@
 package pbrg.webservices.servlets;
 
-import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import pbrg.webservices.Singleton;
 
-import org.json.JSONObject;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,7 +54,7 @@ public class GetWallImageServlet extends MyHttpServlet {
 
         Connection conn = Singleton.getDbConnection();
 
-        byte[] imageData = new byte[0];
+        byte[] imageData;
         String image_file_name = "";
 
         try (PreparedStatement pst = conn.prepareStatement(
@@ -76,7 +69,6 @@ public class GetWallImageServlet extends MyHttpServlet {
             if (rs.next()) {
                 image_file_name = rs.getString("image_file_name");
             }
-            pst.close();
         } catch (IllegalArgumentException | SQLException e) {
             PrintWriter out = response.getWriter();
             out.println(e.getMessage());

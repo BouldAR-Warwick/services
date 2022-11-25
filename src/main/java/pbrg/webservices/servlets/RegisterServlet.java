@@ -2,17 +2,13 @@ package pbrg.webservices.servlets;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,7 +16,6 @@ import com.google.gson.Gson;
 import org.json.JSONObject;
 import java.util.*;
 import java.io.*;
-import java.net.URLDecoder;
 
 
 import pbrg.webservices.models.LoggedInUser;

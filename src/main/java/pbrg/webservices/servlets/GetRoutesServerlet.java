@@ -15,7 +15,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.google.gson.Gson;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.*;
 
@@ -50,8 +49,6 @@ public class GetRoutesServerlet extends MyHttpServlet {
         String gymID = jObj.getString("gymID");
         assert gymID != null;
 
-        PrintWriter out = response.getWriter();
-
         Connection conn = Singleton.getDbConnection();
 
         try (PreparedStatement pst = conn.prepareStatement(
@@ -70,17 +67,17 @@ public class GetRoutesServerlet extends MyHttpServlet {
                 routeIDs.add(rs.getString("RID"));
             }
 
-            String[] arrayOfRouteIDs = routeIDs.toArray(new String[routeIDs.size()]);
+            String[] arrayOfRouteIDs = routeIDs.toArray(new String[0]);
 
             String json = new Gson().toJson(arrayOfRouteIDs);
 
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(json);
-            pst.close();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            PrintWriter out = response.getWriter();
+            out.println(e.getMessage());
             System.exit(1);
         }
 

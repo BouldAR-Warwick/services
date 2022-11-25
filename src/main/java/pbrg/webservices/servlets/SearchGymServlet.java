@@ -15,7 +15,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import com.google.gson.Gson;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.*;
 
@@ -56,7 +55,7 @@ public class SearchGymServlet extends MyHttpServlet {
             pst.setString(2, "%"+queryword+"%");
             ResultSet rs = pst.executeQuery();
 
-            ArrayList<String> gyms = new ArrayList<String>();
+            List<String> gyms = new ArrayList<>();
             while(rs.next()) {
                 gyms.add(rs.getString("Gymname"));
             }

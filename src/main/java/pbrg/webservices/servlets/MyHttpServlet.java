@@ -12,7 +12,7 @@ public class MyHttpServlet extends HttpServlet {
     // add a function to get json object in the request body
     public static String getBody(HttpServletRequest request)  {
 
-        String body = null;
+        String body;
         StringBuilder stringBuilder = new StringBuilder();
         BufferedReader bufferedReader = null;
 
@@ -21,12 +21,10 @@ public class MyHttpServlet extends HttpServlet {
             if (inputStream != null) {
                 bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                 char[] charBuffer = new char[128];
-                int bytesRead = -1;
+                int bytesRead;
                 while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
                     stringBuilder.append(charBuffer, 0, bytesRead);
                 }
-            } else {
-                stringBuilder.append("");
             }
         } catch (IOException ex) {
             // throw ex;
@@ -35,7 +33,7 @@ public class MyHttpServlet extends HttpServlet {
             if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
 
                 }
             }
@@ -61,7 +59,7 @@ public class MyHttpServlet extends HttpServlet {
             }
             if (!uid.isEmpty()) {
                 // create a new session for stay logged-in user
-                int id = Integer.valueOf(uid);
+                int id = Integer.parseInt(uid);
                 session = request.getSession();
                 session.setAttribute("uid", id);
             }
