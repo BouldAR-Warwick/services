@@ -44,17 +44,19 @@ public class GetPrimaryGymServlet extends MyHttpServlet {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
             Connection conn = ds.getConnection();
-            PreparedStatement pst = conn.prepareStatement("SELECT (GID, Gymname) FROM gyms WHERE GID = (SELECT GID FROM user_in_gym WHERE UID = ?)");
+            PreparedStatement pst = conn.prepareStatement(
+                    "SELECT (GID, Gymname) FROM gyms WHERE GID = (SELECT GID FROM user_in_gym WHERE UID = ?)"
+            );
             pst.setInt(1, (int)session.getAttribute("uid"));
             ResultSet rs = pst.executeQuery();
 
             int gid = 0;
-            String gymname = "";
-            Gym gym = new Gym(gid,gymname);
+            String gym_name = "";
+            Gym gym = new Gym(gid, gym_name);
             if(rs.next()) {
                 gid = rs.getInt("GID");
-                gymname = rs.getString("Gymname");
-                gym = new Gym(gid,gymname);
+                gym_name = rs.getString("Gymname");
+                gym = new Gym(gid, gym_name);
                 session.setAttribute("gid",gid);
             }
 

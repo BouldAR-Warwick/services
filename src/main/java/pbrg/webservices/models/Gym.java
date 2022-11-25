@@ -2,18 +2,18 @@ package pbrg.webservices.models;
 
 public class Gym {
     private final int gid;
-    private final String gymname;
+    private final String gym_name;
 
-    public Gym (int gid, String gymname) {
+    public Gym (int gid, String gym_name) {
         this.gid = gid;
-        this.gymname = gymname;
+        this.gym_name = gym_name;
     }
 
     public int getGid() {
         return gid;
     }
 
-    public String getGymname() {
-        return gymname;
+    public String get_gym_name() {
+        return gym_name;
     }
 }

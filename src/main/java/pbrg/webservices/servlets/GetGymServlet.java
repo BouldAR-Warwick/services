@@ -23,7 +23,7 @@ import pbrg.webservices.models.Gym;
 public class GetGymServlet extends MyHttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doPost(request,response);
+        doPost(request, response);
     }
 
     @Override
@@ -43,27 +43,26 @@ public class GetGymServlet extends MyHttpServlet {
 
         // get json object in the request body
         JSONObject jObj = new JSONObject(getBody(request));
-        String gymname = jObj.getString("gymname");
+        String gym_name = jObj.getString("gymname");
 
-        PrintWriter out = response.getWriter();
-
-        try
-        {
+        try {
             // get a database connection from connection pool
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
             Connection conn = ds.getConnection();
-            PreparedStatement pst = conn.prepareStatement("SELECT GID,Gymname FROM gyms WHERE Gymname = ?");
-            pst.setString(1, gymname);
+            PreparedStatement pst = conn.prepareStatement(
+                    "SELECT GID,Gymname FROM gyms WHERE Gymname = ?"
+            );
+            pst.setString(1, gym_name);
             ResultSet rs = pst.executeQuery();
 
             int gid = 0;
-            gymname = "";
-            Gym gym = new Gym(gid,gymname);
+            gym_name = "";
+            Gym gym = new Gym(gid, gym_name);
             if(rs.next()) {
                 gid = rs.getInt("GID");
-                gymname = rs.getString("Gymname");
-                gym = new Gym(gid,gymname);
+                gym_name = rs.getString("Gymname");
+                gym = new Gym(gid, gym_name);
                 session.setAttribute("gid",gid);
             }
 
@@ -77,7 +76,7 @@ public class GetGymServlet extends MyHttpServlet {
         }
         catch(Exception e)
         {
-            out.println(e.getMessage());
+            response.getWriter().println(e.getMessage());
         }
     }
 }

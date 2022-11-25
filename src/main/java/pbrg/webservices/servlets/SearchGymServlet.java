@@ -40,7 +40,7 @@ public class SearchGymServlet extends MyHttpServlet {
 
         // get json object in the request body
         JSONObject jObj = new JSONObject(getBody(request));
-        String queryword = jObj.getString("queryword");
+        String query_word = jObj.getString("queryword");
 
         PrintWriter out = response.getWriter();
 
@@ -51,8 +51,8 @@ public class SearchGymServlet extends MyHttpServlet {
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
             Connection conn = ds.getConnection();
             PreparedStatement pst = conn.prepareStatement("SELECT Gymname FROM gyms WHERE GymLocation LIKE ? OR Gymname LIKE ?");
-            pst.setString(1, "%"+queryword+"%");
-            pst.setString(2, "%"+queryword+"%");
+            pst.setString(1, "%"+query_word+"%");
+            pst.setString(2, "%"+query_word+"%");
             ResultSet rs = pst.executeQuery();
 
             List<String> gyms = new ArrayList<>();
