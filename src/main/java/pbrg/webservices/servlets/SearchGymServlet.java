@@ -42,8 +42,9 @@ public class SearchGymServlet extends MyHttpServlet {
         List<String> gyms = null;
         try {
             Connection connection = Singleton.getDbConnection();
+            assert connection != null;
             gyms = Database.get_gyms(query_word, connection);
-            Singleton.closeDbConnection();
+            connection.close();
         } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }

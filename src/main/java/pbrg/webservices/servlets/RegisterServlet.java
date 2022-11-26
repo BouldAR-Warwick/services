@@ -54,8 +54,9 @@ public class RegisterServlet extends MyHttpServlet {
         boolean added = false;
         try {
             Connection connection = Singleton.getDbConnection();
+            assert connection != null;
             added = Database.sign_up(username, email, password, connection);
-            Singleton.closeDbConnection();
+            connection.close();
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
         }
@@ -70,8 +71,9 @@ public class RegisterServlet extends MyHttpServlet {
         User user = null;
         try {
             Connection connection = Singleton.getDbConnection();
+            assert connection != null;
             user = Database.sign_in(username, password, connection);
-            Singleton.closeDbConnection();
+            connection.close();
         } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }

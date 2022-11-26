@@ -44,23 +44,19 @@ public class GetRoutesServerlet extends MyHttpServlet {
 
         int gym_id = (int) parameters.get("gymID");
 
-        List<String> route_ids = null;
+        List<String> route_ids;
         try {
             Connection connection = Singleton.getDbConnection();
+            assert connection != null;
             route_ids = Database.get_route_ids_by_gym_id(gym_id, connection);
-            Singleton.closeDbConnection();
+            connection.close();
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
+            return;
         }
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-
-        // query for routes failed
-        if (route_ids == null) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
 
         String[] arrayOfRouteIDs = route_ids.toArray(new String[0]);
         String json = new Gson().toJson(arrayOfRouteIDs);

@@ -14,6 +14,8 @@ import javax.sql.DataSource;
 public final class Singleton {
 
     public static final String wallImagePath = System.getProperty("user.home") + "/wall-images/";
+
+    public static final String routeImagePath = System.getProperty("user.home") + "/route-images/";
     private static final Map<String, String> contentTypeLookup =
         Map.ofEntries(
             Map.entry("jpg", "image/jpeg"),
@@ -29,64 +31,29 @@ public final class Singleton {
               image/svg+xml
           */
         );
-    private static DataSource ds;
-    private static Connection conn;
-
-    static {
-        try {
-            instantiateDB();
-        } catch (NamingException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
 
     private Singleton() {
     }
 
     public static String getContentType(String imageFormat) {
-        return Singleton.contentTypeLookup.get(imageFormat);
-    }
-
-    /**
-     * Instantiate DB
-     */
-    private static void instantiateDB() throws NamingException {
-        // TODO - pass implementation properties to InitialContext
-        Context initContext = new InitialContext();
-        Context envContext = (Context) initContext.lookup("java:/comp/env");
-        ds = (DataSource) envContext.lookup("jdbc/grabourg");
+        return contentTypeLookup.get(imageFormat);
     }
 
     /**
      * Get DB connection
      */
-    public static Connection getDbConnection() throws SQLException {
-        // if unclosed connection -> close it
-        if (Singleton.conn != null) {
-            Singleton.closeDbConnection();
-        }
+    public static Connection getDbConnection() {
+        // TODO - pass implementation properties to InitialContext
+        try {
+            Context initContext = new InitialContext();
+            Context envContext = (Context) initContext.lookup("java:/comp/env");
+            DataSource ds = (DataSource) envContext.lookup("jdbc/grabourg");
 
-        if (ds == null) {
-            System.out.println("DB not initialised");
-            System.exit(1);
+            // create and return new connection
+            return ds.getConnection();
+        } catch (NamingException | SQLException exception) {
+            System.out.println(exception.getMessage());
+            return null;
         }
-
-        // create and return new connection
-        Singleton.conn = Singleton.ds.getConnection();
-        return Singleton.conn;
     }
-
-    /**
-     * Close DB connection
-     */
-    public static void closeDbConnection() throws SQLException {
-        if (Singleton.conn == null) {
-            return;
-        }
-
-        Singleton.conn.close();
-    }
-
-    // getters and setters
 }

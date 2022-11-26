@@ -7,15 +7,13 @@ import jakarta.servlet.http.HttpSession;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.io.FilenameUtils;
 import pbrg.webservices.Singleton;
 import pbrg.webservices.utils.Database;
 
-@WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
-public class GetWallImageServlet extends MyHttpServlet {
-
+@WebServlet(name = "GetRouteImageServerlet", urlPatterns = "/GetRouteImage")
+public class GetRouteImage extends MyHttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
@@ -25,41 +23,35 @@ public class GetWallImageServlet extends MyHttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        if (request == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
 
-        // get session, error if request is unauthorized
         HttpSession session = getSession(request);
+
+        // return unauthorized error message if session is not exist
         if (session == null) {
-            // return unauthorized error message
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        if (session.getAttribute("gid") == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        // ensure session has route_id
+        if (session.getAttribute("RID") == null) {
+            // no route id in session
+            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
 
-        int gym_id = (int) session.getAttribute("gid");
+        int route_id = (int) session.getAttribute("RID");
 
-        // get wall image file name from gym id
+        // get the route image file name
         String image_file_name;
         try {
-            Connection connection = Singleton.getDbConnection();
-            assert connection != null;
-            image_file_name = Database.get_wall_image_file_name_from_gym_id(gym_id, connection);
-            connection.close();
-        } catch (SQLException e) {
-            response.getWriter().println(e.getMessage());
+            image_file_name = Database.get_route_image_file_names_by_route_id(route_id);
+        } catch (SQLException exception) {
+            response.getWriter().println(exception.getMessage());
             return;
         }
 
-        // wall query failed or no wall against gym
+        // route does not exist
         if (image_file_name == null) {
-            // case gym has no wall! - TODO
             response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
@@ -71,7 +63,7 @@ public class GetWallImageServlet extends MyHttpServlet {
 
         // read-in image file
         byte[] image_buffer;
-        try (FileInputStream fis = new FileInputStream(Singleton.wallImagePath + image_file_name)) {
+        try (FileInputStream fis = new FileInputStream(Singleton.routeImagePath + image_file_name)) {
             int size = fis.available();
             image_buffer = new byte[size];
             int bytes_read = fis.read(image_buffer);

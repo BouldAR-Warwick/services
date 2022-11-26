@@ -38,8 +38,9 @@ public class GetPrimaryGymServlet extends MyHttpServlet {
         Gym gym = null;
         try {
             Connection connection = Singleton.getDbConnection();
+            assert connection != null;
             gym = Database.get_gym_by_user_id(user_id, connection);
-            Singleton.closeDbConnection();
+            connection.close();
         } catch (SQLException exception) {
             response.getWriter().println(exception.getMessage());
         }

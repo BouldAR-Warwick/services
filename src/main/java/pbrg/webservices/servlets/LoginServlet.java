@@ -54,8 +54,9 @@ public class LoginServlet extends MyHttpServlet {
         User user;
         try {
             Connection connection = Singleton.getDbConnection();
+            assert connection != null;
             user = Database.sign_in(username, password, connection);
-            Singleton.closeDbConnection();
+            connection.close();
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;

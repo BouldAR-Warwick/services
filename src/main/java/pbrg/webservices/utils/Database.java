@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import pbrg.webservices.Singleton;
 import pbrg.webservices.models.Gym;
+import pbrg.webservices.models.Route;
 import pbrg.webservices.models.User;
 
 public class Database {
@@ -109,7 +111,6 @@ public class Database {
 
     public static List<String> get_route_ids_by_gym_id(int gym_id, Connection connection)
         throws SQLException {
-        List<String> route_ids;
         try (PreparedStatement pst =
             connection.prepareStatement(
                 "SELECT routes.RID "
@@ -120,13 +121,12 @@ public class Database {
             pst.setInt(1, gym_id);
 
             ResultSet rs = pst.executeQuery();
-            route_ids = new ArrayList<>();
+            List<String> route_ids = new ArrayList<>();
             while (rs.next()) {
                 route_ids.add(rs.getString("RID"));
             }
+            return route_ids;
         }
-
-        return route_ids;
     }
 
     public static String get_wall_image_file_name_from_gym_id(int gym_id, Connection connection)
@@ -144,5 +144,43 @@ public class Database {
         }
 
         return null;
+    }
+
+    private static Route get_route_by_route_id(int route_id)
+        throws SQLException {
+        try (Connection connection = Singleton.getDbConnection()) {
+            assert connection != null;
+            try (PreparedStatement pst =
+                connection.prepareStatement(
+                    "SELECT * "
+                        + "FROM routes "
+                        + "WHERE routes.RID = ?")) {
+                pst.setInt(1, route_id);
+
+                ResultSet rs = pst.executeQuery();
+                if (rs.next()) {
+                    return new Route(
+                        rs.getInt("RID"),
+                        rs.getInt("WID"),
+                        rs.getInt("creator_user_id"),
+                        rs.getInt("Difficulty"),
+                        rs.getString("RouteContent"),
+                        rs.getString("RouteContent")
+                    );
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static String get_route_image_file_names_by_route_id(int route_id) throws SQLException {
+        Route route = get_route_by_route_id(route_id);
+
+        if (route == null) {
+            return null;
+        }
+
+        return route.getImage_file_name();
     }
 }
