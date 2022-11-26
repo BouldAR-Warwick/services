@@ -24,8 +24,8 @@ public class HelloServlet extends HttpServlet {
     }
 
     /**
-     * This method is called by the server (via the service method) \ to allow a servlet to handle a
-     * GET request.
+     * This method is called by the server (via the service method) \
+     * to allow a servlet to handle a GET request.
      */
     @Override
     public final void doGet(

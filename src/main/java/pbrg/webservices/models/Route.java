@@ -33,8 +33,8 @@ public class Route {
     private final String imageFileName;
 
     /**
-     * Construct a route with ID, wall ID, creator user ID, \ difficulty, content, and image file
-     * name.
+     * Construct a route with ID, wall ID, creator user ID, \
+     * difficulty, content, and image file name.
      *
      * @param pRouteId       route ID
      * @param pWallId        wall ID
