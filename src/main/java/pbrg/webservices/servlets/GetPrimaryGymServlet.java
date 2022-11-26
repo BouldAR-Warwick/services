@@ -1,20 +1,18 @@
 package pbrg.webservices.servlets;
 
 import com.google.gson.Gson;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import pbrg.webservices.Singleton;
 import pbrg.webservices.models.Gym;
+import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "GetPrimaryGymServlet", urlPatterns = "/GetPrimaryGym")
 public class GetPrimaryGymServlet extends MyHttpServlet {
@@ -34,38 +32,29 @@ public class GetPrimaryGymServlet extends MyHttpServlet {
             return;
         }
 
-        PrintWriter out = response.getWriter();
+        int user_id = (int) session.getAttribute("uid");
 
-        try
-        {
+        Gym gym = null;
+        try {
             Connection connection = Singleton.getDbConnection();
-            PreparedStatement pst = connection.prepareStatement(
-                    "SELECT (GID, Gymname) FROM gyms WHERE GID = (SELECT GID FROM user_in_gym WHERE UID = ?)"
-            );
-            pst.setInt(1, (int)session.getAttribute("uid"));
-            ResultSet rs = pst.executeQuery();
-
-            int gid = 0;
-            String gym_name = "";
-            Gym gym = new Gym(gid, gym_name);
-            if(rs.next()) {
-                gid = rs.getInt("GID");
-                gym_name = rs.getString("Gymname");
-                gym = new Gym(gid, gym_name);
-                session.setAttribute("gid",gid);
-            }
-
-            String json = new Gson().toJson(gym);
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(json);
-
-            pst.close();
+            gym = Database.get_gym_by_user_id(user_id, connection);
             Singleton.closeDbConnection();
         }
-        catch(Exception e)
-        {
-            out.println(e.getMessage());
+        catch (SQLException exception) {
+            response.getWriter().println(exception.getMessage());
         }
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        // when no gyms are matched
+        if (gym == null) {
+            response.getWriter().write("{}");
+            return;
+        }
+
+        session.setAttribute("gid", gym.getGid());
+        String json = new Gson().toJson(gym);
+        response.getWriter().write(json);
     }
 }

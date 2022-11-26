@@ -11,10 +11,6 @@ import javax.sql.DataSource;
 
 /** For services storage - e.g., db */
 public final class Singleton {
-    private static Singleton INSTANCE;
-
-    private static Context initContext;
-    private static Context envContext;
     private static DataSource ds;
     private static Connection conn;
 
@@ -47,14 +43,6 @@ public final class Singleton {
     private Singleton() {
 
     }
-    
-    public static Singleton getInstance() {
-        if (Singleton.INSTANCE == null) {
-            Singleton.INSTANCE = new Singleton();
-        }
-        
-        return Singleton.INSTANCE;
-    }
 
     public static String getContentType(String imageFormat) {
         return Singleton.contentTypeLookup.get(imageFormat);
@@ -63,8 +51,8 @@ public final class Singleton {
     /** Instantiate DB */
     private static void instantiateDB() throws NamingException {
         // TODO - pass implementation properties to InitialContext
-        initContext = new InitialContext();
-        envContext = (Context) initContext.lookup("java:/comp/env");
+        Context initContext = new InitialContext();
+        Context envContext = (Context) initContext.lookup("java:/comp/env");
         ds = (DataSource) envContext.lookup("jdbc/grabourg");
     }
 
@@ -73,6 +61,11 @@ public final class Singleton {
         // if unclosed connection -> close it
         if (Singleton.conn != null) {
             Singleton.closeDbConnection();
+        }
+
+        if (ds == null) {
+            System.out.println("DB not initialised");
+            System.exit(1);
         }
 
         // create and return new connection

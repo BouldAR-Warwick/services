@@ -8,12 +8,12 @@ import pbrg.webservices.Singleton;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.google.gson.Gson;
 import org.json.JSONObject;
+import pbrg.webservices.utils.Database;
+
 import java.util.*;
 
 
@@ -31,52 +31,41 @@ public class GetRoutesServerlet extends MyHttpServlet {
         HttpSession session = getSession(request);
 
         // return unauthorized error message if session is not exist
-        if (session==null) {
+        if (session == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
         // get json object in the request body
-        JSONObject jObj = new JSONObject(getBody(request));
+        JSONObject parameters = new JSONObject(getBody(request));
 
-        if (!jObj.has("gymID")) {
+        if (!parameters.has("gymID")) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        String gymID = jObj.getString("gymID");
+        int gym_id = (int) parameters.get("gymID");
 
+        List<String> route_ids = null;
         try {
-            Connection conn = Singleton.getDbConnection();
-            PreparedStatement pst = conn.prepareStatement(
-            "SELECT routes.RID " +
-                "FROM routes " +
-                "INNER JOIN walls ON routes.WID = walls.WID " +
-                "INNER JOIN gyms ON walls.GID = gyms.GID " +
-                "WHERE gyms.GID = ?"
-            );
-            pst.setString(1, "%"+gymID+"%");
-
-            ResultSet rs = pst.executeQuery();
-
-            List<String> routeIDs = new ArrayList<>();
-            while(rs.next()) {
-                routeIDs.add(rs.getString("RID"));
-            }
-
-            String[] arrayOfRouteIDs = routeIDs.toArray(new String[0]);
-
-            String json = new Gson().toJson(arrayOfRouteIDs);
-
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(json);
-
-            pst.close();
+            Connection connection = Singleton.getDbConnection();
+            route_ids = Database.get_route_ids_by_gym_id(gym_id, connection);
             Singleton.closeDbConnection();
-
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
         }
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        // query for routes failed
+        if (route_ids == null) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        String[] arrayOfRouteIDs = route_ids.toArray(new String[0]);
+        String json = new Gson().toJson(arrayOfRouteIDs);
+        response.getWriter().write(json);
     }
 }

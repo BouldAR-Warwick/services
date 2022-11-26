@@ -43,7 +43,7 @@ public class MyHttpServlet extends HttpServlet {
         return body;
     }
 
-    // add a function to get session and handle authentication
+    /* add a function to get session and handle authentication */
     public static HttpSession getSession(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 

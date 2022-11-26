@@ -82,4 +82,60 @@ public class Database {
         }
         return null;
     }
+
+    public static Gym get_gym_by_user_id(int user_id, Connection connection) throws SQLException {
+        try (PreparedStatement pst = connection.prepareStatement(
+                "SELECT (GID, Gymname) FROM gyms WHERE GID = (SELECT GID FROM user_in_gym WHERE UID = ?)"
+        )) {
+            pst.setInt(1, user_id);
+
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                int gid = rs.getInt("GID");
+                String gym_name = rs.getString("Gymname");
+                return new Gym(gid, gym_name);
+            }
+        }
+
+        return null;
+    }
+
+    public static List<String> get_route_ids_by_gym_id(int gym_id, Connection connection) throws SQLException {
+        List<String> route_ids;
+        try (PreparedStatement pst = connection.prepareStatement(
+        "SELECT routes.RID " +
+                "FROM routes " +
+                "INNER JOIN walls ON routes.WID = walls.WID " +
+                "INNER JOIN gyms ON walls.GID = gyms.GID " +
+                "WHERE gyms.GID = ?"
+        )) {
+            pst.setInt(1, gym_id);
+
+            ResultSet rs = pst.executeQuery();
+            route_ids = new ArrayList<>();
+            while (rs.next()) {
+                route_ids.add(rs.getString("RID"));
+            }
+        }
+
+        return route_ids;
+    }
+
+    public static String get_wall_image_file_name_from_gym_id(int gym_id, Connection connection) throws SQLException {
+        try (PreparedStatement pst = connection.prepareStatement(
+                "SELECT (walls.image_file_name) " +
+                        "FROM walls " +
+                        "WHERE GID = ?"
+        )) {
+            pst.setInt(1, gym_id);
+            ResultSet rs = pst.executeQuery();
+
+            // get name of wall image
+            if (rs.next()) {
+                return rs.getString("image_file_name");
+            }
+        }
+
+        return null;
+    }
 }

@@ -1,6 +1,5 @@
 package pbrg.webservices.servlets;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,7 +7,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 
 import java.nio.charset.StandardCharsets;
-import java.io.*;
 import java.net.URLDecoder;
 
 @WebServlet(name = "LogoutServlet", urlPatterns = "/Logout")

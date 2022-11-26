@@ -1,6 +1,5 @@
 package pbrg.webservices.servlets;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,14 +9,12 @@ import pbrg.webservices.Singleton;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /* For parsing file extensions */
 import org.apache.commons.io.FilenameUtils;
+import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
 public class GetWallImageServlet extends MyHttpServlet {
@@ -30,8 +27,7 @@ public class GetWallImageServlet extends MyHttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws IOException
-    {
+            throws IOException {
         if (request == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -50,32 +46,19 @@ public class GetWallImageServlet extends MyHttpServlet {
             return;
         }
 
-        int gymID = (int) session.getAttribute("gid");
+        int gym_id = (int) session.getAttribute("gid");
 
-        byte[] imageData;
-        String image_file_name = "";
-
+        // get wall image file name from gym id
+        String image_file_name = null;
         try {
             Connection connection = Singleton.getDbConnection();
-            PreparedStatement pst = connection.prepareStatement(
-            "SELECT (walls.image_file_name) " +
-                "FROM walls " +
-                "WHERE GID = ?"
-            );
-            pst.setInt(1, gymID);
-            ResultSet rs = pst.executeQuery();
-
-            // get name of wall image
-            if (rs.next()) {
-                image_file_name = rs.getString("image_file_name");
-            }
-
+            image_file_name = Database.get_wall_image_file_name_from_gym_id(gym_id, connection);
             Singleton.closeDbConnection();
-        } catch (IllegalArgumentException | SQLException e) {
-            PrintWriter out = response.getWriter();
-            out.println(e.getMessage());
+        } catch (SQLException e) {
+            response.getWriter().println(e.getMessage());
         }
 
+        // wall query failed or no wall against gym
         if (image_file_name == null) {
             // case gym has no wall! - TODO
             response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
@@ -87,18 +70,22 @@ public class GetWallImageServlet extends MyHttpServlet {
         String contentType = Singleton.getContentType(ext);
         response.setContentType(contentType);
 
-        // image directory
-        FileInputStream fis = new FileInputStream(Singleton.wallImagePath + image_file_name);
+        // read-in image file
+        byte[] image_buffer;
+        try (FileInputStream fis = new FileInputStream(Singleton.wallImagePath + image_file_name)) {
+            int size = fis.available();
+            image_buffer = new byte[size];
+            int bytes_read = fis.read(image_buffer);
 
-        // get file size
-        int size = fis.available();
-        imageData = new byte[size];
-        fis.read(imageData);
-        fis.close();
+            if (bytes_read != size) {
+                response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+                return;
+            }
+        }
 
-        OutputStream outputStream = response.getOutputStream();
-        outputStream.write(imageData);
-        outputStream.flush();
-        outputStream.close();
+        try (OutputStream outputStream = response.getOutputStream()) {
+            outputStream.write(image_buffer);
+            outputStream.flush();
+        }
     }
 }
