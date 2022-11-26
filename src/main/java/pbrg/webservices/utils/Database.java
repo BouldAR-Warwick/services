@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import pbrg.webservices.models.Gym;
 import pbrg.webservices.models.User;
 
 public class Database {
@@ -66,5 +67,19 @@ public class Database {
             }
             return gyms;
         }
+    }
+
+    public static Gym get_gym_by_name(String gym_name, Connection connection) throws SQLException {
+        try (PreparedStatement pst = connection.prepareStatement("SELECT GID,Gymname FROM gyms WHERE Gymname = ?")) {
+            pst.setString(1, gym_name);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                int gid = rs.getInt("GID");
+                gym_name = rs.getString("Gymname");
+                return new Gym(gid, gym_name);
+            }
+        }
+        return null;
     }
 }

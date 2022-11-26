@@ -9,11 +9,12 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-/** For services sorage - e.g., db */
+/** For services storage - e.g., db */
 public final class Singleton {
     private static Singleton INSTANCE;
 
-    private static Context ctx;
+    private static Context initContext;
+    private static Context envContext;
     private static DataSource ds;
     private static Connection conn;
 
@@ -61,8 +62,10 @@ public final class Singleton {
 
     /** Instantiate DB */
     private static void instantiateDB() throws NamingException {
-        Singleton.ctx = new InitialContext();
-        Singleton.ds = (DataSource) ctx.lookup("java:/comp/env/jdbc/grabourg");
+        // TODO - pass implementation properties to InitialContext
+        initContext = new InitialContext();
+        envContext = (Context) initContext.lookup("java:/comp/env");
+        ds = (DataSource) envContext.lookup("jdbc/grabourg");
     }
 
     /** Get DB connection */
