@@ -1,34 +1,33 @@
 package pbrg.webservices.servlets;
 
+import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
-
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import com.google.gson.Gson;
-
+import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.*;
-import java.io.*;
-
 import pbrg.webservices.Singleton;
 import pbrg.webservices.models.User;
 import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")
 public class LoginServlet extends MyHttpServlet {
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        doPost(request,response);
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
+        doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
 
         // convert request body to json object
         JSONObject credentials;
@@ -74,13 +73,13 @@ public class LoginServlet extends MyHttpServlet {
         session.setAttribute("uid", user.get_uid());
 
         // TODO: store primary gym id in session?
-        
+
         if (stayLoggedIn) {
             // create cookie and store logged-in user info in cookie
             Cookie cookie1 = new Cookie("username", user.get_username());
             Cookie cookie2 = new Cookie("uid", String.valueOf(user.get_uid()));
             // set expired time to 7 days
-            cookie1.setMaxAge(302400); 
+            cookie1.setMaxAge(302400);
             cookie2.setMaxAge(302400);
             // send cookie back to client for authentication next time
             response.addCookie(cookie1);

@@ -1,31 +1,30 @@
 package pbrg.webservices.servlets;
 
+import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
 import java.sql.Connection;
-
-import com.google.gson.Gson;
+import java.util.List;
 import org.json.JSONObject;
-
-import java.util.*;
-
 import pbrg.webservices.Singleton;
 import pbrg.webservices.models.GymList;
 import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "SearchGymServlet", urlPatterns = "/SearchGym")
 public class SearchGymServlet extends MyHttpServlet {
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        doPost(request,response);
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
+        doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
 
         HttpSession session = getSession(request);
 
@@ -45,7 +44,7 @@ public class SearchGymServlet extends MyHttpServlet {
             Connection connection = Singleton.getDbConnection();
             gyms = Database.get_gyms(query_word, connection);
             Singleton.closeDbConnection();
-        } catch(Exception e) {
+        } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }
 

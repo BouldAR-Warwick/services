@@ -4,16 +4,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import pbrg.webservices.Singleton;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-/* For parsing file extensions */
 import org.apache.commons.io.FilenameUtils;
+import pbrg.webservices.Singleton;
 import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
@@ -21,13 +18,13 @@ public class GetWallImageServlet extends MyHttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+        throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+        throws IOException {
         if (request == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;

@@ -1,32 +1,30 @@
 package pbrg.webservices.servlets;
 
+import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import pbrg.webservices.Singleton;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import com.google.gson.Gson;
+import java.util.List;
 import org.json.JSONObject;
+import pbrg.webservices.Singleton;
 import pbrg.webservices.utils.Database;
-
-import java.util.*;
-
 
 @WebServlet(name = "GetRoutesServerlet", urlPatterns = "/getRoutes")
 public class GetRoutesServerlet extends MyHttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        doPost(request,response);
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
+        doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
 
         HttpSession session = getSession(request);
 

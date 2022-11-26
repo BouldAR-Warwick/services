@@ -1,33 +1,32 @@
 package pbrg.webservices.servlets;
 
+import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import com.google.gson.Gson;
-
+import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.*;
-import java.io.*;
-
 import pbrg.webservices.Singleton;
 import pbrg.webservices.models.User;
 import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "RegisterServlet", urlPatterns = "/Register")
 public class RegisterServlet extends MyHttpServlet {
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        doPost(request,response);
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
+        doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
 
         // parse credentials
         JSONObject credentials;
@@ -57,7 +56,7 @@ public class RegisterServlet extends MyHttpServlet {
             Connection connection = Singleton.getDbConnection();
             added = Database.sign_up(username, email, password, connection);
             Singleton.closeDbConnection();
-        } catch(SQLException e){
+        } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
         }
 
@@ -73,7 +72,7 @@ public class RegisterServlet extends MyHttpServlet {
             Connection connection = Singleton.getDbConnection();
             user = Database.sign_in(username, password, connection);
             Singleton.closeDbConnection();
-        } catch(Exception e){
+        } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }
 

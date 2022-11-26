@@ -1,7 +1,9 @@
 package pbrg.webservices.servlets;
 
-import jakarta.servlet.http.*;
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +12,7 @@ import java.io.InputStreamReader;
 public class MyHttpServlet extends HttpServlet {
 
     // add a function to get json object in the request body
-    public static String getBody(HttpServletRequest request)  {
+    public static String getBody(HttpServletRequest request) {
 
         String body;
         StringBuilder stringBuilder = new StringBuilder();
@@ -48,7 +50,7 @@ public class MyHttpServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
 
         // return unauthorized error message if session is not exist
-        if (session==null) {
+        if (session == null) {
             // check cookie for user information
             String uid = "";
             Cookie[] cookies = request.getCookies();
@@ -66,5 +68,4 @@ public class MyHttpServlet extends HttpServlet {
         }
         return session;
     }
-
 }

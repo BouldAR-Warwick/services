@@ -1,10 +1,11 @@
 package pbrg.webservices.models;
 
 public class Gym {
+
     private final int gid;
     private final String gym_name;
 
-    public Gym (int gid, String gym_name) {
+    public Gym(int gid, String gym_name) {
         this.gid = gid;
         this.gym_name = gym_name;
     }

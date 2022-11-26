@@ -5,24 +5,25 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.sql.Connection;
-
+import org.json.JSONObject;
 import pbrg.webservices.Singleton;
 import pbrg.webservices.models.Gym;
 import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "GetGymServlet", urlPatterns = "/GetGym")
 public class GetGymServlet extends MyHttpServlet {
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
 
         if (request == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -45,7 +46,7 @@ public class GetGymServlet extends MyHttpServlet {
             Connection connection = Singleton.getDbConnection();
             gym = Database.get_gym_by_name(gym_name, connection);
             Singleton.closeDbConnection();
-        } catch(Exception e) {
+        } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }
 
@@ -63,4 +64,3 @@ public class GetGymServlet extends MyHttpServlet {
         response.getWriter().write(json);
     }
 }
-
