@@ -7,23 +7,26 @@ import jakarta.servlet.http.HttpSession;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.io.FilenameUtils;
-import pbrg.webservices.Singleton;
 import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
 public class GetWallImageServlet extends MyHttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected final void doGet(
+        final HttpServletRequest request, final HttpServletResponse response
+    )
         throws IOException {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected final void doPost(
+        final HttpServletRequest request, final HttpServletResponse response
+    )
         throws IOException {
         if (request == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -43,47 +46,48 @@ public class GetWallImageServlet extends MyHttpServlet {
             return;
         }
 
-        int gym_id = (int) session.getAttribute("gid");
+        int gymId = (int) session.getAttribute("gid");
 
         // get wall image file name from gym id
-        String image_file_name;
+        String imageFileName;
         try {
-            Connection connection = Singleton.getDbConnection();
-            assert connection != null;
-            image_file_name = Database.get_wall_image_file_name_from_gym_id(gym_id, connection);
-            connection.close();
+            imageFileName = Database.getWallImageFileNameFromGymId(gymId);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;
         }
 
         // wall query failed or no wall against gym
-        if (image_file_name == null) {
+        if (imageFileName == null) {
             // case gym has no wall! - TODO
             response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
 
         // get the file extension, lookup & set content type
-        String ext = FilenameUtils.getExtension(image_file_name);
-        String contentType = Singleton.getContentType(ext);
+        String ext = FilenameUtils.getExtension(imageFileName);
+        String contentType = Utils.getContentType(ext);
         response.setContentType(contentType);
 
         // read-in image file
-        byte[] image_buffer;
-        try (FileInputStream fis = new FileInputStream(Singleton.wallImagePath + image_file_name)) {
+        byte[] imageBuffer;
+        try (
+            FileInputStream fis = new FileInputStream(
+                Utils.WALL_IMAGE_PATH + imageFileName
+            )
+        ) {
             int size = fis.available();
-            image_buffer = new byte[size];
-            int bytes_read = fis.read(image_buffer);
+            imageBuffer = new byte[size];
+            int bytesRead = fis.read(imageBuffer);
 
-            if (bytes_read != size) {
+            if (bytesRead != size) {
                 response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
                 return;
             }
         }
 
         try (OutputStream outputStream = response.getOutputStream()) {
-            outputStream.write(image_buffer);
+            outputStream.write(imageBuffer);
             outputStream.flush();
         }
     }

@@ -1,4 +1,4 @@
-package pbrg.webservices;
+package pbrg.webservices.utils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -9,14 +9,26 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 /**
- * For services storage - e.g., db
+ * For static utils: \ getting database connection, file path utils, API utils.
  */
-public final class Singleton {
+public final class Utils {
 
-    public static final String wallImagePath = System.getProperty("user.home") + "/wall-images/";
+    /**
+     * Path to wall image directory.
+     */
+    public static final String WALL_IMAGE_PATH =
+        System.getProperty("user.home") + "/wall-images/";
 
-    public static final String routeImagePath = System.getProperty("user.home") + "/route-images/";
-    private static final Map<String, String> contentTypeLookup =
+    /**
+     * Path to route image directory.
+     */
+    public static final String ROUTE_IMAGE_PATH =
+        System.getProperty("user.home") + "/route-images/";
+
+    /**
+     * Map from file extensions to content types.
+     */
+    private static final Map<String, String> CONTENT_TYPE_MAP =
         Map.ofEntries(
             Map.entry("jpg", "image/jpeg"),
             Map.entry("jpeg", "image/jpeg"),
@@ -32,28 +44,39 @@ public final class Singleton {
           */
         );
 
-    private Singleton() {
-    }
-
-    public static String getContentType(String imageFormat) {
-        return contentTypeLookup.get(imageFormat);
+    private Utils() {
     }
 
     /**
-     * Get DB connection
+     * Get a content type from a file extension.
+     *
+     * @param imageFormat file extension
+     * @return content type
+     */
+    public static String getContentType(final String imageFormat) {
+        return CONTENT_TYPE_MAP.get(imageFormat);
+    }
+
+    /**
+     * Get DB connection.
+     *
+     * @return DB connection
      */
     public static Connection getDbConnection() {
         // TODO - pass implementation properties to InitialContext
+        Connection connection = null;
         try {
             Context initContext = new InitialContext();
             Context envContext = (Context) initContext.lookup("java:/comp/env");
             DataSource ds = (DataSource) envContext.lookup("jdbc/grabourg");
 
             // create and return new connection
-            return ds.getConnection();
+            connection = ds.getConnection();
         } catch (NamingException | SQLException exception) {
             System.out.println(exception.getMessage());
-            return null;
         }
+
+        assert (connection != null);
+        return connection;
     }
 }

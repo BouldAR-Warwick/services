@@ -6,9 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
-import pbrg.webservices.Singleton;
 import pbrg.webservices.models.Gym;
 import pbrg.webservices.utils.Database;
 
@@ -16,14 +14,16 @@ import pbrg.webservices.utils.Database;
 public class GetPrimaryGymServlet extends MyHttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doGet(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doPost(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
 
         HttpSession session = getSession(request);
 
@@ -33,14 +33,11 @@ public class GetPrimaryGymServlet extends MyHttpServlet {
             return;
         }
 
-        int user_id = (int) session.getAttribute("uid");
+        int userId = (int) session.getAttribute("uid");
 
         Gym gym = null;
         try {
-            Connection connection = Singleton.getDbConnection();
-            assert connection != null;
-            gym = Database.get_gym_by_user_id(user_id, connection);
-            connection.close();
+            gym = Database.getGymByUserId(userId);
         } catch (SQLException exception) {
             response.getWriter().println(exception.getMessage());
         }

@@ -1,45 +1,115 @@
 package pbrg.webservices.models;
 
 public class Route {
-    private final int route_id;
-    private final int wall_id;
-    private final int creator_user_id;
+
+    /**
+     * Route ID.
+     */
+    private final int routeId;
+
+    /**
+     * Wall ID.
+     */
+    private final int wallId;
+
+    /**
+     * Creator user ID.
+     */
+    private final int creatorUserId;
+
+    /**
+     * Route difficulty.
+     */
     private final int difficulty;
-    private final String route_content;
-    private final String image_file_name;
 
-    public Route(int route_id, int wall_id, int creator_user_id, int difficulty,
-        String route_content,
-        String image_file_name) {
-        this.route_id = route_id;
-        this.wall_id = wall_id;
-        this.creator_user_id = creator_user_id;
-        this.difficulty = difficulty;
-        this.route_content = route_content;
-        this.image_file_name = image_file_name;
+    /**
+     * Route content.
+     */
+    private final String routeContent;
+
+    /**
+     * Route image file name.
+     */
+    private final String imageFileName;
+
+    /**
+     * Construct a route with ID, wall ID, creator user ID, \ difficulty, content, and image file
+     * name.
+     *
+     * @param pRouteId       route ID
+     * @param pWallId        wall ID
+     * @param pCreatorUserId creator user ID
+     * @param pDifficulty    difficulty
+     * @param pRouteContent  content
+     * @param pImageFileName image file name
+     */
+    public Route(
+        final int pRouteId,
+        final int pWallId,
+        final int pCreatorUserId,
+        final int pDifficulty,
+        final String pRouteContent,
+        final String pImageFileName
+    ) {
+        this.routeId = pRouteId;
+        this.wallId = pWallId;
+        this.creatorUserId = pCreatorUserId;
+        this.difficulty = pDifficulty;
+        this.routeContent = pRouteContent;
+        this.imageFileName = pImageFileName;
     }
 
-    public int getRoute_id() {
-        return route_id;
+    /**
+     * Get route ID.
+     *
+     * @return route ID
+     */
+    public final int getRouteId() {
+        return routeId;
     }
 
-    public int getWall_id() {
-        return wall_id;
+    /**
+     * Get wall ID.
+     *
+     * @return wall ID
+     */
+    public final int getWallId() {
+        return wallId;
     }
 
-    public int getCreator_user_id() {
-        return creator_user_id;
+    /**
+     * Get route creator's user ID.
+     *
+     * @return creator user ID
+     */
+    public final int getCreatorUserId() {
+        return creatorUserId;
     }
 
-    public int getDifficulty() {
+    /**
+     * Get route difficulty.
+     *
+     * @return difficulty
+     */
+    public final int getDifficulty() {
         return difficulty;
     }
 
-    public String getRoute_content() {
-        return route_content;
+    /**
+     * Get route content.
+     *
+     * @return content
+     */
+    public final String getRouteContent() {
+        return routeContent;
     }
 
-    public String getImage_file_name() {
-        return image_file_name;
+    /**
+     * Get route image file name.
+     *
+     * @return image file name
+     */
+    public final String getImageFileName() {
+        return imageFileName;
     }
 }

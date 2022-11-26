@@ -10,13 +10,27 @@ import java.io.PrintWriter;
 @WebServlet(name = "helloServlet", value = "/hello-servlet")
 public class HelloServlet extends HttpServlet {
 
+
+    /**
+     * test message.
+     */
     private String message;
 
+    /**
+     * initialise message.
+     */
     public void init() {
         message = "Hello World!";
     }
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    /**
+     * This method is called by the server (via the service method) \ to allow a servlet to handle a
+     * GET request.
+     */
+    @Override
+    public final void doGet(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
         response.setContentType("text/html");
 
         // Hello
@@ -24,8 +38,5 @@ public class HelloServlet extends HttpServlet {
         out.println("<html><body>");
         out.println("<h1>" + message + "</h1>");
         out.println("</body></html>");
-    }
-
-    public void destroy() {
     }
 }

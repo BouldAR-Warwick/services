@@ -1,13 +1,13 @@
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import pbrg.webservices.Singleton;
+import pbrg.webservices.utils.Utils;
 
 @Disabled
-public class SingletonTest {
+public class UtilsTest {
 
     @Test
     void testFilePath() {
-        String wallPath = Singleton.wallImagePath;
+        String wallPath = Utils.WALL_IMAGE_PATH;
         System.out.printf("Wall image path: {%s}%n", wallPath);
     }
 }

@@ -6,12 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
-import pbrg.webservices.Singleton;
 import pbrg.webservices.models.User;
 import pbrg.webservices.utils.Database;
 
@@ -19,14 +17,16 @@ import pbrg.webservices.utils.Database;
 public class RegisterServlet extends MyHttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doGet(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doPost(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
 
         // parse credentials
         JSONObject credentials;
@@ -53,10 +53,7 @@ public class RegisterServlet extends MyHttpServlet {
         // create new user
         boolean added = false;
         try {
-            Connection connection = Singleton.getDbConnection();
-            assert connection != null;
-            added = Database.sign_up(username, email, password, connection);
-            connection.close();
+            added = Database.signUp(username, email, password);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
         }
@@ -70,10 +67,7 @@ public class RegisterServlet extends MyHttpServlet {
         // select user
         User user = null;
         try {
-            Connection connection = Singleton.getDbConnection();
-            assert connection != null;
-            user = Database.sign_in(username, password, connection);
-            connection.close();
+            user = Database.signIn(username, password);
         } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }
@@ -88,7 +82,7 @@ public class RegisterServlet extends MyHttpServlet {
         // case two -> user is authenticated
 
         HttpSession session = request.getSession();
-        session.setAttribute("uid", user.get_uid());
+        session.setAttribute("uid", user.getUid());
 
         String json = new Gson().toJson(user);
         response.setContentType("application/json");

@@ -6,10 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.List;
 import org.json.JSONObject;
-import pbrg.webservices.Singleton;
 import pbrg.webservices.models.GymList;
 import pbrg.webservices.utils.Database;
 
@@ -17,14 +15,16 @@ import pbrg.webservices.utils.Database;
 public class SearchGymServlet extends MyHttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doGet(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doPost(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
 
         HttpSession session = getSession(request);
 
@@ -36,15 +36,12 @@ public class SearchGymServlet extends MyHttpServlet {
 
         // get json object in the request body
         JSONObject jObj = new JSONObject(getBody(request));
-        String query_word = jObj.getString("queryword");
+        String queryWord = jObj.getString("queryword");
 
         // get all gyms matching query_word
         List<String> gyms = null;
         try {
-            Connection connection = Singleton.getDbConnection();
-            assert connection != null;
-            gyms = Database.get_gyms(query_word, connection);
-            connection.close();
+            gyms = Database.getGymsByQueryWord(queryWord);
         } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }

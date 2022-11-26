@@ -12,25 +12,35 @@ import java.nio.charset.StandardCharsets;
 public class LogoutServlet extends MyHttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    protected final void doGet(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+    protected final void doPost(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) {
 
         // set cookie to 0 second valid (a.k.a. deleted)
         Cookie[] cookies = request.getCookies();
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                System.out.println(URLDecoder.decode(cookie.getName(), StandardCharsets.UTF_8));
+                System.out.println(
+                    URLDecoder.decode(cookie.getName(), StandardCharsets.UTF_8)
+                );
                 if (URLDecoder.decode(cookie.getName(), StandardCharsets.UTF_8)
                     .equals("username")) {
                     cookie.setMaxAge(0);
                     response.addCookie(cookie);
                 }
-                if (URLDecoder.decode(cookie.getName(), StandardCharsets.UTF_8).equals("uid")) {
+                if (
+                    URLDecoder.decode(
+                        cookie.getName(), StandardCharsets.UTF_8
+                    ).equals("uid")
+                ) {
                     cookie.setMaxAge(0);
                     response.addCookie(cookie);
                 }

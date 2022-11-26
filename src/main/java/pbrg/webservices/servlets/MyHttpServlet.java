@@ -11,8 +11,13 @@ import java.io.InputStreamReader;
 
 public class MyHttpServlet extends HttpServlet {
 
-    // add a function to get json object in the request body
-    public static String getBody(HttpServletRequest request) {
+    /**
+     * Get json object in the request body.
+     *
+     * @param request the http serverlet request
+     * @return request body as a json object
+     */
+    public static String getBody(final HttpServletRequest request) {
 
         String body;
         StringBuilder stringBuilder = new StringBuilder();
@@ -21,8 +26,11 @@ public class MyHttpServlet extends HttpServlet {
         try {
             InputStream inputStream = request.getInputStream();
             if (inputStream != null) {
-                bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                char[] charBuffer = new char[128];
+                bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream)
+                );
+                int size = inputStream.available();
+                char[] charBuffer = new char[size];
                 int bytesRead;
                 while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
                     stringBuilder.append(charBuffer, 0, bytesRead);
@@ -45,8 +53,13 @@ public class MyHttpServlet extends HttpServlet {
         return body;
     }
 
-    /* add a function to get session and handle authentication */
-    public static HttpSession getSession(HttpServletRequest request) {
+    /**
+     * Get session and handle authentication.
+     *
+     * @param request the http serverlet request
+     * @return the HttpSession from an HttpServletRequest
+     */
+    public static HttpSession getSession(final HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 
         // return unauthorized error message if session is not exist

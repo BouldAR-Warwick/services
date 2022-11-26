@@ -6,25 +6,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import org.json.JSONObject;
-import pbrg.webservices.Singleton;
 import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "GetRoutesServerlet", urlPatterns = "/getRoutes")
 public class GetRoutesServerlet extends MyHttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doGet(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doPost(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
 
         HttpSession session = getSession(request);
 
@@ -42,14 +42,11 @@ public class GetRoutesServerlet extends MyHttpServlet {
             return;
         }
 
-        int gym_id = (int) parameters.get("gymID");
+        int gymId = (int) parameters.get("gymID");
 
-        List<String> route_ids;
+        List<String> routeIds;
         try {
-            Connection connection = Singleton.getDbConnection();
-            assert connection != null;
-            route_ids = Database.get_route_ids_by_gym_id(gym_id, connection);
-            connection.close();
+            routeIds = Database.getRouteIdsByGymId(gymId);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;
@@ -58,7 +55,7 @@ public class GetRoutesServerlet extends MyHttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String[] arrayOfRouteIDs = route_ids.toArray(new String[0]);
+        String[] arrayOfRouteIDs = routeIds.toArray(new String[0]);
         String json = new Gson().toJson(arrayOfRouteIDs);
         response.getWriter().write(json);
     }

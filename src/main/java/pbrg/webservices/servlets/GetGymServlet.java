@@ -6,9 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.Connection;
 import org.json.JSONObject;
-import pbrg.webservices.Singleton;
 import pbrg.webservices.models.Gym;
 import pbrg.webservices.utils.Database;
 
@@ -16,13 +14,17 @@ import pbrg.webservices.utils.Database;
 public class GetGymServlet extends MyHttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected final void doGet(
+        final HttpServletRequest request, final HttpServletResponse response
+    )
         throws IOException {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected final void doPost(
+        final HttpServletRequest request, final HttpServletResponse response
+    )
         throws IOException {
 
         if (request == null) {
@@ -39,14 +41,11 @@ public class GetGymServlet extends MyHttpServlet {
 
         // get json object in the request body
         JSONObject jObj = new JSONObject(getBody(request));
-        String gym_name = jObj.getString("gymname");
+        String gymName = jObj.getString("gymname");
 
         Gym gym = null;
         try {
-            Connection connection = Singleton.getDbConnection();
-            assert connection != null;
-            gym = Database.get_gym_by_name(gym_name, connection);
-            connection.close();
+            gym = Database.getGymByGymName(gymName);
         } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }

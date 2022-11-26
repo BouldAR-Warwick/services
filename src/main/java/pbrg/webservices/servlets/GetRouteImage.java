@@ -9,20 +9,24 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import org.apache.commons.io.FilenameUtils;
-import pbrg.webservices.Singleton;
 import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetRouteImageServerlet", urlPatterns = "/GetRouteImage")
 public class GetRouteImage extends MyHttpServlet {
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected final void doGet(
+        final HttpServletRequest request, final HttpServletResponse response
+    )
         throws IOException {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doPost(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
 
         HttpSession session = getSession(request);
 
@@ -39,43 +43,46 @@ public class GetRouteImage extends MyHttpServlet {
             return;
         }
 
-        int route_id = (int) session.getAttribute("RID");
+        int routeId = (int) session.getAttribute("RID");
 
         // get the route image file name
-        String image_file_name;
+        String imageFileName;
         try {
-            image_file_name = Database.get_route_image_file_names_by_route_id(route_id);
+            imageFileName = Database.getRouteImageFileNamesByRouteId(
+                routeId
+            );
         } catch (SQLException exception) {
             response.getWriter().println(exception.getMessage());
             return;
         }
 
         // route does not exist
-        if (image_file_name == null) {
+        if (imageFileName == null) {
             response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
 
         // get the file extension, lookup & set content type
-        String ext = FilenameUtils.getExtension(image_file_name);
-        String contentType = Singleton.getContentType(ext);
+        String ext = FilenameUtils.getExtension(imageFileName);
+        String contentType = Utils.getContentType(ext);
         response.setContentType(contentType);
 
         // read-in image file
-        byte[] image_buffer;
-        try (FileInputStream fis = new FileInputStream(Singleton.routeImagePath + image_file_name)) {
+        byte[] imageBuffer;
+        try (FileInputStream fis = new FileInputStream(
+            Utils.ROUTE_IMAGE_PATH + imageFileName)) {
             int size = fis.available();
-            image_buffer = new byte[size];
-            int bytes_read = fis.read(image_buffer);
+            imageBuffer = new byte[size];
+            int bytesRead = fis.read(imageBuffer);
 
-            if (bytes_read != size) {
+            if (bytesRead != size) {
                 response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
                 return;
             }
         }
 
         try (OutputStream outputStream = response.getOutputStream()) {
-            outputStream.write(image_buffer);
+            outputStream.write(imageBuffer);
             outputStream.flush();
         }
     }

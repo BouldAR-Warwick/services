@@ -7,27 +7,33 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
-import pbrg.webservices.Singleton;
 import pbrg.webservices.models.User;
 import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")
 public class LoginServlet extends MyHttpServlet {
 
+    /**
+     * Seven days.
+     */
+    private static final int SEVEN_DAYS = 7;
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doGet(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    protected final void doPost(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
 
         // convert request body to json object
         JSONObject credentials;
@@ -53,10 +59,7 @@ public class LoginServlet extends MyHttpServlet {
         // select user
         User user;
         try {
-            Connection connection = Singleton.getDbConnection();
-            assert connection != null;
-            user = Database.sign_in(username, password, connection);
-            connection.close();
+            user = Database.signIn(username, password);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;
@@ -71,17 +74,21 @@ public class LoginServlet extends MyHttpServlet {
 
         // user is authenticated
         HttpSession session = request.getSession();
-        session.setAttribute("uid", user.get_uid());
+        session.setAttribute("uid", user.getUid());
 
-        // TODO: store primary gym id in session?
+        // TODO store primary gym id in session?
 
         if (stayLoggedIn) {
             // create cookie and store logged-in user info in cookie
-            Cookie cookie1 = new Cookie("username", user.get_username());
-            Cookie cookie2 = new Cookie("uid", String.valueOf(user.get_uid()));
+            Cookie cookie1 = new Cookie("username", user.getUsername());
+            Cookie cookie2 = new Cookie("uid", String.valueOf(user.getUid()));
+
             // set expired time to 7 days
-            cookie1.setMaxAge(302400);
-            cookie2.setMaxAge(302400);
+            int sevenDaysInSeconds =
+                (int) Duration.ofDays(SEVEN_DAYS).getSeconds();
+            cookie1.setMaxAge(sevenDaysInSeconds);
+            cookie2.setMaxAge(sevenDaysInSeconds);
+
             // send cookie back to client for authentication next time
             response.addCookie(cookie1);
             response.addCookie(cookie2);
