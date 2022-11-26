@@ -14,15 +14,16 @@ import java.net.URLDecoder;
 @WebServlet(name = "LogoutServlet", urlPatterns = "/Logout")
 public class LogoutServlet extends MyHttpServlet {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         doPost(request,response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 
         // set cookie to 0 second valid (a.k.a. deleted)
         Cookie[] cookies = request.getCookies();
+
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 System.out.println(URLDecoder.decode(cookie.getName(), StandardCharsets.UTF_8));

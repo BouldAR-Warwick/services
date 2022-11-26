@@ -24,12 +24,12 @@ import pbrg.webservices.utils.Database;
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")
 public class LoginServlet extends MyHttpServlet {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         doPost(request,response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         // convert request body to json object
         JSONObject credentials;
@@ -52,18 +52,16 @@ public class LoginServlet extends MyHttpServlet {
         String password = credentials.getString("password");
         boolean stayLoggedIn = credentials.getBoolean("stayLoggedIn");
 
-        Connection conn = Singleton.getDbConnection();
-
         // select user
         User user;
         try {
-            user = Database.sign_in(username, password, conn);
+            Connection connection = Singleton.getDbConnection();
+            user = Database.sign_in(username, password, connection);
+            Singleton.closeDbConnection();
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;
         }
-
-        Singleton.closeDbConnection();
 
         // case one -> the user has not been authenticated (wrong credentials)
         boolean userLoggedIn = (user != null);

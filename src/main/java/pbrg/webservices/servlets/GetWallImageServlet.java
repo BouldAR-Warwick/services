@@ -24,13 +24,13 @@ public class GetWallImageServlet extends MyHttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException 
+            throws IOException
     {
         if (request == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -52,16 +52,16 @@ public class GetWallImageServlet extends MyHttpServlet {
 
         int gymID = (int) session.getAttribute("gid");
 
-        Connection conn = Singleton.getDbConnection();
-
         byte[] imageData;
         String image_file_name = "";
 
-        try (PreparedStatement pst = conn.prepareStatement(
+        try {
+            Connection connection = Singleton.getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
             "SELECT (walls.image_file_name) " +
-            "FROM walls " +
-            "WHERE GID = ?"
-        )) {
+                "FROM walls " +
+                "WHERE GID = ?"
+            );
             pst.setInt(1, gymID);
             ResultSet rs = pst.executeQuery();
 
@@ -69,6 +69,8 @@ public class GetWallImageServlet extends MyHttpServlet {
             if (rs.next()) {
                 image_file_name = rs.getString("image_file_name");
             }
+
+            Singleton.closeDbConnection();
         } catch (IllegalArgumentException | SQLException e) {
             PrintWriter out = response.getWriter();
             out.println(e.getMessage());
@@ -79,8 +81,6 @@ public class GetWallImageServlet extends MyHttpServlet {
             response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
-
-        Singleton.closeDbConnection();
 
         // get the file extension, lookup & set content type
         String ext = FilenameUtils.getExtension(image_file_name);

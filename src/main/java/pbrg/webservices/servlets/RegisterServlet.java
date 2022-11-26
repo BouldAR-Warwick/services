@@ -23,12 +23,12 @@ import pbrg.webservices.utils.Database;
 @WebServlet(name = "RegisterServlet", urlPatterns = "/Register")
 public class RegisterServlet extends MyHttpServlet {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         doPost(request,response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         // parse credentials
         JSONObject credentials;
@@ -52,12 +52,12 @@ public class RegisterServlet extends MyHttpServlet {
         String email = credentials.getString("email");
         String password = credentials.getString("password");
 
-        Connection connection = Singleton.getDbConnection();
-
         // create new user
         boolean added = false;
         try {
+            Connection connection = Singleton.getDbConnection();
             added = Database.sign_up(username, email, password, connection);
+            Singleton.closeDbConnection();
         } catch(SQLException e){
             response.getWriter().println(e.getMessage());
         }
@@ -71,12 +71,12 @@ public class RegisterServlet extends MyHttpServlet {
         // select user
         User user = null;
         try {
+            Connection connection = Singleton.getDbConnection();
             user = Database.sign_in(username, password, connection);
+            Singleton.closeDbConnection();
         } catch(Exception e){
             response.getWriter().println(e.getMessage());
         }
-
-        Singleton.closeDbConnection();
 
         // case one -> the user has not been authenticated (wrong credentials)
         boolean userLoggedIn = (user != null);

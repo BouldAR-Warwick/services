@@ -66,34 +66,24 @@ public final class Singleton {
     }
 
     /** Get DB connection */
-    public static Connection getDbConnection() {
+    public static Connection getDbConnection() throws SQLException {
         // if unclosed connection -> close it
         if (Singleton.conn != null) {
             Singleton.closeDbConnection();
         }
 
         // create and return new connection
-        try {
-            Singleton.conn = Singleton.ds.getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        Singleton.conn = Singleton.ds.getConnection();
         return Singleton.conn;
     }
 
     /** Close DB connection */
-    public static void closeDbConnection() {
+    public static void closeDbConnection() throws SQLException {
         if (Singleton.conn == null) {
             return;
         }
 
-        try {
-            Singleton.conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        Singleton.conn.close();
     }
 
     // getters and setters

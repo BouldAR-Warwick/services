@@ -8,26 +8,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.json.JSONObject;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import pbrg.webservices.Singleton;
 import pbrg.webservices.models.Gym;
 
 @WebServlet(name = "GetGymServlet", urlPatterns = "/GetGym")
 public class GetGymServlet extends MyHttpServlet {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         doPost(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         if (request == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -46,11 +43,8 @@ public class GetGymServlet extends MyHttpServlet {
         String gym_name = jObj.getString("gymname");
 
         try {
-            // get a database connection from connection pool
-            Context ctx = new InitialContext();
-            DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/grabourg");
-            Connection conn = ds.getConnection();
-            PreparedStatement pst = conn.prepareStatement(
+            Connection connection = Singleton.getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
                     "SELECT GID,Gymname FROM gyms WHERE Gymname = ?"
             );
             pst.setString(1, gym_name);
@@ -72,10 +66,8 @@ public class GetGymServlet extends MyHttpServlet {
             response.getWriter().write(json);
 
             pst.close();
-            conn.close();
-        }
-        catch(Exception e)
-        {
+            Singleton.closeDbConnection();
+        } catch(Exception e) {
             response.getWriter().println(e.getMessage());
         }
     }

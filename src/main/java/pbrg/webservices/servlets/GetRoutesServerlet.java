@@ -1,6 +1,5 @@
 package pbrg.webservices.servlets;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,7 +7,6 @@ import jakarta.servlet.http.HttpSession;
 import pbrg.webservices.Singleton;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,12 +21,12 @@ import java.util.*;
 public class GetRoutesServerlet extends MyHttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         doPost(request,response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         HttpSession session = getSession(request);
 
@@ -47,17 +45,16 @@ public class GetRoutesServerlet extends MyHttpServlet {
         }
 
         String gymID = jObj.getString("gymID");
-        assert gymID != null;
 
-        Connection conn = Singleton.getDbConnection();
-
-        try (PreparedStatement pst = conn.prepareStatement(
-            "SELECT routes.RID " + 
-            "FROM routes " + 
-            "INNER JOIN walls ON routes.WID = walls.WID " +
-            "INNER JOIN gyms ON walls.GID = gyms.GID " +
-            "WHERE gyms.GID = ?"
-        )) {
+        try {
+            Connection conn = Singleton.getDbConnection();
+            PreparedStatement pst = conn.prepareStatement(
+            "SELECT routes.RID " +
+                "FROM routes " +
+                "INNER JOIN walls ON routes.WID = walls.WID " +
+                "INNER JOIN gyms ON walls.GID = gyms.GID " +
+                "WHERE gyms.GID = ?"
+            );
             pst.setString(1, "%"+gymID+"%");
 
             ResultSet rs = pst.executeQuery();
@@ -75,12 +72,11 @@ public class GetRoutesServerlet extends MyHttpServlet {
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(json);
 
-        } catch (SQLException e) {
-            PrintWriter out = response.getWriter();
-            out.println(e.getMessage());
-            System.exit(1);
-        }
+            pst.close();
+            Singleton.closeDbConnection();
 
-        Singleton.closeDbConnection();
+        } catch (SQLException e) {
+            response.getWriter().println(e.getMessage());
+        }
     }
 }
