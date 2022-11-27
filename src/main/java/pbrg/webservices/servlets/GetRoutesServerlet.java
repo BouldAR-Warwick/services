@@ -38,7 +38,7 @@ public class GetRoutesServerlet extends MyHttpServlet {
         }
 
         // ensure session has required attributes: gym id, user id
-        if (session.getAttribute("gid") == null|| session.getAttribute("uid") == null) {
+        if (session.getAttribute("gid") == null || session.getAttribute("uid") == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -61,9 +61,9 @@ public class GetRoutesServerlet extends MyHttpServlet {
         JSONObject jsonObject = new JSONObject();
 
         Route[] arrayOfRoutes = routes.toArray(new Route[0]);
-        JsonElement jsonArrayOfRoutes = new Gson().toJsonTree(arrayOfRoutes);
+        // JsonElement jsonArrayOfRoutes = new Gson().toJson(arrayOfRoutes);
 
-        jsonObject.put("routes", jsonArrayOfRoutes);
+        jsonObject.put("routes", arrayOfRoutes);
 
         response.getWriter().write(jsonObject.toString());
     }
