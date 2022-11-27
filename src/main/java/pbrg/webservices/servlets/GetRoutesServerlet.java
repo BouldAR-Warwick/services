@@ -11,20 +11,18 @@ import java.util.List;
 import org.json.JSONObject;
 import pbrg.webservices.utils.Database;
 
-@WebServlet(name = "GetRoutesServerlet", urlPatterns = "/getRoutes")
+@WebServlet(name = "GetRoutesServerlet", urlPatterns = "/GetRoutes")
 public class GetRoutesServerlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-        final HttpServletRequest request, final HttpServletResponse response
-    ) throws IOException {
+            final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected final void doPost(
-        final HttpServletRequest request, final HttpServletResponse response
-    ) throws IOException {
+            final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
         HttpSession session = getSession(request);
 
