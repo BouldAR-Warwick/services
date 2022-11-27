@@ -1,8 +1,5 @@
 package pbrg.webservices.servlets;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -200,7 +200,7 @@ public final class Database {
                 routes.add(new Route(
                     rs.getInt("RID"),
                     rs.getInt("Difficulty"),
-                    "Route #" + String.valueOf(rs.getInt("RID"))
+                    "Route #" + rs.getInt("RID")
                 ));
             }
 
@@ -276,5 +276,33 @@ public final class Database {
         }
 
         return route.getImageFileName();
+    }
+
+    /**
+     * Check if a user, by ID, has created a route, by ID
+     * @param userId creator user ID
+     * @param routeId route ID
+     * @return user has created route
+     * @throws SQLException Query or database get fails
+     */
+    public static boolean userOwnsRoute(int userId, int routeId) throws SQLException {
+        try (
+            Connection connection = Utils.getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+            "SELECT EXISTS("
+                +"SELECT 1 FROM routes WHERE routes.RID=? AND routes.creator_user_id = ?"
+                +")"
+            )
+        ) {
+            pst.setInt(1, routeId);
+            pst.setInt(2, userId);
+
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                return rs.getBoolean(1);
+            }
+        }
+
+        return false;
     }
 }
