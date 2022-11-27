@@ -27,9 +27,11 @@ public final class Database {
     public static User signIn(
             final String username, final String password) throws SQLException {
         try (
-                Connection connection = Utils.getDbConnection();
-                PreparedStatement pst = connection.prepareStatement(
-                        "SELECT * FROM users WHERE username=? AND password=?")) {
+            Connection connection = Utils.getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT * FROM users WHERE username=? AND password=?"
+            )
+        ) {
             pst.setString(1, username);
             pst.setString(2, password);
 
@@ -52,18 +54,22 @@ public final class Database {
      * @throws SQLException if SQL error occurs
      */
     public static boolean signUp(
-            final String username, final String email, final String password) throws SQLException {
+        final String username, final String email, final String password
+    ) throws SQLException {
         insertUser(username, email, password);
         return userExists(username);
     }
 
     private static void insertUser(
-            final String username, final String email, final String password) throws SQLException {
+        final String username, final String email, final String password
+    ) throws SQLException {
         try (
-                Connection connection = Utils.getDbConnection();
-                PreparedStatement pst = connection.prepareStatement(
-                        "INSERT INTO users (Username, Email, Password) VALUES (?,?,?)")) {
-            String[] values = { username, email, password };
+            Connection connection = Utils.getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "INSERT INTO users (Username, Email, Password) VALUES (?,?,?)"
+            )
+        ) {
+            String[] values = {username, email, password};
             for (int i = 1; i <= values.length; i++) {
                 pst.setString(i, values[i]);
             }
@@ -74,9 +80,11 @@ public final class Database {
     private static boolean userExists(
             final String username) throws SQLException {
         try (
-                Connection connection = Utils.getDbConnection();
-                PreparedStatement pst = connection.prepareStatement(
-                        "SELECT EXISTS(SELECT 1 FROM users WHERE username=?)")) {
+            Connection connection = Utils.getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT EXISTS(SELECT 1 FROM users WHERE username=?)"
+            )
+        ) {
             pst.setString(1, username);
 
             ResultSet rs = pst.executeQuery();
@@ -98,11 +106,13 @@ public final class Database {
     public static List<String> getGymsByQueryWord(
             final String queryWord) throws SQLException {
         try (
-                Connection connection = Utils.getDbConnection();
-                PreparedStatement pst = connection.prepareStatement(
-                        "SELECT Gymname "
-                                + "FROM gyms "
-                                + "WHERE GymLocation LIKE ? OR Gymname LIKE ?")) {
+            Connection connection = Utils.getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT Gymname "
+                        + "FROM gyms "
+                        + "WHERE GymLocation LIKE ? OR Gymname LIKE ?"
+            )
+        ) {
             pst.setString(1, "%" + queryWord + "%");
             pst.setString(2, "%" + queryWord + "%");
             ResultSet rs = pst.executeQuery();
@@ -152,11 +162,13 @@ public final class Database {
      */
     public static Gym getGymByUserId(final int userId) throws SQLException {
         try (
-                Connection connection = Utils.getDbConnection();
-                PreparedStatement pst = connection.prepareStatement(
-                        "SELECT GID, Gymname "
-                                + "FROM gyms "
-                                + "WHERE GID = (SELECT GID FROM user_in_gym WHERE UID = ?)")) {
+            Connection connection = Utils.getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT GID, Gymname "
+                    + "FROM gyms "
+                    + "WHERE GID = (SELECT GID FROM user_in_gym WHERE UID = ?)"
+            )
+        ) {
             pst.setInt(1, userId);
 
             ResultSet rs = pst.executeQuery();
@@ -279,19 +291,22 @@ public final class Database {
     }
 
     /**
-     * Check if a user, by ID, has created a route, by ID
+     * Check if a user, by ID, has created a route, by ID.
      * @param userId creator user ID
      * @param routeId route ID
      * @return user has created route
      * @throws SQLException Query or database get fails
      */
-    public static boolean userOwnsRoute(int userId, int routeId) throws SQLException {
+    public static boolean userOwnsRoute(
+        final int userId, final int routeId
+    ) throws SQLException {
         try (
             Connection connection = Utils.getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
             "SELECT EXISTS("
-                +"SELECT 1 FROM routes WHERE routes.RID=? AND routes.creator_user_id = ?"
-                +")"
+                + "SELECT 1 FROM routes "
+                + "WHERE routes.RID=? AND routes.creator_user_id = ?"
+                + ")"
             )
         ) {
             pst.setInt(1, routeId);

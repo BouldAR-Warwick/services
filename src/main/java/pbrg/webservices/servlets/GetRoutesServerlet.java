@@ -12,19 +12,22 @@ import org.json.JSONObject;
 
 import pbrg.webservices.models.Route;
 import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetRoutesServerlet", urlPatterns = "/GetRoutes")
 public class GetRoutesServerlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-            final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+            final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected final void doPost(
-            final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
 
         HttpSession session = getSession(request);
 
@@ -35,8 +38,9 @@ public class GetRoutesServerlet extends MyHttpServlet {
         }
 
         // ensure session has required attributes: gym id, user id
-        if (session.getAttribute("gid") == null || session.getAttribute("uid") == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        String[] requiredSessionAttributes = {"gid", "uid"};
+        if (!Utils.sessionHasAttributes(session, requiredSessionAttributes)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 

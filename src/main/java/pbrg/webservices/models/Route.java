@@ -18,7 +18,7 @@ public class Route {
     private final String routeName;
 
     /**
-     * Construct a route using its id, difficulty, and name
+     * Construct a route using its id, difficulty, and name.
      *
      * @param pRouteID       route ID
      * @param pDifficulty    difficulty

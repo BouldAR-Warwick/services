@@ -2,11 +2,14 @@ package pbrg.webservices.utils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Map;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+
+import jakarta.servlet.http.HttpSession;
 
 /**
  * For static utils: \ getting database connection, file path utils, API utils.
@@ -83,5 +86,22 @@ public final class Utils {
 
         assert (connection != null);
         return connection;
+    }
+
+    /**
+     * Check if a session has required attributes.
+     * @param session session
+     * @param requiredSessionAttributes string array of required attributes
+     * @return true if session has all required attributes
+     */
+    public static boolean sessionHasAttributes(
+        final HttpSession session,
+        final String[] requiredSessionAttributes
+    ) {
+        return Arrays
+            .stream(requiredSessionAttributes)
+            .allMatch(
+                attribute -> session.getAttribute(attribute) != null
+            );
     }
 }
