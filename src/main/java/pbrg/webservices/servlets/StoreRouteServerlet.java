@@ -54,7 +54,7 @@ public class StoreRouteServerlet extends MyHttpServlet {
 
         // ensure this user created this route
 
-        boolean userCreatedRoute = false;
+        boolean userCreatedRoute;
         try {
             userCreatedRoute = Database.userOwnsRoute(userID, routeID);
         } catch (SQLException e) {

@@ -70,15 +70,11 @@ public class GetRouteImageServerlet extends MyHttpServlet {
         // read-in image file
         byte[] imageBuffer;
         try (FileInputStream fis = new FileInputStream(
-            Utils.ROUTE_IMAGE_PATH + imageFileName)) {
+            Utils.ROUTE_IMAGE_PATH + imageFileName)
+        ) {
             int size = fis.available();
             imageBuffer = new byte[size];
-            int bytesRead = fis.read(imageBuffer);
-
-            if (bytesRead != size) {
-                response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
-                return;
-            }
+            fis.read(imageBuffer);
         }
 
         try (OutputStream outputStream = response.getOutputStream()) {
