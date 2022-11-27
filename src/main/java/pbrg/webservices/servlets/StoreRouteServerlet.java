@@ -1,32 +1,27 @@
 package pbrg.webservices.servlets;
 
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.Duration;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.utils.Database;
-import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "StoreRouteServerlet", urlPatterns = "/GetRoute")
 public class StoreRouteServerlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-        final HttpServletRequest request, final HttpServletResponse response
-    ) throws IOException {
+            final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected final void doPost(
-        final HttpServletRequest request, final HttpServletResponse response
-    ) throws IOException {
+            final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         HttpSession session = getSession(request);
 
         // return unauthorized error message if session is not exist
@@ -50,10 +45,9 @@ public class StoreRouteServerlet extends MyHttpServlet {
             return;
         }
 
-        int routeID = (int) credentials.get("routeID");
+        Integer routeID = Integer.valueOf((int) credentials.get("routeID"));
 
         // ensure this user created this route
-
         boolean userCreatedRoute;
         try {
             userCreatedRoute = Database.userOwnsRoute(userID, routeID);
@@ -68,17 +62,7 @@ public class StoreRouteServerlet extends MyHttpServlet {
             return;
         }
 
-        // store route ID in session cookie
-
-        // create cookie and store logged-in user info in cookie
-        Cookie routeIdCoolie = new Cookie("rid", String.valueOf(routeID));
-
-        // set expired time to 7 days
-        int sevenDaysInSeconds =
-            (int) Duration.ofDays(Utils.SEVEN_DAYS).getSeconds();
-        routeIdCoolie.setMaxAge(sevenDaysInSeconds);
-
-        // send cookie back to client for authentication next time
-        response.addCookie(routeIdCoolie);
+        // store route ID in session attribute
+        session.setAttribute("rid", routeID);
     }
 }

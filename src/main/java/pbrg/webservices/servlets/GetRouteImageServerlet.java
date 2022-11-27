@@ -17,16 +17,14 @@ public class GetRouteImageServerlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-        final HttpServletRequest request, final HttpServletResponse response
-    )
-        throws IOException {
+            final HttpServletRequest request, final HttpServletResponse response)
+            throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected final void doPost(
-        final HttpServletRequest request, final HttpServletResponse response
-    ) throws IOException {
+            final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
         HttpSession session = getSession(request);
 
@@ -37,20 +35,19 @@ public class GetRouteImageServerlet extends MyHttpServlet {
         }
 
         // ensure session has route_id
-        if (session.getAttribute("RID") == null) {
+        if (session.getAttribute("rid") == null) {
             // no route id in session
             response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
 
-        int routeId = (int) session.getAttribute("RID");
+        Integer routeId = (Integer) session.getAttribute("rid");
 
         // get the route image file name
         String imageFileName;
         try {
             imageFileName = Database.getRouteImageFileNamesByRouteId(
-                routeId
-            );
+                    routeId);
         } catch (SQLException exception) {
             response.getWriter().println(exception.getMessage());
             return;
@@ -70,8 +67,7 @@ public class GetRouteImageServerlet extends MyHttpServlet {
         // read-in image file
         byte[] imageBuffer;
         try (FileInputStream fis = new FileInputStream(
-            Utils.ROUTE_IMAGE_PATH + imageFileName)
-        ) {
+                Utils.ROUTE_IMAGE_PATH + imageFileName)) {
             int size = fis.available();
             imageBuffer = new byte[size];
             fis.read(imageBuffer);
