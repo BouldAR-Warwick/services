@@ -170,30 +170,43 @@ public final class Database {
     }
 
     /**
-     * Get a list of routes in a gym, by gym ID.
+     * Get a list of routes in a gym, created by a user.
      *
      * @param gymId gym ID
+     * @param userId creator user ID
      * @return list of routes
      * @throws SQLException if SQL error occurs
      */
-    public static List<String> getRouteIdsByGymId(final int gymId)
-            throws SQLException {
+    public static List<Route> getRoutesInGymMadeByUser(
+        final int gymId, final int userId
+    ) throws SQLException {
         try (
-                Connection connection = Utils.getDbConnection();
-                PreparedStatement pst = connection.prepareStatement(
-                        "SELECT routes.RID "
-                                + "FROM routes "
-                                + "INNER JOIN walls ON routes.WID = walls.WID "
-                                + "INNER JOIN gyms ON walls.GID = gyms.GID "
-                                + "WHERE gyms.GID = ?")) {
+            Connection connection = Utils.getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT * "
+                    + "FROM routes "
+                    + "INNER JOIN walls ON routes.WID = walls.WID "
+                    + "INNER JOIN gyms ON walls.GID = gyms.GID "
+                    + "WHERE gyms.GID = ? AND routes.creator_user_id = ?"
+            )
+        ) {
             pst.setInt(1, gymId);
+            pst.setInt(2, userId);
 
             ResultSet rs = pst.executeQuery();
-            List<String> routeIds = new ArrayList<>();
+            List<Route> routes = new ArrayList<>();
             while (rs.next()) {
-                routeIds.add(rs.getString("RID"));
+                routes.add(new Route(
+                    rs.getInt("RID"),
+                    rs.getInt("WID"),
+                    rs.getInt("creator_user_id"),
+                    rs.getInt("Difficulty"),
+                    rs.getString("RouteContent"),
+                    rs.getString("RouteContent")
+                ));
             }
-            return routeIds;
+
+            return routes;
         }
     }
 

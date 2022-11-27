@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import org.json.JSONObject;
+
+import pbrg.webservices.models.Route;
 import pbrg.webservices.utils.Database;
 
 @WebServlet(name = "GetRoutesServerlet", urlPatterns = "/GetRoutes")
@@ -35,16 +37,17 @@ public class GetRoutesServerlet extends MyHttpServlet {
         // get json object in the request body
         JSONObject parameters = new JSONObject(getBody(request));
 
-        if (!parameters.has("gymID")) {
+        if (!parameters.has("gymID") || session.getAttribute("uid") == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         int gymId = (int) parameters.get("gymID");
+        int userId = (int) session.getAttribute("uid");
 
-        List<String> routeIds;
+        List<Route> routes;
         try {
-            routeIds = Database.getRouteIdsByGymId(gymId);
+            routes = Database.getRoutesInGymMadeByUser(gymId, userId);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;
@@ -53,8 +56,8 @@ public class GetRoutesServerlet extends MyHttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String[] arrayOfRouteIDs = routeIds.toArray(new String[0]);
-        String json = new Gson().toJson(arrayOfRouteIDs);
+        String[] arrayOfRoutes = routes.toArray(new String[0]);
+        String json = new Gson().toJson(arrayOfRoutes);
         response.getWriter().write(json);
     }
 }
