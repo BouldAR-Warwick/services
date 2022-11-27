@@ -78,12 +78,12 @@ public class GetWallImageServlet extends MyHttpServlet {
         ) {
             int size = fis.available();
             imageBuffer = new byte[size];
-            int bytesRead = fis.read(imageBuffer);
+            // int bytesRead = fis.read(imageBuffer);
+            fis.read(imageBuffer);
 
-            if (bytesRead != size) {
-                response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
-                return;
-            }
+            // if (bytesRead != size) {
+            //     return;
+            // }
         }
 
         try (OutputStream outputStream = response.getOutputStream()) {
