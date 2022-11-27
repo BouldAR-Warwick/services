@@ -56,7 +56,7 @@ public class GetRoutesServerlet extends MyHttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String[] arrayOfRoutes = routes.toArray(new String[0]);
+        Route[] arrayOfRoutes = routes.toArray(new Route[0]);
         String json = new Gson().toJson(arrayOfRoutes);
         response.getWriter().write(json);
     }
