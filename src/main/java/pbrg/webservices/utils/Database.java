@@ -124,9 +124,11 @@ public final class Database {
     public static Gym getGymByGymName(
             final String gymName) throws SQLException {
         try (
-                Connection connection = Utils.getDbConnection();
-                PreparedStatement pst = connection.prepareStatement(
-                        "SELECT GID,Gymname FROM gyms WHERE Gymname = ?")) {
+            Connection connection = Utils.getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT GID, Gymname FROM gyms WHERE Gymname = ?"
+            )
+        ) {
             pst.setString(1, gymName);
             ResultSet rs = pst.executeQuery();
 
@@ -207,7 +209,7 @@ public final class Database {
         try (
                 Connection connection = Utils.getDbConnection();
                 PreparedStatement pst = connection.prepareStatement(
-                        "SELECT (walls.image_file_name) "
+                        "SELECT walls.image_file_name "
                                 + "FROM walls "
                                 + "WHERE GID = ?")) {
             pst.setInt(1, gymId);
