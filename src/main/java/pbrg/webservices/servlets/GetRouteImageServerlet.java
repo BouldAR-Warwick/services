@@ -17,14 +17,15 @@ public class GetRouteImageServerlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException {
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected final void doPost(
-            final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+        final HttpServletRequest request, final HttpServletResponse response
+    ) throws IOException {
 
         HttpSession session = getSession(request);
 
@@ -66,11 +67,19 @@ public class GetRouteImageServerlet extends MyHttpServlet {
 
         // read-in image file
         byte[] imageBuffer;
-        try (FileInputStream fis = new FileInputStream(
-                Utils.ROUTE_IMAGE_PATH + imageFileName)) {
+        try (
+            FileInputStream fis = new FileInputStream(
+                Utils.ROUTE_IMAGE_PATH + imageFileName
+            )
+        ) {
             int size = fis.available();
             imageBuffer = new byte[size];
-            fis.read(imageBuffer);
+            int bytesRead = fis.read(imageBuffer);
+
+            if (size != bytesRead) {
+                response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+                return;
+            }
         }
 
         try (OutputStream outputStream = response.getOutputStream()) {
