@@ -44,6 +44,11 @@ public final class Utils {
           */
         );
 
+    /**
+     * Seven days.
+     */
+    public static final int SEVEN_DAYS = 7;
+
     private Utils() {
     }
 

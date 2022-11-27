@@ -14,14 +14,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.models.User;
 import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")
 public class LoginServlet extends MyHttpServlet {
-
-    /**
-     * Seven days.
-     */
-    private static final int SEVEN_DAYS = 7;
 
     @Override
     protected final void doGet(
@@ -85,7 +81,7 @@ public class LoginServlet extends MyHttpServlet {
 
             // set expired time to 7 days
             int sevenDaysInSeconds =
-                (int) Duration.ofDays(SEVEN_DAYS).getSeconds();
+                (int) Duration.ofDays(Utils.SEVEN_DAYS).getSeconds();
             cookie1.setMaxAge(sevenDaysInSeconds);
             cookie2.setMaxAge(sevenDaysInSeconds);
 

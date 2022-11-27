@@ -13,7 +13,7 @@ import pbrg.webservices.utils.Database;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetRouteImageServerlet", urlPatterns = "/GetRouteImage")
-public class GetRouteImage extends MyHttpServlet {
+public class GetRouteImageServerlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
