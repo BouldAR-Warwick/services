@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import org.json.JSONObject;
 
 import pbrg.webservices.models.Route;
 import pbrg.webservices.utils.Database;
@@ -34,15 +33,14 @@ public class GetRoutesServerlet extends MyHttpServlet {
             return;
         }
 
-        // get json object in the request body
-        JSONObject parameters = new JSONObject(getBody(request));
-
-        if (!parameters.has("gymID") || session.getAttribute("uid") == null) {
+        // ensure session has required attributes: gym id, user id
+        if (session.getAttribute("gid") == null|| session.getAttribute("uid") == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        int gymId = (int) parameters.get("gymID");
+        // collect gym id, user id from cookies
+        int gymId = (int) session.getAttribute("gid");
         int userId = (int) session.getAttribute("uid");
 
         List<Route> routes;
