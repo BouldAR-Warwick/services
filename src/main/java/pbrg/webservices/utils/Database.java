@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import pbrg.webservices.models.Gym;
 import pbrg.webservices.models.Route;
+import pbrg.webservices.models.RouteFull;
 import pbrg.webservices.models.User;
 
 public final class Database {
@@ -198,11 +199,8 @@ public final class Database {
             while (rs.next()) {
                 routes.add(new Route(
                     rs.getInt("RID"),
-                    rs.getInt("WID"),
-                    rs.getInt("creator_user_id"),
                     rs.getInt("Difficulty"),
-                    rs.getString("RouteContent"),
-                    rs.getString("RouteContent")
+                    "Route #" + String.valueOf(rs.getInt("RID"))
                 ));
             }
 
@@ -237,7 +235,7 @@ public final class Database {
         return null;
     }
 
-    private static Route getRouteByRouteId(final int routeId)
+    private static RouteFull getRouteByRouteId(final int routeId)
             throws SQLException {
         try (
                 Connection connection = Utils.getDbConnection();
@@ -249,13 +247,13 @@ public final class Database {
 
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                return new Route(
+                return new RouteFull(
                         rs.getInt("RID"),
                         rs.getInt("WID"),
                         rs.getInt("creator_user_id"),
                         rs.getInt("Difficulty"),
                         rs.getString("RouteContent"),
-                        rs.getString("RouteContent"));
+                        rs.getString("image_file_name"));
             }
         }
 
@@ -271,7 +269,7 @@ public final class Database {
      */
     public static String getRouteImageFileNamesByRouteId(
             final int routeId) throws SQLException {
-        Route route = getRouteByRouteId(routeId);
+        RouteFull route = getRouteByRouteId(routeId);
 
         if (route == null) {
             return null;

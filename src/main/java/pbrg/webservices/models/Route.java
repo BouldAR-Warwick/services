@@ -5,17 +5,7 @@ public class Route {
     /**
      * Route ID.
      */
-    private final int routeId;
-
-    /**
-     * Wall ID.
-     */
-    private final int wallId;
-
-    /**
-     * Creator user ID.
-     */
-    private final int creatorUserId;
+    private final int routeID;
 
     /**
      * Route difficulty.
@@ -23,40 +13,25 @@ public class Route {
     private final int difficulty;
 
     /**
-     * Route content.
+     * Route name.
      */
-    private final String routeContent;
+    private final String routeName;
 
     /**
-     * Route image file name.
-     */
-    private final String imageFileName;
-
-    /**
-     * Construct a route with ID, wall ID, creator user ID, \
-     * difficulty, content, and image file name.
+     * Construct a route using its id, difficulty, and name
      *
-     * @param pRouteId       route ID
-     * @param pWallId        wall ID
-     * @param pCreatorUserId creator user ID
+     * @param pRouteID       route ID
      * @param pDifficulty    difficulty
-     * @param pRouteContent  content
-     * @param pImageFileName image file name
+     * @param pRouteName     route name
      */
     public Route(
-        final int pRouteId,
-        final int pWallId,
-        final int pCreatorUserId,
+        final int pRouteID,
         final int pDifficulty,
-        final String pRouteContent,
-        final String pImageFileName
+        final String pRouteName
     ) {
-        this.routeId = pRouteId;
-        this.wallId = pWallId;
-        this.creatorUserId = pCreatorUserId;
+        this.routeID = pRouteID;
         this.difficulty = pDifficulty;
-        this.routeContent = pRouteContent;
-        this.imageFileName = pImageFileName;
+        this.routeName = pRouteName;
     }
 
     /**
@@ -65,25 +40,7 @@ public class Route {
      * @return route ID
      */
     public final int getRouteId() {
-        return routeId;
-    }
-
-    /**
-     * Get wall ID.
-     *
-     * @return wall ID
-     */
-    public final int getWallId() {
-        return wallId;
-    }
-
-    /**
-     * Get route creator's user ID.
-     *
-     * @return creator user ID
-     */
-    public final int getCreatorUserId() {
-        return creatorUserId;
+        return routeID;
     }
 
     /**
@@ -96,20 +53,11 @@ public class Route {
     }
 
     /**
-     * Get route content.
+     * Get route name.
      *
-     * @return content
+     * @return route name
      */
-    public final String getRouteContent() {
-        return routeContent;
-    }
-
-    /**
-     * Get route image file name.
-     *
-     * @return image file name
-     */
-    public final String getImageFileName() {
-        return imageFileName;
+    public final String getRouteName() {
+        return routeName;
     }
 }
