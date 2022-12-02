@@ -14,7 +14,7 @@ public class MyHttpServlet extends HttpServlet {
     /**
      * Get json object in the request body.
      *
-     * @param request the http serverlet request
+     * @param request the http servlet request
      * @return request body as a json object
      */
     public static String getBody(final HttpServletRequest request) {
@@ -56,7 +56,7 @@ public class MyHttpServlet extends HttpServlet {
     /**
      * Get session and handle authentication.
      *
-     * @param request the http serverlet request
+     * @param request the http servlet request
      * @return the HttpSession from an HttpServletRequest
      */
     public static HttpSession getSession(final HttpServletRequest request) {
