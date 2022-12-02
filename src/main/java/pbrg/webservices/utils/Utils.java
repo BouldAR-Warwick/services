@@ -1,13 +1,7 @@
 package pbrg.webservices.utils;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -63,29 +57,6 @@ public final class Utils {
      */
     public static String getContentType(final String imageFormat) {
         return CONTENT_TYPE_MAP.get(imageFormat);
-    }
-
-    /**
-     * Get DB connection.
-     *
-     * @return DB connection
-     */
-    public static Connection getDbConnection() {
-        // TODO - pass implementation properties to InitialContext
-        Connection connection = null;
-        try {
-            Context initContext = new InitialContext();
-            Context envContext = (Context) initContext.lookup("java:/comp/env");
-            DataSource ds = (DataSource) envContext.lookup("jdbc/grabourg");
-
-            // create and return new connection
-            connection = ds.getConnection();
-        } catch (NamingException | SQLException exception) {
-            System.out.println(exception.getMessage());
-        }
-
-        assert (connection != null);
-        return connection;
     }
 
     /**

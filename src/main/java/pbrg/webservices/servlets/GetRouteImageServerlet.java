@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import org.apache.commons.io.FilenameUtils;
-import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetRouteImageServerlet", urlPatterns = "/GetRouteImage")
@@ -47,7 +47,7 @@ public class GetRouteImageServerlet extends MyHttpServlet {
         // get the route image file name
         String imageFileName;
         try {
-            imageFileName = Database.getRouteImageFileNamesByRouteId(
+            imageFileName = DatabaseController.getRouteImageFileNamesByRouteId(
                     routeId);
         } catch (SQLException exception) {
             response.getWriter().println(exception.getMessage());

@@ -6,14 +6,41 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import pbrg.webservices.models.Gym;
 import pbrg.webservices.models.Route;
 import pbrg.webservices.models.RouteFull;
 import pbrg.webservices.models.User;
 
-public final class Database {
+public final class DatabaseController {
 
-    private Database() {
+    private DatabaseController() {
+    }
+
+    /**
+     * Get DB connection.
+     *
+     * @return DB connection
+     */
+    public static Connection getDbConnection() {
+        // TODO - pass implementation properties to InitialContext
+        Connection connection = null;
+        try {
+            Context initContext = new InitialContext();
+            Context envContext = (Context) initContext.lookup("java:/comp/env");
+            DataSource ds = (DataSource) envContext.lookup("jdbc/grabourg");
+
+            // create and return new connection
+            connection = ds.getConnection();
+        } catch (NamingException | SQLException exception) {
+            System.out.println(exception.getMessage());
+        }
+
+        assert (connection != null);
+        return connection;
     }
 
     /**
@@ -27,7 +54,7 @@ public final class Database {
     public static User signIn(
             final String username, final String password) throws SQLException {
         try (
-            Connection connection = Utils.getDbConnection();
+            Connection connection = getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT * FROM users WHERE username=? AND password=?"
             )
@@ -64,7 +91,7 @@ public final class Database {
         final String username, final String email, final String password
     ) throws SQLException {
         try (
-            Connection connection = Utils.getDbConnection();
+            Connection connection = getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "INSERT INTO users (Username, Email, Password) VALUES (?,?,?)"
             )
@@ -80,7 +107,7 @@ public final class Database {
     private static boolean userExists(
             final String username) throws SQLException {
         try (
-            Connection connection = Utils.getDbConnection();
+            Connection connection = getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT EXISTS (SELECT 1 FROM users WHERE username=?)"
             )
@@ -106,7 +133,7 @@ public final class Database {
     public static List<String> getGymsByQueryWord(
             final String queryWord) throws SQLException {
         try (
-            Connection connection = Utils.getDbConnection();
+            Connection connection = getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT Gymname "
                     + "FROM gyms "
@@ -135,7 +162,7 @@ public final class Database {
     public static Gym getGymByGymName(
             final String gymName) throws SQLException {
         try (
-                Connection connection = Utils.getDbConnection();
+                Connection connection = getDbConnection();
                 PreparedStatement pst = connection.prepareStatement(
                         "SELECT GID, Gymname FROM gyms WHERE Gymname = ?")) {
             pst.setString(1, gymName);
@@ -160,7 +187,7 @@ public final class Database {
      */
     public static Gym getGymByUserId(final int userId) throws SQLException {
         try (
-            Connection connection = Utils.getDbConnection();
+            Connection connection = getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT GID, Gymname "
                     + "FROM gyms "
@@ -191,7 +218,7 @@ public final class Database {
     public static List<Route> getRoutesInGymMadeByUser(
             final int gymId, final int userId) throws SQLException {
         try (
-            Connection connection = Utils.getDbConnection();
+            Connection connection = getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT * "
                     + "FROM routes "
@@ -226,7 +253,7 @@ public final class Database {
     public static String getWallImageFileNameFromGymId(final int gymId)
             throws SQLException {
         try (
-                Connection connection = Utils.getDbConnection();
+                Connection connection = getDbConnection();
                 PreparedStatement pst = connection.prepareStatement(
                         "SELECT walls.image_file_name "
                                 + "FROM walls "
@@ -246,7 +273,7 @@ public final class Database {
     private static RouteFull getRouteByRouteId(final int routeId)
             throws SQLException {
         try (
-                Connection connection = Utils.getDbConnection();
+                Connection connection = getDbConnection();
                 PreparedStatement pst = connection.prepareStatement(
                         "SELECT * "
                                 + "FROM routes "
@@ -298,7 +325,7 @@ public final class Database {
             final int userId, final int routeId
     ) throws SQLException {
         try (
-            Connection connection = Utils.getDbConnection();
+            Connection connection = getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT EXISTS("
                     + "SELECT 1 FROM routes "

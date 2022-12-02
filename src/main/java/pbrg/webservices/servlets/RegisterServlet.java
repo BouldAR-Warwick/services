@@ -11,7 +11,7 @@ import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.models.User;
-import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.DatabaseController;
 
 @WebServlet(name = "RegisterServlet", urlPatterns = "/Register")
 public class RegisterServlet extends MyHttpServlet {
@@ -53,7 +53,7 @@ public class RegisterServlet extends MyHttpServlet {
         // create new user
         boolean added = false;
         try {
-            added = Database.signUp(username, email, password);
+            added = DatabaseController.signUp(username, email, password);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
         }
@@ -67,7 +67,7 @@ public class RegisterServlet extends MyHttpServlet {
         // select user
         User user = null;
         try {
-            user = Database.signIn(username, password);
+            user = DatabaseController.signIn(username, password);
         } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }

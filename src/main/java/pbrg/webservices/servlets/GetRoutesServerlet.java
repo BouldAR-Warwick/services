@@ -11,7 +11,7 @@ import java.util.List;
 import org.json.JSONObject;
 
 import pbrg.webservices.models.Route;
-import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetRoutesServerlet", urlPatterns = "/GetRoutes")
@@ -50,7 +50,7 @@ public class GetRoutesServerlet extends MyHttpServlet {
 
         List<Route> routes;
         try {
-            routes = Database.getRoutesInGymMadeByUser(gymId, userId);
+            routes = DatabaseController.getRoutesInGymMadeByUser(gymId, userId);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;

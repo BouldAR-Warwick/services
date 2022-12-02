@@ -1,8 +1,9 @@
-import org.junit.jupiter.api.Disabled;
+package pbrg.webservices;
+
 import org.junit.jupiter.api.Test;
 import pbrg.webservices.utils.Utils;
 
-@Disabled
+//@Disabled
 public class UtilsTest {
 
     @Test

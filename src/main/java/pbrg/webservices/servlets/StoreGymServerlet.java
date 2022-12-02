@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Duration;
 import pbrg.webservices.models.Gym;
-import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "StoreGymServerlet", urlPatterns = "/StoreGym")
@@ -38,7 +38,7 @@ public class StoreGymServerlet extends MyHttpServlet {
 
         Gym gym = null;
         try {
-            gym = Database.getGymByUserId(userId);
+            gym = DatabaseController.getGymByUserId(userId);
         } catch (SQLException exception) {
             response.getWriter().println(exception.getMessage());
         }

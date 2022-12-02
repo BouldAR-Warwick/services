@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import org.apache.commons.io.FilenameUtils;
-import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
@@ -51,7 +51,8 @@ public class GetWallImageServlet extends MyHttpServlet {
         // get wall image file name from gym id
         String imageFileName;
         try {
-            imageFileName = Database.getWallImageFileNameFromGymId(gymId);
+            imageFileName = DatabaseController
+                .getWallImageFileNameFromGymId(gymId);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;

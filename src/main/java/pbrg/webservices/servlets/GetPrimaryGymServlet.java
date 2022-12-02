@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 import pbrg.webservices.models.Gym;
-import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.DatabaseController;
 
 @WebServlet(name = "GetPrimaryGymServlet", urlPatterns = "/GetPrimaryGym")
 public class GetPrimaryGymServlet extends MyHttpServlet {
@@ -37,7 +37,7 @@ public class GetPrimaryGymServlet extends MyHttpServlet {
 
         Gym gym = null;
         try {
-            gym = Database.getGymByUserId(userId);
+            gym = DatabaseController.getGymByUserId(userId);
         } catch (SQLException exception) {
             response.getWriter().println(exception.getMessage());
         }

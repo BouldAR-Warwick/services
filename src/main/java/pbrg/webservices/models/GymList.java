@@ -17,9 +17,9 @@ public class GymList {
     }
 
     /**
-     * Get list of gym names.
+     * Get array of gym names.
      *
-     * @return list of gym names
+     * @return array of gym names
      */
     public String[] getGyms() {
         return gyms;

@@ -13,7 +13,7 @@ import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.models.User;
-import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")
@@ -55,7 +55,7 @@ public class LoginServlet extends MyHttpServlet {
         // select user
         User user;
         try {
-            user = Database.signIn(username, password);
+            user = DatabaseController.signIn(username, password);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;

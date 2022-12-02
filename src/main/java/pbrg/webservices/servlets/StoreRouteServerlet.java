@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import pbrg.webservices.utils.Database;
+import pbrg.webservices.utils.DatabaseController;
 
 @WebServlet(name = "StoreRouteServerlet", urlPatterns = "/GetRoute")
 public class StoreRouteServerlet extends MyHttpServlet {
@@ -47,12 +47,13 @@ public class StoreRouteServerlet extends MyHttpServlet {
             return;
         }
 
-        Integer routeID = Integer.valueOf((int) credentials.get("routeID"));
+        int routeID = (int) credentials.get("routeID");
 
         // ensure this user created this route
         boolean userCreatedRoute;
         try {
-            userCreatedRoute = Database.userOwnsRoute(userID, routeID);
+            userCreatedRoute = DatabaseController
+                .userOwnsRoute(userID, routeID);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;

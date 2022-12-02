@@ -17,6 +17,27 @@
           <element id="library" level="project" name="Maven: com.google.code.gson:gson:2.10" />
           <element id="library" level="project" name="Maven: org.json:json:20220924" />
           <element id="library" level="project" name="Maven: commons-io:commons-io:2.11.0" />
+          <element id="library" level="project" name="Maven: org.jacoco:jacoco-maven-plugin:maven-plugin:0.8.8" />
+          <element id="library" level="project" name="Maven: org.codehaus.plexus:plexus-utils:3.0.22" />
+          <element id="library" level="project" name="Maven: org.apache.maven.shared:file-management:1.2.1" />
+          <element id="library" level="project" name="Maven: org.apache.maven:maven-plugin-api:2.0.6" />
+          <element id="library" level="project" name="Maven: org.apache.maven.shared:maven-shared-io:1.1" />
+          <element id="library" level="project" name="Maven: org.apache.maven:maven-artifact:2.0.2" />
+          <element id="library" level="project" name="Maven: org.apache.maven:maven-artifact-manager:2.0.2" />
+          <element id="library" level="project" name="Maven: org.apache.maven:maven-repository-metadata:2.0.2" />
+          <element id="library" level="project" name="Maven: org.apache.maven.wagon:wagon-provider-api:1.0-alpha-6" />
+          <element id="library" level="project" name="Maven: org.codehaus.plexus:plexus-container-default:1.0-alpha-9" />
+          <element id="library" level="project" name="Maven: junit:junit:3.8.1" />
+          <element id="library" level="project" name="Maven: classworlds:classworlds:1.1-alpha-2" />
+          <element id="library" level="project" name="Maven: org.apache.maven.reporting:maven-reporting-api:3.0" />
+          <element id="library" level="project" name="Maven: org.apache.maven.doxia:doxia-sink-api:1.0" />
+          <element id="library" level="project" name="Maven: org.jacoco:org.jacoco.agent:runtime:0.8.8" />
+          <element id="library" level="project" name="Maven: org.jacoco:org.jacoco.core:0.8.8" />
+          <element id="library" level="project" name="Maven: org.ow2.asm:asm:9.2" />
+          <element id="library" level="project" name="Maven: org.ow2.asm:asm-commons:9.2" />
+          <element id="library" level="project" name="Maven: org.ow2.asm:asm-analysis:9.2" />
+          <element id="library" level="project" name="Maven: org.ow2.asm:asm-tree:9.2" />
+          <element id="library" level="project" name="Maven: org.jacoco:org.jacoco.report:0.8.8" />
         </element>
       </element>
       <element id="directory" name="META-INF">
