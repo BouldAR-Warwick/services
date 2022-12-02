@@ -17,7 +17,6 @@ jobs:
         run: |
           chmod +x mvnw
           ./mvnw test
-          ./mvnw jacoco:report
 
       - name: Add coverage to PR
         id: jacoco
