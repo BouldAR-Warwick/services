@@ -1,7 +1,6 @@
-package pbrg.webservices;
+package pbrg.webservices.utils;
 
 import org.junit.jupiter.api.Test;
-import pbrg.webservices.utils.Utils;
 
 //@Disabled
 public class UtilsTest {
