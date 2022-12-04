@@ -25,7 +25,7 @@ public final class DatabaseController {
      *
      * @return DB connection
      */
-    public static Connection getDbConnection() {
+    public static Connection getDbConnection() throws SQLException{
         // TODO - pass implementation properties to InitialContext
         Connection connection = null;
         try {
@@ -35,7 +35,7 @@ public final class DatabaseController {
 
             // create and return new connection
             connection = ds.getConnection();
-        } catch (NamingException | SQLException exception) {
+        } catch (NamingException exception) {
             System.out.println(exception.getMessage());
         }
 
