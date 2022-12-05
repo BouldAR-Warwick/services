@@ -6,7 +6,7 @@
 ## Technologies
 - Apache Tomcat v10.0.27
 - Java 11
-- MySQL v15.1
+- MySQL v5.5.68-MariaDB
 
 ## Build and integrate `.war` file into Apache Tomcat
 ```bash
