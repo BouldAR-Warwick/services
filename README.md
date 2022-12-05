@@ -1,7 +1,7 @@
 # Web services for project pbrg
 
-[![Java CI with Maven](https://github.com/herobrinor/pbrg_services/actions/workflows/maven.yml/badge.svg)](https://github.com/herobrinor/pbrg_services/actions/workflows/maven.yml)
-[![GitHub Super-Linter](https://github.com/herobrinor/pbrg_services/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
+[![Java CI with Maven](https://github.com/tmcowley/pbrg-services/actions/workflows/maven.yml/badge.svg)](https://github.com/tmcowley/pbrg-services/actions/workflows/maven.yml)
+[![GitHub Super-Linter](https://github.com/tmcowley/pbrg-services/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
 ## compile commands
 ```bash
