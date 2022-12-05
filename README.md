@@ -4,9 +4,9 @@
 [![GitHub Super-Linter](https://github.com/tmcowley/pbrg-services/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
 ## Technologies
-- Apache Tomcat
+- Apache Tomcat v10.0.27
 - Java 11
-- MySQL
+- MySQL v15.1
 
 ## Build and integrate `.war` file into Apache Tomcat
 ```bash
