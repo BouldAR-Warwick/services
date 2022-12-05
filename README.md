@@ -8,7 +8,7 @@
 - Java 11
 - MySQL
 
-## Build and integrate `.war` file into Apache Tomcat. 
+## Build and integrate `.war` file into Apache Tomcat
 ```bash
 source scripts/make.sh
 ```
