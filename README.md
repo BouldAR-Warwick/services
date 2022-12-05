@@ -1,16 +1,25 @@
-# Web services for project pbrg
+# Services - PBRG (Problem Board Route Generator)
 
 [![Java CI with Maven](https://github.com/tmcowley/pbrg-services/actions/workflows/maven.yml/badge.svg)](https://github.com/tmcowley/pbrg-services/actions/workflows/maven.yml)
 [![GitHub Super-Linter](https://github.com/tmcowley/pbrg-services/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
-## compile commands
+## Technologies
+- Apache Tomcat
+- Java 11
+- MySQL
+
+## Build and integrate `.war` file into Apache Tomcat. 
+```bash
+source scripts/make.sh
+```
+
+### compile commands
 ```bash
 mvn clean package
 ```
-Then copy the war file in generated target dir to tomcat webapps dir.
 
-## login to database and apply schema
-Connect from grabourg:
+### login to database and apply schema
+Connect:
 ```bash
 mysql -h mysql -D grabourgdb -u grabourg -p
 ```
