@@ -25,7 +25,7 @@ public final class DatabaseController {
      *
      * @return DB connection
      */
-    public static Connection getDbConnection() throws SQLException{
+    public static Connection getDbConnection() throws SQLException {
         // TODO - pass implementation properties to InitialContext
         Connection connection = null;
         try {
