@@ -99,7 +99,7 @@ public final class Utils {
         Mat image = Imgcodecs.imread(wallImageFileName);
 
         // Parse the JSON string into a JSON array
-        JSONArray holdArray = DatabaseController.getRouteContentJSON(routeId);
+        JSONArray holdArray = DatabaseController.getRouteContentJSONArray(routeId);
 
         // Loop through each hold in the JSON array
         for (int i = 0; i < holdArray.length(); i++) {

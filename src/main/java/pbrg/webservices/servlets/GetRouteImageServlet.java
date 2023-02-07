@@ -12,8 +12,8 @@ import org.apache.commons.io.FilenameUtils;
 import pbrg.webservices.utils.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
-@WebServlet(name = "GetRouteImageServerlet", urlPatterns = "/GetRouteImage")
-public class GetRouteImageServerlet extends MyHttpServlet {
+@WebServlet(name = "GetRouteImageServlet", urlPatterns = "/GetRouteImage")
+public class GetRouteImageServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(

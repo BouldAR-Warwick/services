@@ -12,8 +12,8 @@ import pbrg.webservices.models.Gym;
 import pbrg.webservices.utils.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
-@WebServlet(name = "StoreGymServerlet", urlPatterns = "/StoreGym")
-public class StoreGymServerlet extends MyHttpServlet {
+@WebServlet(name = "StoreGymServlet", urlPatterns = "/StoreGym")
+public class StoreGymServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(

@@ -14,8 +14,8 @@ import pbrg.webservices.models.Route;
 import pbrg.webservices.utils.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
-@WebServlet(name = "GetRoutesServerlet", urlPatterns = "/GetRoutes")
-public class GetRoutesServerlet extends MyHttpServlet {
+@WebServlet(name = "GetRoutesServlet", urlPatterns = "/GetRoutes")
+public class GetRoutesServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(

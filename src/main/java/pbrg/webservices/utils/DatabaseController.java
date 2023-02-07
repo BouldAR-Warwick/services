@@ -12,6 +12,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import pbrg.webservices.models.Gym;
 import pbrg.webservices.models.Route;
 import pbrg.webservices.models.RouteFull;
@@ -378,8 +379,18 @@ public final class DatabaseController {
      * @return list of holds in JSON
      * @throws SQLException database issues
      */
-    public static JSONArray getRouteContentJSON(final int routeId) throws SQLException {
+    public static JSONArray getRouteContentJSONArray(final int routeId) throws SQLException {
         return new JSONArray(Objects.requireNonNull(getRouteContent(routeId)));
+    }
+
+    /**
+     * Get a route's contents (list of holds) as a JSON object
+     * @param routeId route identifier
+     * @return list of holds in JSON
+     * @throws SQLException database issues
+     */
+    public static JSONObject getRouteContentJSONObject(final int routeId) throws SQLException {
+        return new JSONObject(Objects.requireNonNull(getRouteContent(routeId)));
     }
 
     /**
