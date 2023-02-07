@@ -63,6 +63,14 @@
             <version>2.11.0</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-project-info-reports-plugin -->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.maven.plugins</groupId>-->
+<!--            <artifactId>maven-project-info-reports-plugin</artifactId>-->
+<!--            <version>3.4.2</version>-->
+<!--        </dependency>-->
+
+
         <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
         <dependency>
             <groupId>org.jacoco</groupId>
@@ -70,6 +78,13 @@
             <version>0.8.8</version>
             <type>maven-plugin</type>
         </dependency>
+
+        <dependency>
+            <groupId>org.openpnp</groupId>
+            <artifactId>opencv</artifactId>
+            <version>3.4.2-0</version>
+        </dependency>
+
     </dependencies>
 
     <build>

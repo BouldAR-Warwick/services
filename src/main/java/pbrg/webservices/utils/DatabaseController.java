@@ -6,10 +6,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.json.JSONArray;
 import pbrg.webservices.models.Gym;
 import pbrg.webservices.models.Route;
 import pbrg.webservices.models.RouteFull;
@@ -343,5 +345,79 @@ public final class DatabaseController {
         }
 
         return false;
+    }
+
+    /**
+     * Get a route's contents (list of holds) as a String
+     * @param routeId route identifier
+     * @return list of holds in JSON
+     * @throws SQLException database issues
+     */
+    public static String getRouteContent(final int routeId) throws SQLException {
+        try (
+            Connection connection = getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT routes.route_content "
+                    + "FROM routes "
+                    + "WHERE RID = ?")) {
+            pst.setInt(1, routeId);
+            ResultSet rs = pst.executeQuery();
+
+            // get JSON list of holds
+            if (rs.next()) {
+                return rs.getString("route_content");
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get a route's contents (list of holds) as a JSON array
+     * @param routeId route identifier
+     * @return list of holds in JSON
+     * @throws SQLException database issues
+     */
+    public static JSONArray getRouteContentJSON(final int routeId) throws SQLException {
+        return new JSONArray(Objects.requireNonNull(getRouteContent(routeId)));
+    }
+
+    /**
+     * Get a wall ID from a route ID
+     * @param routeId route identifier
+     * @return wall identifier
+     * @throws SQLException database issues
+     */
+    public static Integer getWallIdFromRouteId(final int routeId) throws SQLException {
+        try (
+            Connection connection = getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT routes.WID "
+                    + "FROM routes "
+                    + "WHERE RID = ?")) {
+            pst.setInt(1, routeId);
+            ResultSet rs = pst.executeQuery();
+
+            // get JSON list of holds
+            if (rs.next()) {
+                return Integer.parseInt(rs.getString("WID"));
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the wall image file name based on the route ID.
+     * @param routeId the route ID
+     * @return the wall image file name if found, null otherwise
+     * @throws SQLException if there is an error accessing the database
+     */
+    public static String getWallImageFileNameFromRouteId(final int routeId) throws SQLException {
+        Integer gymId = getWallIdFromRouteId(routeId);
+        if (gymId == null) {
+            return null;
+        }
+        return getWallImageFileNameFromGymId(gymId);
     }
 }
