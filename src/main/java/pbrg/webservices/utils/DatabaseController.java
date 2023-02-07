@@ -349,12 +349,14 @@ public final class DatabaseController {
     }
 
     /**
-     * Get a route's contents (list of holds) as a String
+     * Get a route's contents (list of holds) as a String.
      * @param routeId route identifier
      * @return list of holds in JSON
      * @throws SQLException database issues
      */
-    public static String getRouteContent(final int routeId) throws SQLException {
+    public static String getRouteContent(
+        final int routeId
+    ) throws SQLException {
         try (
             Connection connection = getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -374,32 +376,38 @@ public final class DatabaseController {
     }
 
     /**
-     * Get a route's contents (list of holds) as a JSON array
+     * Get a route's contents (list of holds) as a JSON array.
      * @param routeId route identifier
      * @return list of holds in JSON
      * @throws SQLException database issues
      */
-    public static JSONArray getRouteContentJSONArray(final int routeId) throws SQLException {
+    public static JSONArray getRouteContentJSONArray(
+        final int routeId
+    ) throws SQLException {
         return new JSONArray(Objects.requireNonNull(getRouteContent(routeId)));
     }
 
     /**
-     * Get a route's contents (list of holds) as a JSON object
+     * Get a route's contents (list of holds) as a JSON object.
      * @param routeId route identifier
      * @return list of holds in JSON
      * @throws SQLException database issues
      */
-    public static JSONObject getRouteContentJSONObject(final int routeId) throws SQLException {
+    public static JSONObject getRouteContentJSONObject(
+        final int routeId
+    ) throws SQLException {
         return new JSONObject(Objects.requireNonNull(getRouteContent(routeId)));
     }
 
     /**
-     * Get a wall ID from a route ID
+     * Get a wall ID from a route ID.
      * @param routeId route identifier
      * @return wall identifier
      * @throws SQLException database issues
      */
-    public static Integer getWallIdFromRouteId(final int routeId) throws SQLException {
+    public static Integer getWallIdFromRouteId(
+        final int routeId
+    ) throws SQLException {
         try (
             Connection connection = getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -424,7 +432,9 @@ public final class DatabaseController {
      * @return the wall image file name if found, null otherwise
      * @throws SQLException if there is an error accessing the database
      */
-    public static String getWallImageFileNameFromRouteId(final int routeId) throws SQLException {
+    public static String getWallImageFileNameFromRouteId(
+        final int routeId
+    ) throws SQLException {
         Integer gymId = getWallIdFromRouteId(routeId);
         if (gymId == null) {
             return null;

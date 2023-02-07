@@ -95,11 +95,13 @@ public final class Utils {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         // Load the image file
-        String wallImageFileName = DatabaseController.getWallImageFileNameFromRouteId(routeId);
+        String wallImageFileName = DatabaseController
+            .getWallImageFileNameFromRouteId(routeId);
         Mat image = Imgcodecs.imread(wallImageFileName);
 
         // Parse the JSON string into a JSON array
-        JSONArray holdArray = DatabaseController.getRouteContentJSONArray(routeId);
+        JSONArray holdArray = DatabaseController
+            .getRouteContentJSONArray(routeId);
 
         // Loop through each hold in the JSON array
         for (int i = 0; i < holdArray.length(); i++) {
@@ -116,7 +118,10 @@ public final class Utils {
 
             // Draw a circle at the location of the hold
             Imgproc.circle(
-                image, new Point(xScaled, yScaled), 10, new Scalar(0, 0, 255), -1
+                image,
+                new Point(xScaled, yScaled),
+                10, new Scalar(0, 0, 255),
+                -1
             );
         }
 
