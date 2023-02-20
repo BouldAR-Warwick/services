@@ -104,9 +104,11 @@ public final class Utils {
      * @param grade grade
      * @return route as a JSON object of holds
      */
-    public static JSONObject generateRouteMoonboard(final int grade) {
+    public static JSONArray generateRouteMoonboard(final int grade) {
         ProcessBuilder pb = new ProcessBuilder(
-            "python", "route-gen-moonboard.py", String.valueOf(grade)
+            "python",
+            "python-scripts/route-gen-moonboard.py",
+            String.valueOf(grade)
         );
         Process process = null;
 
@@ -148,8 +150,7 @@ public final class Utils {
         String result = output.toString();
 
         // parse result as a json object
-        JSONObject route = new JSONObject(result);
-
+        JSONArray route = new JSONArray(result);
         return route;
     }
 
@@ -168,12 +169,25 @@ public final class Utils {
         // Load the image file
         String wallImageFileName = DatabaseController
             .getWallImageFileNameFromRouteId(routeId);
-        Mat image = Imgcodecs.imread(wallImageFileName);
 
         // Parse the JSON string into a JSON array
         JSONArray holdArray = DatabaseController
             .getRouteContentJSONArray(routeId);
 
+        return plotHoldsOnImage(routeId, wallImageFileName, holdArray);
+    }
+
+    /**
+     * Plot holds on an image
+     * @param routeId route id
+     * @param wallImageFileName wall image file name
+     * @param holdArray json array of holds
+     * @return new file name
+     */
+    public static String plotHoldsOnImage(
+        int routeId, String wallImageFileName, JSONArray holdArray
+    ) {
+        Mat image = Imgcodecs.imread(wallImageFileName);
         // Loop through each hold in the JSON array
         for (int i = 0; i < holdArray.length(); i++) {
             // Get the current hold

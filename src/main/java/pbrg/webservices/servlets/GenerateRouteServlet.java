@@ -4,6 +4,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.json.JSONArray;
 import pbrg.webservices.utils.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
@@ -80,7 +81,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         int grade = arguments.getInt("difficulty");
 
         // generate the route
-        JSONObject route = Utils.generateRouteMoonboard(grade);
+        JSONArray route = Utils.generateRouteMoonboard(grade);
 
         // get the wall ID
         int wallID;
