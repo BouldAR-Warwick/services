@@ -20,11 +20,20 @@ public class GenerateRouteServlet extends MyHttpServlet {
         final HttpServletRequest request, final HttpServletResponse response
     ) {
         // given wall ID
+        // TODO: we are prototyping only for the MoonBoard wall so verify that the requested wall is the MoonBoard
 
-        // get the wall image
+        // run route generation to return list of holds and coordinates to be used in route:
+        // - direct call to python script
+        // - or call to tensorflow REST API / java tensorflow
+        //   - however these will require additional proccessing which would have to be written on java side
+        //   - => will just stick with python call
+        
+        // python route generation call: pass grade as stdin
 
-        // run through route generation model
+        // returns comma separated list of coordinates (hold positions to be used)
+        // TODO: we really need a whole restructuring of service classes so that Holds exist as children of wall not associated with routes
 
+        // construct route from grade and holds
         // store route in database
     }
 
