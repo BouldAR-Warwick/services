@@ -78,6 +78,7 @@ public final class Utils {
      * @return content type
      */
     public static String getContentType(final String imageFormat) {
+        if (imageFormat == null) return null;
         return CONTENT_TYPE_MAP.get(imageFormat);
     }
 
