@@ -51,8 +51,11 @@ public class GetWallImageServlet extends MyHttpServlet {
         // get wall image file name from gym id
         String imageFileName;
         try {
+            Integer wallId = DatabaseController.getWallIdFromGymId(gymId);
+            assert wallId != null;
+
             imageFileName = DatabaseController
-                .getWallImageFileNameFromGymId(gymId);
+                .getWallImageFileNameFromWallId(wallId);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;

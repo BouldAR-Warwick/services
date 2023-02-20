@@ -1,5 +1,8 @@
 package pbrg.webservices.utils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
@@ -18,6 +21,16 @@ import org.opencv.imgproc.Imgproc;
  * For static utils: \ getting database connection, file path utils, API utils.
  */
 public final class Utils {
+
+    /**
+     * Default radius for route image generation.
+     */
+    private static final int DEFAULT_RADIUS = 10;
+
+    /**
+     * Default color for route image generation.
+     */
+    private static final Scalar DEFAULT_COLOUR = new Scalar(0, 0, 255);
 
     /**
      * Path to wall image directory.
@@ -86,11 +99,68 @@ public final class Utils {
     }
 
     /**
+     * Generate a route on a 2016 Moonboard.
+     * @param grade grade
+     * @return route as a JSON object of holds
+     */
+    public static JSONObject generateRouteMoonboard(final int grade) {
+        ProcessBuilder pb = new ProcessBuilder(
+            "python", "route-gen-moonboard.py", String.valueOf(grade)
+        );
+        Process process = null;
+
+        try {
+            process = pb.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(process.getInputStream())
+        );
+        StringBuilder output = new StringBuilder();
+
+        String line;
+        try {
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append('\n');
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int exitCode = 0;
+        try {
+            exitCode = process.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (exitCode != 0) {
+            throw new RuntimeException(
+                "Route generation failed with exit code " + exitCode
+            );
+        }
+
+        // result is a comma separated list of coordinates \
+        // (hold positions to be used)
+        String result = output.toString();
+
+        // parse result as a json object
+        JSONObject route = new JSONObject(result);
+
+        return route;
+    }
+
+    /**
      * Create a 2d route image by highlighting holds on a wall.
      * @param routeId route identifier
+     * @return file name of the route image
      * @throws SQLException database issues
      */
-    public static void createRouteImage(final int routeId) throws SQLException {
+    public static String createRouteImage(
+        final int routeId
+    ) throws SQLException {
         // Load the OpenCV library
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
@@ -120,12 +190,16 @@ public final class Utils {
             Imgproc.circle(
                 image,
                 new Point(xScaled, yScaled),
-                10, new Scalar(0, 0, 255),
+                DEFAULT_RADIUS,
+                DEFAULT_COLOUR,
                 -1
             );
         }
 
         // Save the modified image
-        Imgcodecs.imwrite("r" + routeId + "-" + wallImageFileName, image);
+        String routeImageFileName = "r" + routeId + "-" + wallImageFileName;
+        Imgcodecs.imwrite(routeImageFileName, image);
+
+        return routeImageFileName;
     }
 }

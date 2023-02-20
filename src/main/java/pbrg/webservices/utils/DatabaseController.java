@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -247,21 +248,20 @@ public final class DatabaseController {
     }
 
     /**
-     * Get a wall image file name by gym id.
-     *
-     * @param gymId the gym id
+     * Get a wall image file name by wall id.
+     * @param wallId the wall id
      * @return the wall image file name
      * @throws SQLException If the query fails
      */
-    public static String getWallImageFileNameFromGymId(final int gymId)
+    public static String getWallImageFileNameFromWallId(final int wallId)
             throws SQLException {
         try (
                 Connection connection = getDbConnection();
                 PreparedStatement pst = connection.prepareStatement(
                         "SELECT walls.image_file_name "
                                 + "FROM walls "
-                                + "WHERE GID = ?")) {
-            pst.setInt(1, gymId);
+                                + "WHERE WID = ?")) {
+            pst.setInt(1, wallId);
             ResultSet rs = pst.executeQuery();
 
             // get name of wall image
@@ -435,10 +435,105 @@ public final class DatabaseController {
     public static String getWallImageFileNameFromRouteId(
         final int routeId
     ) throws SQLException {
-        Integer gymId = getWallIdFromRouteId(routeId);
-        if (gymId == null) {
+        Integer wallId = getWallIdFromRouteId(routeId);
+        if (wallId == null) {
             return null;
         }
-        return getWallImageFileNameFromGymId(gymId);
+        return getWallImageFileNameFromWallId(wallId);
+    }
+
+    /**
+     * Get a gym ID from a gym ID.
+     * @param gymId gym identifier
+     * @return wall identifier
+     */
+    public static Integer getWallIdFromGymId(
+        final int gymId
+    ) throws SQLException {
+        try (
+            Connection connection = getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT walls.WID "
+                    + "FROM walls "
+                    + "WHERE GID = ?")) {
+            pst.setInt(1, gymId);
+            ResultSet rs = pst.executeQuery();
+
+            // get JSON list of holds
+            if (rs.next()) {
+                return Integer.parseInt(rs.getString("WID"));
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Create a new route (without image) in the database.
+     * @param routeContent route content (list of holds)
+     * @param difficulty route difficulty
+     * @param creatorUserId creator user identifier
+     * @param wallId wall identifier
+     * @return route identifier
+     * @throws SQLException database issues
+     */
+    public static Integer createRoute(
+        final String routeContent, final int difficulty,
+        final int creatorUserId, final int wallId
+    ) throws SQLException {
+        try (
+            Connection connection = getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "INSERT INTO routes "
+                    + "(route_content, difficulty, creator_user_id, WID) "
+                    + "VALUES (?, ?, ?, ?) "
+                + "RETURNING RID"
+            )
+        ) {
+            Object[] values = {routeContent, difficulty, creatorUserId, wallId};
+            String[] types = {"String", "int", "int", "int"};
+
+            for (int i = 1; i <= values.length; i++) {
+                Object value = values[i];
+                String type = types[i];
+
+                if (type == "String") {
+                    pst.setString(i, (String) value);
+                } else if (type == "int") {
+                    pst.setInt(i, (int) value);
+                }
+            }
+            ResultSet rs = pst.executeQuery();
+
+            // get JSON list of holds
+            if (rs.next()) {
+                return Integer.parseInt(rs.getString("RID"));
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Add a route image to an existing route.
+     * @param routeId route identifier
+     * @param imageFileName route image file name
+     * @throws SQLException database issues
+     */
+    public static void addImageToRoute(
+        final int routeId, final String imageFileName
+    ) throws SQLException {
+        try (
+            Connection connection = getDbConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "UPDATE routes "
+                    + "SET image_file_name = ? "
+                    + "WHERE RID = ?"
+            )
+        ) {
+            pst.setString(1, imageFileName);
+            pst.setInt(2, routeId);
+            pst.executeUpdate();
+        }
     }
 }
