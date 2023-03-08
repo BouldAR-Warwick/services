@@ -52,15 +52,15 @@ public final class Utils {
             Map.entry("jpg", "image/jpeg"),
             Map.entry("jpeg", "image/jpeg"),
             Map.entry("pbg", "image/png")
-          /*
-          unsupported:
-              image/gif
-              image/tiff
-              image/vnd.microsoft.icon
-              image/x-icon
-              image/vnd.djvu
-              image/svg+xml
-          */
+            /*
+            unsupported:
+                image/gif
+                image/tiff
+                image/vnd.microsoft.icon
+                image/x-icon
+                image/vnd.djvu
+                image/svg+xml
+            */
         );
 
     /**
@@ -155,12 +155,105 @@ public final class Utils {
     }
 
     /**
-     * Create a 2d route image by highlighting holds on a wall.
+     * Create a 2D route image by highlighting holds on a wall with a Python script.
+     * @param routeId
+     * @return
+     * @throws SQLException
+     */
+    public static String createRouteImagePython(
+        final int routeId
+    ) throws SQLException {
+        // Load the image file
+        String wallImageFileName = DatabaseController
+            .getWallImageFileNameFromRouteId(routeId);
+
+        // Parse the JSON string into a JSON array
+        JSONArray holdArray = DatabaseController
+            .getRouteContentJSONArray(routeId);
+
+        // plot holds on image by calling python script
+        return plotHoldsOnImagePython(
+            routeId, wallImageFileName, Utils.WALL_IMAGE_PATH, Utils.ROUTE_IMAGE_PATH, holdArray
+        );
+    }
+
+    /**
+     * Plot holds on an image using python script plot-holds.py.
+     * @param routeId route id
+     * @param wallImageFileName wall image file name
+     * @param holdArray json array of holds
+     * @return new file name
+     */
+    public static String plotHoldsOnImagePython(
+        final int routeId,
+        final String wallImageFileName,
+        final String wallImageFilePath, 
+        final String routeImageFilePath,
+        final JSONArray holdArray
+    ) {
+        // pass the wallImageFileName, routeID, and holdArray to the python script
+        ProcessBuilder pb = new ProcessBuilder(
+            "python",
+            "python-scripts/plot-holds.py",
+            wallImageFileName,
+            wallImageFilePath,
+            routeImageFilePath,
+            String.valueOf(routeId),
+            holdArray.toString()
+        );
+
+        // read the output printed by the python script
+        Process process = null;
+        try {
+            process = pb.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(process.getInputStream())
+        );
+
+        StringBuilder output = new StringBuilder();
+
+        String line;
+        try {
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append('\n');
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int exitCode = 0;
+        int success = Integer.parseInt(output.toString().strip());
+        try {
+            exitCode = process.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (exitCode != 0 || success != 0) {
+            // print the error
+            System.out.println("python script plot-holds.py failed");
+            System.out.println("exit code: " + exitCode);
+            System.out.println("output: " + output.toString());
+            return null;
+        }
+
+        // return the file name of the route image
+        String routeFileName = "r" + routeId + "-" + wallImageFileName;
+        return routeFileName;
+    }
+
+
+    /**
+     * Create a 2D route image by highlighting holds on a wall using OpenCV.
      * @param routeId route identifier
      * @return file name of the route image
      * @throws SQLException database issues
      */
-    public static String createRouteImage(
+    public static String createRouteImageOpenCV(
         final int routeId
     ) throws SQLException {
         // Load the OpenCV library
@@ -174,7 +267,7 @@ public final class Utils {
         JSONArray holdArray = DatabaseController
             .getRouteContentJSONArray(routeId);
 
-        return plotHoldsOnImage(routeId, wallImageFileName, holdArray);
+        return plotHoldsOnImageOpenCV(routeId, wallImageFileName, holdArray);
     }
 
     /**
@@ -184,7 +277,7 @@ public final class Utils {
      * @param holdArray json array of holds
      * @return new file name
      */
-    public static String plotHoldsOnImage(
+    public static String plotHoldsOnImageOpenCV(
         int routeId, String wallImageFileName, JSONArray holdArray
     ) {
         Mat image = Imgcodecs.imread(wallImageFileName);

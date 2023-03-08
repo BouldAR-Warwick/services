@@ -28,8 +28,6 @@ import java.sql.SQLException;
         //   - however these will require additional processing \
         // which would have to be written on java side
         //   - => will just stick with python call
-
-
         // require a restructuring of service classes \
     // so that Holds exist as children of wall not associated with routes
  */
@@ -46,12 +44,14 @@ public class GenerateRouteServlet extends MyHttpServlet {
         doPost(request, response);
     }
 
+    /**
+     * given wall ID and grade, generate a route
+     * */
     @Override
     protected final void doPost(
         final HttpServletRequest request, final HttpServletResponse response
     ) throws IOException {
-        // given wall ID, grade
-
+        // get session
         HttpSession session = getSession(request);
 
         // return unauthorized error message if session is not exist
@@ -110,10 +110,17 @@ public class GenerateRouteServlet extends MyHttpServlet {
         // generate route image, store filename
         String newFile;
         try {
-            newFile = Utils.createRouteImage(gymId);
+            newFile = Utils.createRouteImagePython(gymId);
         } catch (SQLException e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        // wall query failed or no wall against gym
+        if (newFile == null) {
+            // case gym has no wall! - TODO
+            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
 
@@ -127,12 +134,6 @@ public class GenerateRouteServlet extends MyHttpServlet {
         }
 
         // return the new image as a bitmap
-        // wall query failed or no wall against gym
-        if (newFile == null) {
-            // case gym has no wall! - TODO
-            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
-            return;
-        }
 
         // get the file extension, lookup & set content type
         String ext = FilenameUtils.getExtension(newFile);

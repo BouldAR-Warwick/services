@@ -4,10 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Objects;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.opencv.core.Core;
 
 class UtilsTest {
 
@@ -33,6 +31,20 @@ class UtilsTest {
 
     @Test
     @Disabled
+    void plotHoldsOnImageOpenCV() {
+        int grade = 5;
+        JSONArray holds = Utils.generateRouteMoonboard(grade);
+
+        String wallImageFilePath = "moonboard2016.jpg";
+
+        int name = 500;
+
+        String newFile = Utils.plotHoldsOnImageOpenCV(name, wallImageFilePath, holds);
+
+        assertNotNull(newFile);
+    }
+
+    @Test
     void plotHoldsOnImage() {
         int grade = 5;
         JSONArray holds = Utils.generateRouteMoonboard(grade);
@@ -41,6 +53,8 @@ class UtilsTest {
 
         int name = 500;
 
-        String newFile = Utils.plotHoldsOnImage(name, wallImageFilePath, holds);
+        String newFile = Utils.plotHoldsOnImagePython(name, wallImageFilePath, "./", "./", holds);
+
+        assertNotNull(newFile);
     }
 }
