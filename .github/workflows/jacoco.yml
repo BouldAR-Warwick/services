@@ -13,7 +13,7 @@ jobs:
         with:
           java-version: 11
       - name: Set up python 3.6.8
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           # matching DCS systems
           python-version: '3.6.8'
