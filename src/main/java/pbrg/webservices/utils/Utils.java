@@ -214,14 +214,23 @@ public final class Utils {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
 
-        int exitCode = 0;
-        int success = Integer.parseInt(output.toString().strip());
+        int success;
+        try {
+            success = Integer.parseInt(output.toString().strip());
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        int exitCode;
         try {
             exitCode = process.waitFor();
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return null;
         }
 
         if (exitCode != 0 || success != 0) {

@@ -20,6 +20,8 @@ class UtilsTest {
         if (!TestUtils.python3Installed()) {
             throw new RuntimeException("Python 3 not installed.");
         }
+
+
     }
 
     @Test
@@ -43,6 +45,7 @@ class UtilsTest {
         // then: result is not null
         assertNotNull(result);
         assert !result.isEmpty();
+        assert !result.toString().isBlank();
     }
 
     @Test
@@ -50,6 +53,7 @@ class UtilsTest {
         // given: holds, paths, route ID, working directory
         JSONArray holds = Utils.generateRouteMoonBoard(AVERAGE_GRADE);
         assertNotNull(holds);
+        assert !holds.toString().isBlank();
         String wallImageFilePath = "MoonBoard2016.jpg";
         String workingDirectory = System.getProperty("user.dir");
 
@@ -60,7 +64,7 @@ class UtilsTest {
             holds
         );
 
-        // then: ensure file is created
+        // then: file is successfully created
         assertNotNull(newFile);
     }
 }
