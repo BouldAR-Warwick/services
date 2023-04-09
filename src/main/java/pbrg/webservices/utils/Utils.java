@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import org.json.JSONArray;
 
 /**
- * For static utils: \ getting database connection, file path utils, API utils.
+ * For static utils: getting database connection, file path utils, API utils.
  */
 public final class Utils {
 
@@ -85,18 +85,18 @@ public final class Utils {
     }
 
     /**
-     * Generate a route on a 2016 Moonboard.
+     * Generate a route on a 2016 MoonBoard.
      * @param grade grade
      * @return route as a JSON object of holds
      */
-    public static JSONArray generateRouteMoonboard(final int grade) {
+    public static JSONArray generateRouteMoonBoard(final int grade) {
         ProcessBuilder pb = new ProcessBuilder(
             "python",
-            "python-scripts/route-gen-moonboard.py",
+            "python-scripts/route-gen-moon-board.py",
             String.valueOf(grade)
         );
-        Process process;
 
+        Process process;
         try {
             process = pb.start();
         } catch (IOException e) {
@@ -118,11 +118,12 @@ public final class Utils {
             e.printStackTrace();
         }
 
-        int exitCode = 0;
+        int exitCode;
         try {
             exitCode = process.waitFor();
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return null;
         }
 
         if (exitCode != 0) {
@@ -143,7 +144,7 @@ public final class Utils {
      * with a Python script.
      * @param routeId route ID
      * @return file name of the route image
-     * @throws SQLException
+     * @throws SQLException database errors
      */
     public static String createRouteImagePython(
         final int routeId
@@ -192,11 +193,12 @@ public final class Utils {
         );
 
         // read the output printed by the python script
-        Process process = null;
+        Process process;
         try {
             process = pb.start();
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
 
         BufferedReader reader = new BufferedReader(
@@ -226,12 +228,11 @@ public final class Utils {
             // print the error
             System.out.println("python script plot-holds.py failed");
             System.out.println("exit code: " + exitCode);
-            System.out.println("output: " + output.toString());
+            System.out.println("output: " + output);
             return null;
         }
 
-        // return the file name of the route image
-        String routeFileName = "r" + routeId + "-" + wallImageFileName;
-        return routeFileName;
+        // return routeFileName: the file name of the route image
+        return "r" + routeId + "-" + wallImageFileName;
     }
 }

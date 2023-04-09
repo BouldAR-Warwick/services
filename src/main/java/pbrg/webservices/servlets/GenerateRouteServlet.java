@@ -81,7 +81,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         int grade = arguments.getInt("difficulty");
 
         // generate the route
-        JSONArray route = Utils.generateRouteMoonboard(grade);
+        JSONArray route = Utils.generateRouteMoonBoard(grade);
         if (route == null) {
             System.out.println("Route generation failed");
             response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);

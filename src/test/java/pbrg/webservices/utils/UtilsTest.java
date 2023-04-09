@@ -2,10 +2,13 @@ package pbrg.webservices.utils;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.io.IOException;
 import java.util.Objects;
 import org.json.JSONArray;
 // import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import pbrg.webservices.SystemEnvironmentTest;
 
 class UtilsTest {
 
@@ -15,12 +18,19 @@ class UtilsTest {
     /** The example route ID. */
     private static final int EXAMPLE_ROUTE_ID = 500;
 
+    @BeforeAll
+    static void setUp() throws IOException, InterruptedException {
+        if (!SystemEnvironmentTest.python3Installed()) {
+            throw new RuntimeException("Python 3 not installed.");
+        }
+    }
+
     @Test
     void getContentType() {
         assert Objects.equals(Utils.getContentType("jpg"), "image/jpeg");
 
         // ensure non keys are mapped to null
-        String[] nonKeys = {null, "not-in-map"};
+        String[] nonKeys = {null, "", "not-in-map"};
         for (String nonKey : nonKeys) {
             assert Objects.equals(Utils.getContentType(nonKey), null);
         }
@@ -31,7 +41,7 @@ class UtilsTest {
         // given: grade
 
         // when: generate route
-        JSONArray result = Utils.generateRouteMoonboard(AVERAGE_GRADE);
+        JSONArray result = Utils.generateRouteMoonBoard(AVERAGE_GRADE);
 
         // then: result is not null
         assertNotNull(result);
@@ -41,7 +51,7 @@ class UtilsTest {
     @Test
     void plotHoldsOnImage() {
         // given: holds, paths, route ID, working directory
-        JSONArray holds = Utils.generateRouteMoonboard(AVERAGE_GRADE);
+        JSONArray holds = Utils.generateRouteMoonBoard(AVERAGE_GRADE);
         assertNotNull(holds);
         String wallImageFilePath = "MoonBoard2016.jpg";
         String workingDirectory = System.getProperty("user.dir");
