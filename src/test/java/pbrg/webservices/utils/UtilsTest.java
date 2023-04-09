@@ -2,13 +2,10 @@ package pbrg.webservices.utils;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.io.IOException;
 import java.util.Objects;
 import org.json.JSONArray;
-// import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import pbrg.webservices.SystemEnvironmentTest;
 
 class UtilsTest {
 
@@ -19,8 +16,8 @@ class UtilsTest {
     private static final int EXAMPLE_ROUTE_ID = 500;
 
     @BeforeAll
-    static void setUp() throws IOException, InterruptedException {
-        if (!SystemEnvironmentTest.python3Installed()) {
+    static void setUp() {
+        if (!TestUtils.python3Installed()) {
             throw new RuntimeException("Python 3 not installed.");
         }
     }

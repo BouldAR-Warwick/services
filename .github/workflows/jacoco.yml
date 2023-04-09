@@ -12,6 +12,11 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Set up python 3.6.8
+        uses: actions/setup-python@v2
+        with:
+          # matching DCS systems
+          python-version: '3.6.8'
       - name: Run Coverage
         run: |
           chmod +x mvnw

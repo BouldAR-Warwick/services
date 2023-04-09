@@ -27,6 +27,11 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
+    - name: Set up python 3.6.8
+      uses: actions/setup-python@v2
+      with:
+        # matching DCS systems
+        python-version: '3.6.8'
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
