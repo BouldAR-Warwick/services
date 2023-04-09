@@ -9,28 +9,11 @@ import java.util.Map;
 
 import jakarta.servlet.http.HttpSession;
 import org.json.JSONArray;
-import org.json.JSONObject;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
 /**
  * For static utils: \ getting database connection, file path utils, API utils.
  */
 public final class Utils {
-
-    /**
-     * Default radius for route image generation.
-     */
-    private static final int DEFAULT_RADIUS = 10;
-
-    /**
-     * Default color for route image generation.
-     */
-    private static final Scalar DEFAULT_COLOUR = new Scalar(0, 0, 255);
 
     /**
      * Path to wall image directory.
@@ -78,7 +61,9 @@ public final class Utils {
      * @return content type
      */
     public static String getContentType(final String imageFormat) {
-        if (imageFormat == null) return null;
+        if (imageFormat == null) {
+            return null;
+        }
         return CONTENT_TYPE_MAP.get(imageFormat);
     }
 
@@ -110,12 +95,13 @@ public final class Utils {
             "python-scripts/route-gen-moonboard.py",
             String.valueOf(grade)
         );
-        Process process = null;
+        Process process;
 
         try {
             process = pb.start();
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
 
         BufferedReader reader = new BufferedReader(
@@ -145,19 +131,18 @@ public final class Utils {
             );
         }
 
-        // result is a comma separated list of coordinates \
-        // (hold positions to be used)
+        // comma separated list of coordinates (hold positions to be used)
         String result = output.toString();
 
-        // parse result as a json object
-        JSONArray route = new JSONArray(result);
-        return route;
+        // return route - parse result as a json object
+        return new JSONArray(result);
     }
 
     /**
-     * Create a 2D route image by highlighting holds on a wall with a Python script.
-     * @param routeId
-     * @return
+     * Create a 2D route image by highlighting holds on a wall \
+     * with a Python script.
+     * @param routeId route ID
+     * @return file name of the route image
      * @throws SQLException
      */
     public static String createRouteImagePython(
@@ -173,7 +158,9 @@ public final class Utils {
 
         // plot holds on image by calling python script
         return plotHoldsOnImagePython(
-            routeId, wallImageFileName, Utils.WALL_IMAGE_PATH, Utils.ROUTE_IMAGE_PATH, holdArray
+            routeId, wallImageFileName,
+            Utils.WALL_IMAGE_PATH, Utils.ROUTE_IMAGE_PATH,
+            holdArray
         );
     }
 
@@ -181,17 +168,19 @@ public final class Utils {
      * Plot holds on an image using python script plot-holds.py.
      * @param routeId route id
      * @param wallImageFileName wall image file name
+     * @param wallImageFilePath wall image file path
+     * @param routeImageFilePath route image file path
      * @param holdArray json array of holds
      * @return new file name
      */
     public static String plotHoldsOnImagePython(
         final int routeId,
         final String wallImageFileName,
-        final String wallImageFilePath, 
+        final String wallImageFilePath,
         final String routeImageFilePath,
         final JSONArray holdArray
     ) {
-        // pass the wallImageFileName, routeID, and holdArray to the python script
+        // python script with arguments: wallImageFileName, routeID, holdArray
         ProcessBuilder pb = new ProcessBuilder(
             "python",
             "python-scripts/plot-holds.py",
@@ -244,70 +233,5 @@ public final class Utils {
         // return the file name of the route image
         String routeFileName = "r" + routeId + "-" + wallImageFileName;
         return routeFileName;
-    }
-
-
-    /**
-     * Create a 2D route image by highlighting holds on a wall using OpenCV.
-     * @param routeId route identifier
-     * @return file name of the route image
-     * @throws SQLException database issues
-     */
-    public static String createRouteImageOpenCV(
-        final int routeId
-    ) throws SQLException {
-        // Load the OpenCV library
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
-        // Load the image file
-        String wallImageFileName = DatabaseController
-            .getWallImageFileNameFromRouteId(routeId);
-
-        // Parse the JSON string into a JSON array
-        JSONArray holdArray = DatabaseController
-            .getRouteContentJSONArray(routeId);
-
-        return plotHoldsOnImageOpenCV(routeId, wallImageFileName, holdArray);
-    }
-
-    /**
-     * Plot holds on an image
-     * @param routeId route id
-     * @param wallImageFileName wall image file name
-     * @param holdArray json array of holds
-     * @return new file name
-     */
-    public static String plotHoldsOnImageOpenCV(
-        int routeId, String wallImageFileName, JSONArray holdArray
-    ) {
-        Mat image = Imgcodecs.imread(wallImageFileName);
-        // Loop through each hold in the JSON array
-        for (int i = 0; i < holdArray.length(); i++) {
-            // Get the current hold
-            JSONObject hold = holdArray.getJSONObject(i);
-
-            // Get the x and y coordinates of the hold
-            double x = hold.getDouble("x");
-            double y = hold.getDouble("y");
-
-            // Scale the coordinates to the size of the image
-            int xScaled = (int) (x * image.width());
-            int yScaled = (int) (y * image.height());
-
-            // Draw a circle at the location of the hold
-            Imgproc.circle(
-                image,
-                new Point(xScaled, yScaled),
-                DEFAULT_RADIUS,
-                DEFAULT_COLOUR,
-                -1
-            );
-        }
-
-        // Save the modified image
-        String routeImageFileName = "r" + routeId + "-" + wallImageFileName;
-        Imgcodecs.imwrite(routeImageFileName, image);
-
-        return routeImageFileName;
     }
 }

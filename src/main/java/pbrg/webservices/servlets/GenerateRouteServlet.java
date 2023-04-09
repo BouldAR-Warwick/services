@@ -45,7 +45,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
     }
 
     /**
-     * given wall ID and grade, generate a route
+     * given wall ID and grade, generate a route.
      * */
     @Override
     protected final void doPost(
@@ -82,9 +82,14 @@ public class GenerateRouteServlet extends MyHttpServlet {
 
         // generate the route
         JSONArray route = Utils.generateRouteMoonboard(grade);
+        if (route == null) {
+            System.out.println("Route generation failed");
+            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+            return;
+        }
 
         // get the wall ID
-        int wallID;
+        Integer wallID;
         try {
             wallID = DatabaseController.getWallIdFromGymId(gymId);
         } catch (SQLException e) {
@@ -92,6 +97,13 @@ public class GenerateRouteServlet extends MyHttpServlet {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
+
+        if (wallID == null) {
+            System.out.println("No wall found for gym ID: " + gymId);
+            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+            return;
+        }
+
 
         // store the route as a new route in the database
         Integer routeId;
@@ -104,7 +116,6 @@ public class GenerateRouteServlet extends MyHttpServlet {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
-
         assert routeId != null;
 
         // generate route image, store filename

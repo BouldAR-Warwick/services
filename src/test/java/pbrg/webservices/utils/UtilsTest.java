@@ -1,13 +1,19 @@
 package pbrg.webservices.utils;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Objects;
 import org.json.JSONArray;
-import org.junit.jupiter.api.Disabled;
+// import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class UtilsTest {
+
+    /** The average bouldering grade worldwide is V5. */
+    private static final int AVERAGE_GRADE = 5;
+
+    /** The example route ID. */
+    private static final int EXAMPLE_ROUTE_ID = 500;
 
     @Test
     void getContentType() {
@@ -21,40 +27,33 @@ class UtilsTest {
     }
 
     @Test
-    void generateRouteMoonboard() {
-        int grade = 5;
+    void generateRouteMoonBoard() {
+        // given: grade
 
-        JSONArray result = Utils.generateRouteMoonboard(grade);
+        // when: generate route
+        JSONArray result = Utils.generateRouteMoonboard(AVERAGE_GRADE);
 
-        assert(!result.isEmpty());
-    }
-
-    @Test
-    @Disabled
-    void plotHoldsOnImageOpenCV() {
-        int grade = 5;
-        JSONArray holds = Utils.generateRouteMoonboard(grade);
-
-        String wallImageFilePath = "moonboard2016.jpg";
-
-        int name = 500;
-
-        String newFile = Utils.plotHoldsOnImageOpenCV(name, wallImageFilePath, holds);
-
-        assertNotNull(newFile);
+        // then: result is not null
+        assertNotNull(result);
+        assert !result.isEmpty();
     }
 
     @Test
     void plotHoldsOnImage() {
-        int grade = 5;
-        JSONArray holds = Utils.generateRouteMoonboard(grade);
+        // given: holds, paths, route ID, working directory
+        JSONArray holds = Utils.generateRouteMoonboard(AVERAGE_GRADE);
+        assertNotNull(holds);
+        String wallImageFilePath = "MoonBoard2016.jpg";
+        String workingDirectory = System.getProperty("user.dir");
 
-        String wallImageFilePath = "moonboard2016.jpg";
+        // when: plotting holds on image
+        String newFile = Utils.plotHoldsOnImagePython(
+            EXAMPLE_ROUTE_ID, wallImageFilePath,
+            workingDirectory, workingDirectory,
+            holds
+        );
 
-        int name = 500;
-
-        String newFile = Utils.plotHoldsOnImagePython(name, wallImageFilePath, "./", "./", holds);
-
+        // then: ensure file is created
         assertNotNull(newFile);
     }
 }
