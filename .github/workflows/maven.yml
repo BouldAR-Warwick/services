@@ -32,6 +32,9 @@ jobs:
       with:
         # DCS systems use 3.6.8
         python-version: '3.9'
+        cache: 'pip'
+    - name: Install Pillow
+      run: pip install pillow
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
