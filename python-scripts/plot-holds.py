@@ -1,12 +1,12 @@
 import json
 import sys
-from PIL import Image, ImageDraw
 import os
+from PIL import Image, ImageDraw
 
 
 def plot_holds(
         wall_image_filename: str, wall_image_directory: str,
-        route_image_directory: str, route_id: int, holds_json: str
+        route_image_directory: str, route_id: str, holds_json: str
 ) -> int:
     """
     Plots the holds on the wall image and saves the route image.
@@ -30,8 +30,10 @@ def plot_holds(
     holds = json.loads(holds_json)
 
     # draw the holds on
-    route_image_filename = "r" + str(route_id) + "-" + wall_image_filename
-    route_image_path = os.path.join(route_image_directory, route_image_filename)
+    route_image_filename = "r" + route_id + "-" + wall_image_filename
+    route_image_path = os.path.join(
+        route_image_directory, route_image_filename
+    )
     route_image = wall_image.copy()
 
     # Draw the holds on the route image
@@ -41,11 +43,19 @@ def plot_holds(
         x_norm, y_norm = hold.values()
 
         # scale coordinates to image size
-        x = round(x_norm * wall_image.size[0])
-        y = round(y_norm * wall_image.size[1])
+        x_coordinate = round(x_norm * wall_image.size[0])
+        y_coordinate = round(y_norm * wall_image.size[1])
 
         # highlight the hold - make the circle border thicker and red, no fill
-        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=None, outline=(255, 0, 0), width=5)
+        draw.ellipse(
+            (
+                x_coordinate - radius, y_coordinate - radius,
+                x_coordinate + radius, y_coordinate + radius
+            ),
+            fill=None,
+            outline=(255, 0, 0),
+            width=5
+        )
 
     # Save the route image
     route_image.save(route_image_path)
@@ -55,7 +65,8 @@ def plot_holds(
 
 if __name__ == "__main__":
     # command line arguments order: \
-    # wall_image_filename, wall_image_directory, route_image_directory, route_id, holds_json
+    # wall_image_filename, wall_image_directory, \
+    # route_image_directory, route_id, holds_json
 
     # Plot the holds on the wall image
-    plot_holds(*sys.argv[1:])
+    plot_holds(*tuple(sys.argv[1:]))

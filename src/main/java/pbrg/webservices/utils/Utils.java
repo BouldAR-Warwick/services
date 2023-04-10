@@ -1,6 +1,7 @@
 package pbrg.webservices.utils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
@@ -153,9 +154,23 @@ public final class Utils {
      * @return route as a JSON object of holds
      */
     public static JSONArray generateRouteMoonBoard(final int grade) {
+        // path is working dir + python-scripts/plot-holds.py
+        File workingDirectory = new File(System.getProperty("user.dir"));
+        File pythonFile = new File(
+            workingDirectory,
+            "python-scripts/route-gen-moon-board.py"
+        );
+
+        // ensure file exists
+        if (!pythonFile.exists()) {
+            throw new RuntimeException(
+                "Python script " + pythonFile.toString() + " does not exist"
+            );
+        }
+
         ProcessBuilder pb = new ProcessBuilder(
             "python3",
-            "python-scripts/route-gen-moon-board.py",
+            pythonFile.toString(),
             String.valueOf(grade)
         );
 
@@ -167,7 +182,7 @@ public final class Utils {
         int exitCode = getExitCode(process);
         if (exitCode != 0) {
             throw new RuntimeException(
-                "Route generation failed with exit code " + exitCode
+                "Route generation failed with exit code " + exitCode + ""
             );
         }
 
@@ -220,10 +235,24 @@ public final class Utils {
         final String routeImageFilePath,
         final JSONArray holdArray
     ) {
+        // path is working dir + python-scripts/plot-holds.py
+        File workingDirectory = new File(System.getProperty("user.dir"));
+        File pythonFile = new File(
+            workingDirectory,
+            "python-scripts/plot-holds.py"
+        );
+
+        // ensure file exists
+        if (!pythonFile.exists()) {
+            throw new RuntimeException(
+                "Python script " + pythonFile.toString() + " does not exist"
+            );
+        }
+
         // python script with arguments: wallImageFileName, routeID, holdArray
         ProcessBuilder pb = new ProcessBuilder(
             "python3",
-            "python-scripts/plot-holds.py",
+            pythonFile.toString(),
             wallImageFileName,
             wallImageFilePath,
             routeImageFilePath,
