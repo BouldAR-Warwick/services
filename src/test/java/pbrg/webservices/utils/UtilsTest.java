@@ -20,8 +20,6 @@ class UtilsTest {
         if (!TestUtils.python3Installed()) {
             throw new RuntimeException("Python 3 not installed.");
         }
-
-
     }
 
     @Test

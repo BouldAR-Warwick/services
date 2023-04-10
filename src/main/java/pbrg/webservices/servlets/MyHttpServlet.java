@@ -62,23 +62,31 @@ public class MyHttpServlet extends HttpServlet {
     public static HttpSession getSession(final HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 
-        // return unauthorized error message if session is not exist
-        if (session == null) {
-            // check cookie for user information
-            String uid = "";
-            Cookie[] cookies = request.getCookies();
-            for (Cookie cookie : cookies) {
-                if ("uid".equals(cookie.getName())) {
-                    uid = cookie.getValue();
-                }
-            }
-            if (!uid.isEmpty()) {
-                // create a new session for stay logged-in user
-                int id = Integer.parseInt(uid);
-                session = request.getSession();
-                session.setAttribute("uid", id);
+        if (session != null) {
+            // return existing session
+            return session;
+        }
+
+        // check cookie for user information
+        String uid = "";
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if ("uid".equals(cookie.getName())) {
+                uid = cookie.getValue();
             }
         }
-        return session;
+        if (!uid.isEmpty()) {
+            // create a new session for stay logged-in user
+            int id = Integer.parseInt(uid);
+            session = request.getSession(true);
+            session.setAttribute("uid", id);
+            return session;
+        }
+
+        // session doesn't exist and no data in cookies
+        return null;
     }
 }

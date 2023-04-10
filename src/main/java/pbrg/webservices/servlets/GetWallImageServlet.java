@@ -4,13 +4,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.SQLException;
-import org.apache.commons.io.FilenameUtils;
+import java.util.Collections;
+import java.util.List;
+
 import pbrg.webservices.utils.DatabaseController;
-import pbrg.webservices.utils.Utils;
+import static pbrg.webservices.utils.Utils.returnImageAsBitmap;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
 public class GetWallImageServlet extends MyHttpServlet {
@@ -18,42 +18,27 @@ public class GetWallImageServlet extends MyHttpServlet {
     @Override
     protected final void doGet(
         final HttpServletRequest request, final HttpServletResponse response
-    )
-        throws IOException {
+    ) throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected final void doPost(
         final HttpServletRequest request, final HttpServletResponse response
-    )
-        throws IOException {
-        if (request == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    ) throws IOException {
+        // validate request, session, session requires gid
+        if (!validatePreconditions(request, response)) {
             return;
         }
 
-        // get session, error if request is unauthorized
         HttpSession session = getSession(request);
-        if (session == null) {
-            // return unauthorized error message
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
-        if (session.getAttribute("gid") == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
+        assert session != null;
         int gymId = (int) session.getAttribute("gid");
 
         // get wall image file name from gym id
         String imageFileName;
         try {
             Integer wallId = DatabaseController.getWallIdFromGymId(gymId);
-            assert wallId != null;
-
             imageFileName = DatabaseController
                 .getWallImageFileNameFromWallId(wallId);
         } catch (SQLException e) {
@@ -68,31 +53,79 @@ public class GetWallImageServlet extends MyHttpServlet {
             return;
         }
 
-        // get the file extension, lookup & set content type
-        String ext = FilenameUtils.getExtension(imageFileName);
-        String contentType = Utils.getContentType(ext);
-        response.setContentType(contentType);
+        returnImageAsBitmap(response, imageFileName);
+    }
 
-        // read-in image file
-        byte[] imageBuffer;
-        try (
-            FileInputStream fis = new FileInputStream(
-                Utils.WALL_IMAGE_PATH + imageFileName
-            )
-        ) {
-            int size = fis.available();
-            imageBuffer = new byte[size];
-            int bytesRead = fis.read(imageBuffer);
+    private boolean validatePreconditions(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) {
+        String[] requiredAttributes = {"gid"};
 
-            if (size != bytesRead) {
-                response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
-                return;
+        // validate the response
+        if (!validateResponse(response)) {
+            System.out.println("Invalid response");
+            return false;
+        }
+
+        // validate the request
+        if (!validateRequest(request, response)) {
+            return false;
+        }
+
+        // validate the session
+        HttpSession session = getSession(request);
+        return validateSession(session, requiredAttributes, response);
+    }
+
+    private boolean validateRequest(
+        final HttpServletRequest request, final HttpServletResponse response
+    ) {
+        // ensure request is not null
+        if (request == null) {
+            try {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateResponse(
+        final HttpServletResponse response
+    ) {
+        return response != null;
+    }
+
+    private boolean validateSession(
+        final HttpSession session, final String[] requiredAttributes,
+        final HttpServletResponse response
+    ) {
+        // error if request is unauthorized
+        if (session == null) {
+            // return unauthorized error message
+            try {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        // ensure session has attributes
+        List<String> attributes = Collections.list(session.getAttributeNames());
+        for (String attribute: requiredAttributes) {
+            if (!attributes.contains(attribute)) {
+                try {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return false;
             }
         }
 
-        try (OutputStream outputStream = response.getOutputStream()) {
-            outputStream.write(imageBuffer);
-            outputStream.flush();
-        }
+        return true;
     }
 }

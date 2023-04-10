@@ -4,20 +4,18 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import org.json.JSONArray;
-import pbrg.webservices.utils.DatabaseController;
-import pbrg.webservices.utils.Utils;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Arrays;
-
-import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.sql.SQLException;
+
+import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.utils.Utils;
+import static pbrg.webservices.utils.Utils.returnImageAsBitmap;
 
 /**
  * prototyping only for the MoonBoard wall.
@@ -81,57 +79,45 @@ public class GenerateRouteServlet extends MyHttpServlet {
         int grade = arguments.getInt("difficulty");
 
         // generate the route
-        JSONArray route = Utils.generateRouteMoonBoard(grade);
-        if (route == null) {
+        JSONArray route;
+        try {
+            route = Utils.generateRouteMoonBoard(grade);
+        } catch (RuntimeException e) {
             System.out.println("Route generation failed");
+            e.printStackTrace();
             response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
 
         // get the wall ID
-        Integer wallID;
+        int wallID;
         try {
             wallID = DatabaseController.getWallIdFromGymId(gymId);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
 
-        if (wallID == null) {
-            System.out.println("No wall found for gym ID: " + gymId);
-            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
-            return;
-        }
-
-
         // store the route as a new route in the database
-        Integer routeId;
+        int routeId;
         try {
             routeId = DatabaseController.createRoute(
                 route.toString(), grade, userId, wallID
             );
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
-        assert routeId != null;
 
         // generate route image, store filename
         String newFile;
         try {
             newFile = Utils.createRouteImagePython(gymId);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-
-        // wall query failed or no wall against gym
-        if (newFile == null) {
-            // case gym has no wall! - TODO
-            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
 
@@ -144,33 +130,6 @@ public class GenerateRouteServlet extends MyHttpServlet {
             return;
         }
 
-        // return the new image as a bitmap
-
-        // get the file extension, lookup & set content type
-        String ext = FilenameUtils.getExtension(newFile);
-        String contentType = Utils.getContentType(ext);
-        response.setContentType(contentType);
-
-        // read-in image file
-        byte[] imageBuffer;
-        try (
-            FileInputStream fis = new FileInputStream(
-                Utils.WALL_IMAGE_PATH + newFile
-            )
-        ) {
-            int size = fis.available();
-            imageBuffer = new byte[size];
-            int bytesRead = fis.read(imageBuffer);
-
-            if (size != bytesRead) {
-                response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
-                return;
-            }
-        }
-
-        try (OutputStream outputStream = response.getOutputStream()) {
-            outputStream.write(imageBuffer);
-            outputStream.flush();
-        }
+        returnImageAsBitmap(response, newFile);
     }
 }

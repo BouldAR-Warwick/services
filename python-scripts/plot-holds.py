@@ -3,28 +3,28 @@ import sys
 from PIL import Image, ImageDraw
 import os
 
+
 def plot_holds(
-    wall_image_filename: str, wall_image_directory: str, 
-    route_image_directory: str, route_id: int, holds_json: str
+        wall_image_filename: str, wall_image_directory: str,
+        route_image_directory: str, route_id: int, holds_json: str
 ) -> int:
     """
     Plots the holds on the wall image and saves the route image.
     :param wall_image_filename: The filename of the wall image.
     :param wall_image_directory: The directory of the wall image.
+    :param route_image_directory: route image directory.
     :param route_id: The route id.
     :param holds_json: The holds in JSON format.
     :return: 0 if successful, -1 if not.
     """
     # Load the wall image
     wall_image_path = os.path.join(wall_image_directory, wall_image_filename)
-   
-    # try opening the wall image
-    try:
-        # print("Opening wall image file: " + wall_image_path)
-        wall_image = Image.open(wall_image_path)
-    except:
-        # print("Error: Could not open wall image file: " + wall_image_path)
-        return -1
+
+    # opening the wall image
+
+    # print("Opening wall image file: " + wall_image_path)
+    # may raise PIL.UnidentifiedImageError
+    wall_image = Image.open(wall_image_path)
 
     # Convert holds_json string to Python list of tuples
     holds = json.loads(holds_json)
@@ -39,10 +39,10 @@ def plot_holds(
     radius = 25
     for hold in holds:
         x_norm, y_norm = hold.values()
-        
+
         # scale coordinates to image size
-        x = int(x_norm * wall_image.size[0])
-        y = int(y_norm * wall_image.size[1])
+        x = round(x_norm * wall_image.size[0])
+        y = round(y_norm * wall_image.size[1])
 
         # highlight the hold - make the circle border thicker and red, no fill
         draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=None, outline=(255, 0, 0), width=5)
@@ -52,10 +52,10 @@ def plot_holds(
 
     return 0
 
+
 if __name__ == "__main__":
-    # Parse command line arguments
-    wall_image_filename, wall_image_directory, route_image_directory, route_id, holds_json = sys.argv[1:]
+    # command line arguments order: \
+    # wall_image_filename, wall_image_directory, route_image_directory, route_id, holds_json
 
     # Plot the holds on the wall image
-    success = plot_holds(wall_image_filename, wall_image_directory, route_image_directory, route_id, holds_json)
-    print(success)
+    plot_holds(*sys.argv[1:])

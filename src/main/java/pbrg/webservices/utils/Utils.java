@@ -3,11 +3,15 @@ package pbrg.webservices.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
 
 /**
@@ -98,6 +102,22 @@ public final class Utils {
     }
 
     /**
+     * Get exit code from a process.
+     * @param process process
+     * @return exit code
+     */
+    private static int getExitCode(final Process process) {
+        int exitCode;
+        try {
+            exitCode = process.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return exitCode;
+    }
+
+    /**
      * Get a content type from a file extension.
      *
      * @param imageFormat file extension
@@ -134,23 +154,17 @@ public final class Utils {
      */
     public static JSONArray generateRouteMoonBoard(final int grade) {
         ProcessBuilder pb = new ProcessBuilder(
-            "python",
+            "python3",
             "python-scripts/route-gen-moon-board.py",
             String.valueOf(grade)
         );
 
-        // read the output printed by the python script, collect output
+        // run py script, collect results
         Process process = runProcess(pb);
         StringBuilder output = collectOutput(process);
 
-        int exitCode;
-        try {
-            exitCode = process.waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return null;
-        }
-
+        // ensure success
+        int exitCode = getExitCode(process);
         if (exitCode != 0) {
             throw new RuntimeException(
                 "Route generation failed with exit code " + exitCode
@@ -208,7 +222,7 @@ public final class Utils {
     ) {
         // python script with arguments: wallImageFileName, routeID, holdArray
         ProcessBuilder pb = new ProcessBuilder(
-            "python",
+            "python3",
             "python-scripts/plot-holds.py",
             wallImageFileName,
             wallImageFilePath,
@@ -217,35 +231,55 @@ public final class Utils {
             holdArray.toString()
         );
 
-        // read the output printed by the python script, collect output
+        // run hold plotting script
         Process process = runProcess(pb);
-        StringBuilder output = collectOutput(process);
 
-        int exitCode;
-        try {
-            exitCode = process.waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return null;
+        // ensure success
+        int exitCode = getExitCode(process);
+        if (exitCode != 0) {
+            throw new RuntimeException(
+                "Route thumbnail generation failed with exit code " + exitCode
+            );
         }
 
-        int success;
-        try {
-            success = Integer.parseInt(output.toString().strip());
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        if (exitCode != 0 || success != 0) {
-            // print the error
-            System.out.println("python script plot-holds.py failed");
-            System.out.println("exit code: " + exitCode);
-            System.out.println("output: " + output);
-            return null;
-        }
-
-        // return routeFileName: the file name of the route image
+        // return the file name of the route image
         return "r" + routeId + "-" + wallImageFileName;
+    }
+
+    /**
+     * Return an image as a bitmap.
+     * @param response response
+     * @param fileName file name
+     * @throws IOException file errors
+     */
+    public static void returnImageAsBitmap(
+        final HttpServletResponse response, final String fileName
+    ) throws IOException {
+        // get the file extension, lookup & set content type
+        String ext = FilenameUtils.getExtension(fileName);
+        String contentType = Utils.getContentType(ext);
+        response.setContentType(contentType);
+
+        // read-in image file
+        byte[] imageBuffer;
+        try (
+            FileInputStream fis = new FileInputStream(
+                Utils.WALL_IMAGE_PATH + fileName
+            )
+        ) {
+            int size = fis.available();
+            imageBuffer = new byte[size];
+            int bytesRead = fis.read(imageBuffer);
+
+            if (size != bytesRead) {
+                response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+                return;
+            }
+        }
+
+        try (OutputStream outputStream = response.getOutputStream()) {
+            outputStream.write(imageBuffer);
+            outputStream.flush();
+        }
     }
 }

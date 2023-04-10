@@ -456,7 +456,8 @@ public final class DatabaseController {
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT walls.WID "
                     + "FROM walls "
-                    + "WHERE GID = ?")) {
+                    + "WHERE GID = ?")
+        ) {
             pst.setInt(1, gymId);
             ResultSet rs = pst.executeQuery();
 
@@ -466,7 +467,7 @@ public final class DatabaseController {
             }
         }
 
-        return null;
+        throw new RuntimeException("No wall against gym ID " + gymId);
     }
 
     /**
@@ -513,7 +514,7 @@ public final class DatabaseController {
             }
         }
 
-        return null;
+        throw new RuntimeException("Route creation: no keys returned.");
     }
 
     /**
