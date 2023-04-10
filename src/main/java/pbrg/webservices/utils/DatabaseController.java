@@ -3,6 +3,7 @@ package pbrg.webservices.utils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -484,10 +485,10 @@ public final class DatabaseController {
         try (
             Connection connection = getDbConnection();
             PreparedStatement pst = connection.prepareStatement(
-                "INSERT INTO routes "
-                    + "(route_content, difficulty, creator_user_id, WID) "
-                    + "VALUES (?, ?, ?, ?) "
-                + "RETURNING RID"
+            "INSERT INTO routes "
+                + "(route_content, difficulty, creator_user_id, WID) "
+                + "VALUES (?, ?, ?, ?) ",
+                Statement.RETURN_GENERATED_KEYS
             )
         ) {
             Object[] values = {routeContent, difficulty, creatorUserId, wallId};
@@ -497,17 +498,18 @@ public final class DatabaseController {
                 Object value = values[i];
                 String type = types[i];
 
-                if (type == "String") {
+                if (type.equals("String")) {
                     pst.setString(i, (String) value);
-                } else if (type == "int") {
+                } else if (type.equals("int")) {
                     pst.setInt(i, (int) value);
                 }
             }
-            ResultSet rs = pst.executeQuery();
+            pst.executeUpdate();
+            ResultSet rs = pst.getGeneratedKeys();
 
-            // get JSON list of holds
             if (rs.next()) {
-                return Integer.parseInt(rs.getString("RID"));
+                // the route ID
+                return rs.getInt(1);
             }
         }
 

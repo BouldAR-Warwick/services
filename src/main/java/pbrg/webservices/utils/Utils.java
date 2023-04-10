@@ -52,6 +52,49 @@ public final class Utils {
     public static final int SEVEN_DAYS = 7;
 
     private Utils() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    /**
+     * Run a process.
+     * @param pb process builder
+     * @return process
+     */
+    private static Process runProcess(final ProcessBuilder pb) {
+        // read the output printed by the python script
+        Process process;
+        try {
+            process = pb.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return process;
+    }
+
+    /**
+     * Collect output from a process.
+     * @param process process
+     * @return output
+     */
+    private static StringBuilder collectOutput(final Process process) {
+        StringBuilder output = new StringBuilder();
+
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(process.getInputStream())
+        );
+
+        String line;
+        try {
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append('\n');
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        return output;
     }
 
     /**
@@ -96,27 +139,9 @@ public final class Utils {
             String.valueOf(grade)
         );
 
-        Process process;
-        try {
-            process = pb.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        BufferedReader reader = new BufferedReader(
-            new InputStreamReader(process.getInputStream())
-        );
-        StringBuilder output = new StringBuilder();
-
-        String line;
-        try {
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append('\n');
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // read the output printed by the python script, collect output
+        Process process = runProcess(pb);
+        StringBuilder output = collectOutput(process);
 
         int exitCode;
         try {
@@ -192,27 +217,14 @@ public final class Utils {
             holdArray.toString()
         );
 
-        // read the output printed by the python script
-        Process process;
+        // read the output printed by the python script, collect output
+        Process process = runProcess(pb);
+        StringBuilder output = collectOutput(process);
+
+        int exitCode;
         try {
-            process = pb.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        BufferedReader reader = new BufferedReader(
-            new InputStreamReader(process.getInputStream())
-        );
-
-        StringBuilder output = new StringBuilder();
-
-        String line;
-        try {
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append('\n');
-            }
-        } catch (IOException e) {
+            exitCode = process.waitFor();
+        } catch (InterruptedException e) {
             e.printStackTrace();
             return null;
         }
@@ -221,14 +233,6 @@ public final class Utils {
         try {
             success = Integer.parseInt(output.toString().strip());
         } catch (NumberFormatException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        int exitCode;
-        try {
-            exitCode = process.waitFor();
-        } catch (InterruptedException e) {
             e.printStackTrace();
             return null;
         }
