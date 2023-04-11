@@ -2,18 +2,22 @@ name: Measure coverage
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up JDK 11
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: 11
+          distribution: 'temurin'
+          cache: maven
+      
+      # Python dependency
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
@@ -21,7 +25,9 @@ jobs:
           python-version: '3.9'
           cache: 'pip'
           cache-dependency-path: '**/requirements.txt'
-      - name: Build with Maven
+      - name: Install Python Dependencies
+        run: pip install -r ./python-scripts/requirements.txt
+      - name: Test with Maven
         run: mvn -B test
 
       - name: Generate JaCoCo Badge
