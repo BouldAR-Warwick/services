@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.sql.SQLException;
 
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 import pbrg.webservices.utils.Utils;
 import static pbrg.webservices.utils.Utils.returnImageAsBitmap;
 

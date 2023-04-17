@@ -11,7 +11,7 @@ import java.util.List;
 import org.json.JSONObject;
 
 import pbrg.webservices.models.Route;
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetRoutesServlet", urlPatterns = "/GetRoutes")

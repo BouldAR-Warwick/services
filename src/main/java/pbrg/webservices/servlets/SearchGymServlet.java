@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import org.json.JSONObject;
 import pbrg.webservices.models.GymList;
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 
 @WebServlet(name = "SearchGymServlet", urlPatterns = "/SearchGym")
 public class SearchGymServlet extends MyHttpServlet {

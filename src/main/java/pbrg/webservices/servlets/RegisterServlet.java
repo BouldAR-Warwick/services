@@ -11,7 +11,7 @@ import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.models.User;
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 
 @WebServlet(name = "RegisterServlet", urlPatterns = "/Register")
 public class RegisterServlet extends MyHttpServlet {

@@ -13,7 +13,7 @@ import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.models.User;
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")

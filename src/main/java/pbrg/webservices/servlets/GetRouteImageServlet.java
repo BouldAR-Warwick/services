@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import org.apache.commons.io.FilenameUtils;
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetRouteImageServlet", urlPatterns = "/GetRouteImage")

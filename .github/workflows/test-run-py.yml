@@ -25,4 +25,4 @@ jobs:
         # DCS systems use 3.6.8
         python-version: '3.9'
     - name: run py
-      run: python3 ./python-scripts/route-gen-moon-board.py 5
+      run: python3 ./scripts/python/route-gen-moon-board.py 5
