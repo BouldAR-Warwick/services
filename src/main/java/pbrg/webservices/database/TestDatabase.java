@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import javax.sql.DataSource;
 import pbrg.webservices.models.ChainingMysqlDataSource;
 
@@ -69,16 +70,24 @@ public final class TestDatabase {
         queryID.destroy();
     };
 
+
+    /** Command to stop a Docker container by ID. */
+    private static Function<String, ProcessBuilder>
+        createDockerStopCommand = (thisContainerId) -> new ProcessBuilder(
+            "/bin/bash", "-c", "docker stop " + thisContainerId
+        );
+
     /** Close the test database in a separate thread. */
     private static final Runnable CLOSE_CONTAINER = () -> {
-        String command = "docker stop " + containerId;
-        ProcessBuilder processBuilder = new ProcessBuilder(
-                "/bin/bash", "-c", command);
+        ProcessBuilder dockerStopCommand =
+            createDockerStopCommand.apply(containerId);
         try {
-            Process process = processBuilder.start();
+            Process process = dockerStopCommand.start();
             int exitCode = process.waitFor();
-            assert exitCode == 0;
             process.destroy();
+            if (exitCode != 0) {
+                throw new InterruptedException("Docker stop failed");
+            }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -112,20 +121,31 @@ public final class TestDatabase {
 
         // await database startup
         DataSource dataSource = getTestDataSource();
-        do {
-            try {
-                // sleep for BUSY_WAIT_MS milliseconds
-                Thread.sleep(BUSY_WAIT_MS);
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
-        } while (!dataSourceIsValid(dataSource));
+        awaitDatabaseStartup(dataSource);
 
         // Find container ID
         run(executor, FIND_CONTAINER_ID);
 
         // shutdown executor
         executor.shutdown();
+    }
+
+    /**
+     * Await database startup.
+     * @param dataSource DataSource to the database
+     */
+    private static void awaitDatabaseStartup(
+        final DataSource dataSource
+    ) {
+        do {
+            try {
+                // sleep for BUSY_WAIT_MS milliseconds
+                Thread.sleep(BUSY_WAIT_MS);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        } while (!dataSourceIsValid(dataSource));
     }
 
     /** Close the test database in a separate thread. */
