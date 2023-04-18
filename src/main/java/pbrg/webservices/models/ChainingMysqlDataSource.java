@@ -4,38 +4,73 @@ import com.mysql.cj.jdbc.MysqlDataSource;
 
 public class ChainingMysqlDataSource {
 
+    /** The mysql data source. */
     private final MysqlDataSource mysqlDataSource;
 
+    /**
+     * Constructor.
+     */
     public ChainingMysqlDataSource() {
         mysqlDataSource = new MysqlDataSource();
     }
 
-    public ChainingMysqlDataSource setServerName(String serverName) {
+    /**
+     * Set the server name.
+     * @param serverName server name
+     * @return this
+     */
+    public ChainingMysqlDataSource setServerName(final String serverName) {
         mysqlDataSource.setServerName(serverName);
         return this;
     }
 
-    public ChainingMysqlDataSource setPort(int port) {
+    /**
+     * Set the port.
+     * @param port port
+     * @return this
+     */
+    public ChainingMysqlDataSource setPort(final int port) {
         mysqlDataSource.setPort(port);
         return this;
     }
 
-    public ChainingMysqlDataSource setDatabaseName(String databaseName) {
+    /**
+     * Set the database name.
+     * @param databaseName database name
+     * @return this
+     */
+    public final ChainingMysqlDataSource setDatabaseName(
+        final String databaseName
+    ) {
         mysqlDataSource.setDatabaseName(databaseName);
         return this;
     }
 
-    public ChainingMysqlDataSource setUser(String user) {
+    /**
+     * Set the user.
+     * @param user user
+     * @return this
+     */
+    public final ChainingMysqlDataSource setUser(final String user) {
         mysqlDataSource.setUser(user);
         return this;
     }
 
-    public ChainingMysqlDataSource setPassword(String password) {
+    /**
+     * Set the password.
+     * @param password password
+     * @return this
+     */
+    public final ChainingMysqlDataSource setPassword(final String password) {
         mysqlDataSource.setPassword(password);
         return this;
     }
 
-    public MysqlDataSource getMysqlDataSource() {
+    /**
+     * Get the mysql data source.
+     * @return mysql data source
+     */
+    public final MysqlDataSource getMysqlDataSource() {
         return mysqlDataSource;
     }
 }

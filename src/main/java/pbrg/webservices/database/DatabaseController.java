@@ -22,6 +22,7 @@ import pbrg.webservices.models.User;
 
 public final class DatabaseController {
 
+    /** The data source. */
     private static DataSource dataSource;
 
     static {
@@ -30,20 +31,17 @@ public final class DatabaseController {
         }
     }
 
-    /**
-     * Get the data source.
-     * @return data source
-     */
-    public static DataSource getDataSource() {
-        return dataSource;
+    /** Static class, no need to instantiate. */
+    private DatabaseController() {
+        throw new IllegalStateException("Utility class");
     }
 
     /**
      * Set the data source.
-     * @param dataSource data source
+     * @param newDataSource data source
      */
-    public static void setDataSource(DataSource dataSource) {
-        DatabaseController.dataSource = dataSource;
+    public static void setDataSource(final DataSource newDataSource) {
+        DatabaseController.dataSource = newDataSource;
     }
 
     /**
@@ -192,7 +190,9 @@ public final class DatabaseController {
      * @return user ID
      * @throws SQLException if SQL error occurs
      */
-    static Integer getUserIDFromUsername(final String username) throws SQLException {
+    static Integer getUserIDFromUsername(
+        final String username
+    ) throws SQLException {
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(

@@ -15,8 +15,11 @@ import org.junit.jupiter.api.Test;
 
 class DatabaseControllerTest {
 
-    private static final String testUsername = "username_test";
-    private static final String testEmail = "email_test";
+    /** The test username. */
+    private static final String TEST_USERNAME = "username_test";
+
+    /** The test email. */
+    private static final String TEST_EMAIL = "email_test";
 
     @BeforeAll
     static void startResources() throws SQLException {
@@ -26,23 +29,26 @@ class DatabaseControllerTest {
         DatabaseController.setDataSource(getTestDataSource());
 
         // remove the test user credentials if they exist
-        if (DatabaseController.usernameExists(testUsername)) {
-            Integer uid = DatabaseController.getUserIDFromUsername(testUsername);
+        if (DatabaseController.usernameExists(TEST_USERNAME)) {
+            Integer uid =
+                DatabaseController.getUserIDFromUsername(TEST_USERNAME);
             assert uid != null;
-            DatabaseController.deleteUser(uid);
-            assertFalse(DatabaseController.usernameExists(testUsername));
+            boolean deleted = DatabaseController.deleteUser(uid);
+            assert deleted;
+            assertFalse(DatabaseController.usernameExists(TEST_USERNAME));
         }
-        if (DatabaseController.emailExists(testEmail)) {
-            Integer uid = DatabaseController.getUserIDFromEmail(testEmail);
+        if (DatabaseController.emailExists(TEST_EMAIL)) {
+            Integer uid = DatabaseController.getUserIDFromEmail(TEST_EMAIL);
             assert uid != null;
-            DatabaseController.deleteUser(uid);
-            assertFalse(DatabaseController.emailExists(testEmail));
+            boolean deleted = DatabaseController.deleteUser(uid);
+            assert deleted;
+            assertFalse(DatabaseController.emailExists(TEST_EMAIL));
         }
     }
 
     @AfterAll
     static void closeResources() {
-        // closeTestDatabaseInThread();
+         closeTestDatabaseInThread();
     }
 
     @Test
@@ -53,7 +59,7 @@ class DatabaseControllerTest {
         assertDoesNotThrow(() -> {
             // when: signing up
             boolean added = DatabaseController.signUp(
-                testUsername, testEmail, "password"
+                TEST_USERNAME, TEST_EMAIL, "password"
             );
 
             // then: the user is added
@@ -61,7 +67,7 @@ class DatabaseControllerTest {
         });
 
         // remove the test user
-        Integer uid = DatabaseController.getUserIDFromUsername(testUsername);
+        Integer uid = DatabaseController.getUserIDFromUsername(TEST_USERNAME);
         assert uid != null;
         DatabaseController.deleteUser(uid);
     }

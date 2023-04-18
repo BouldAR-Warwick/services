@@ -1,6 +1,7 @@
 package pbrg.webservices.database;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -14,13 +15,15 @@ class DatabaseUtilsTest {
     void invalidDataSources() throws SQLException {
         // DataSource without a connection
         DataSource sourceWithoutConn = mock(DataSource.class);
-        when(sourceWithoutConn.getConnection()).thenThrow(new SQLException("Connection failed"));
+        when(sourceWithoutConn.getConnection())
+            .thenThrow(new SQLException("Connection failed"));
 
         // DataSource with a null connection
         DataSource sourceWithNullConn = mock(DataSource.class);
         when(sourceWithNullConn.getConnection()).thenReturn(null);
 
-        DataSource[] invalidSources = {null, sourceWithoutConn, sourceWithNullConn};
+        DataSource[] invalidSources =
+            {null, sourceWithoutConn, sourceWithNullConn};
 
         for (DataSource source : invalidSources) {
             assertFalse(DatabaseUtils.dataSourceIsValid(source));
@@ -30,7 +33,8 @@ class DatabaseUtilsTest {
     @Test
     void validDataSource() throws SQLException {
         DataSource dataSource = mock(DataSource.class);
-        when(dataSource.getConnection()).thenReturn(mock(java.sql.Connection.class));
+        when(dataSource.getConnection())
+            .thenReturn(mock(java.sql.Connection.class));
 
         assertTrue(DatabaseUtils.dataSourceIsValid(dataSource));
     }

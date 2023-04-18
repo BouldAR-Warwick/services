@@ -22,10 +22,12 @@ import pbrg.webservices.database.DatabaseController;
 public final class Utils {
 
     /** The current working directory. */
-    private static final File workingDirectory = new File(System.getProperty("user.dir"));
+    private static final File WORKING_DIR =
+        new File(System.getProperty("user.dir"));
 
     /** The path to the python scripts directory. */
-    private static final String pythonScriptsDirectory = workingDirectory + "/scripts/python/";
+    private static final String PYTHON_SCRIPTS_DIR =
+        WORKING_DIR + "/scripts/python/";
 
     /**
      * Path to wall image directory.
@@ -78,7 +80,6 @@ public final class Utils {
         try {
             process = pb.start();
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
         return process;
@@ -102,7 +103,6 @@ public final class Utils {
                 output.append(line).append('\n');
             }
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
@@ -119,7 +119,6 @@ public final class Utils {
         try {
             exitCode = process.waitFor();
         } catch (InterruptedException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
         return exitCode;
@@ -163,7 +162,7 @@ public final class Utils {
     public static JSONArray generateRouteMoonBoard(final int grade) {
         // path is working dir + python-scripts/plot-holds.py
         File pythonFile = new File(
-            pythonScriptsDirectory,
+            PYTHON_SCRIPTS_DIR,
             "route-gen-moon-board.py"
         );
 
@@ -243,7 +242,7 @@ public final class Utils {
     ) {
         // path is working dir + python-scripts/plot-holds.py
         File pythonFile = new File(
-            pythonScriptsDirectory,
+            PYTHON_SCRIPTS_DIR,
             "plot-holds.py"
         );
 

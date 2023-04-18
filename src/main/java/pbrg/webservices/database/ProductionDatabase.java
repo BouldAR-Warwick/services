@@ -1,19 +1,48 @@
 package pbrg.webservices.database;
 
+import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
-public class ProductionDatabase {
+public final class ProductionDatabase {
+
+    /** Static class, no need to instantiate. */
+    private ProductionDatabase() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /** The initial context. */
     private static InitialContext initialContext;
 
     static {
+        // Set the initial context to the default one
+        setInitialContext(getDefaultContext());
+    }
+
+    /**
+     * Get the default initial context.
+     * @return The default initial context
+     */
+    @Contract(" -> new")
+    static @NotNull InitialContext getDefaultContext() {
+        return getDefaultContext(null);
+    }
+
+    /**
+     * Get the initial context with an environment.
+     * @param environment The environment
+     * @return The default initial context
+     */
+    @Contract("_ -> new")
+    static @NotNull InitialContext getDefaultContext(
+        final Hashtable<?, ?> environment
+    ) {
         try {
-            // Set the initial context to the default one
-            setInitialContext(new InitialContext());
+            return new InitialContext(environment);
         } catch (NamingException e) {
             throw new RuntimeException(e);
         }
@@ -21,13 +50,15 @@ public class ProductionDatabase {
 
     /**
      * Set the initial context.
-     * @param initialContext The initial context (not null)
+     * @param newInitialContext The initial context (not null)
      */
-    public static void setInitialContext(InitialContext initialContext) {
-        if (initialContext == null) {
+    public static void setInitialContext(
+        final InitialContext newInitialContext
+    ) {
+        if (newInitialContext == null) {
             throw new IllegalArgumentException("initialContext cannot be null");
         }
-        ProductionDatabase.initialContext = initialContext;
+        ProductionDatabase.initialContext = newInitialContext;
     }
 
 
@@ -52,8 +83,9 @@ public class ProductionDatabase {
      */
     public static DataSource productionDataSource() {
         try {
-            return (DataSource) ((Context) initialContext.lookup("java:/comp/env"))
-                .lookup("jdbc/grabourg");
+            return (DataSource) (
+                (Context) initialContext.lookup("java:/comp/env")
+            ).lookup("jdbc/grabourg");
         } catch (NamingException exception) {
             throw new RuntimeException(exception);
         }

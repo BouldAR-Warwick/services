@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
-public class DatabaseUtils {
+public final class DatabaseUtils {
 
     /** Utility class, no need to instantiate. */
     private DatabaseUtils() {
@@ -16,7 +16,7 @@ public class DatabaseUtils {
      * @param dataSource The DataSource to check
      * @return true if the DataSource is valid, false otherwise
      */
-    public static boolean dataSourceIsValid(DataSource dataSource) {
+    public static boolean dataSourceIsValid(final DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             return connection != null;
         } catch (SQLException | NullPointerException e) {

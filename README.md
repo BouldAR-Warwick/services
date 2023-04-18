@@ -1,4 +1,6 @@
-# Services - PBRG (Problem Board Route Generator)
+<p style="text-align: center"><a href="https://github.com/BouldAR-Warwick"><img alt="BouldAR Logo" src="https://github.com/BouldAR-Warwick/bouldar-assets/raw/main/logo_purple.png" width="512"/></a></p>
+
+# Services
 
 | __Build Status__  | [![Java CI with Maven](https://github.com/tmcowley/pbrg-services/actions/workflows/maven.yml/badge.svg)](https://github.com/tmcowley/pbrg-services/actions/workflows/maven.yml) |
 |:------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
