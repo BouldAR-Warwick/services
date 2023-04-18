@@ -48,7 +48,7 @@ class ProductionDatabaseTest {
      * Mock an initial context with production database.
      * @return The mock initial context
      */
-    private static InitialContext createProdContext() {
+    static InitialContext createProdContext() {
         InitialContext prodContext = mock(InitialContext.class);
 
         try {

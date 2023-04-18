@@ -26,14 +26,18 @@ public final class DatabaseController {
     private static DataSource dataSource;
 
     static {
-        if (production()) {
-            setDataSource(productionDataSource());
-        }
+        setDataSource(production());
     }
 
     /** Static class, no need to instantiate. */
     private DatabaseController() {
         throw new IllegalStateException("Utility class");
+    }
+
+    public static void setDataSource(final boolean inProduction) {
+        if (inProduction) {
+            setDataSource(productionDataSource());
+        }
     }
 
     /**
