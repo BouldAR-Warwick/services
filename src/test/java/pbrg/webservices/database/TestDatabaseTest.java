@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.DatabaseUtils.dataSourceIsValid;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
-import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -20,9 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 import javax.sql.DataSource;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,12 +27,16 @@ import org.junit.jupiter.api.Test;
 final class TestDatabaseTest {
     @BeforeAll
     static void startResources() {
-
+        assertDoesNotThrow(
+            TestDatabase::startTestDatabaseInThread
+        );
     }
 
     @AfterAll
     static void closeResources() {
-
+        assertDoesNotThrow(
+            TestDatabase::closeTestDatabaseInThread
+        );
     }
 
     @Test
@@ -64,8 +65,6 @@ final class TestDatabaseTest {
 
     @Test
     void testGetTestDataSource() {
-        startTestDatabaseInThread();
-
         DataSource dataSource = getTestDataSource();
         assertNotNull(dataSource);
         assert dataSourceIsValid(dataSource);
@@ -108,74 +107,77 @@ final class TestDatabaseTest {
         testThread.join();
     }
 
-    @SuppressWarnings("unchecked")
-    static @NotNull Function<String, ProcessBuilder>
-        injectCreateDockerStopCommand(final ProcessBuilder mockedCommand)
+    @Test
+    void findContainerIDMultiLineOutput()
         throws NoSuchFieldException, IllegalAccessException {
-        // reflection to change createDockerStopCommand
-        Field createDockerStopCommandField =
-            TestDatabase.class.getDeclaredField("createDockerStopCommand");
-        createDockerStopCommandField.setAccessible(true);
+        // given: a process whose output contains multiple lines
 
-        Function<String, ProcessBuilder> originalFunction;
-        Object fieldValue = createDockerStopCommandField.get(null);
-        if (!(fieldValue instanceof Function)) {
-            throw new RuntimeException("Unexpected field value");
+        // process builder that echoes a multi-line string
+        ProcessBuilder multiLineOutput = new ProcessBuilder(
+            "bash", "-c", "echo '\n'"
+        );
+
+        // use reflection on ProcessBuilder queryIDCommand
+        Field queryIDCommand = TestDatabase.class.getDeclaredField(
+            "queryIDCommand"
+        );
+        queryIDCommand.setAccessible(true);
+        ProcessBuilder originalQueryIDCommand =
+            (ProcessBuilder) queryIDCommand.get(null);
+
+        // inject queryIDCommand with the multiLineOutput
+        try {
+            queryIDCommand.set(null, multiLineOutput);
+        } catch (IllegalAccessException e) {
+            fail("Could not set queryIDCommand");
         }
-        originalFunction = (Function<String, ProcessBuilder>) fieldValue;
 
-        // mock function with process builder
-        Function<String, ProcessBuilder> mockedFunction =
-            (thisContainerId) -> mockedCommand;
-        createDockerStopCommandField.set(null, mockedFunction);
+        // reflection to get FIND_CONTAINER_ID runnable
+        Field findContainerIDField = TestDatabase.class.getDeclaredField(
+            "FIND_CONTAINER_ID"
+        );
+        findContainerIDField.setAccessible(true);
+        Runnable findContainerID = (Runnable) findContainerIDField.get(null);
 
-        return originalFunction;
-    }
+        assertThrows(
+            // then: runtime exception should be thrown
+            RuntimeException.class,
 
-    static void replaceOriginalCreateDockerStopCommand(
-        final Function<String, ProcessBuilder> originalFunction
-    ) throws NoSuchFieldException, IllegalAccessException {
-        // reflection to retrieve createDockerStopCommand
-        Field createDockerStopCommandField =
-            TestDatabase.class.getDeclaredField("createDockerStopCommand");
-        createDockerStopCommandField.setAccessible(true);
+            // when: the container ID is queried
+            findContainerID::run
+        );
 
-        // replace the original function
-        createDockerStopCommandField.set(null, originalFunction);
+        // after: reset queryIDCommand
+        queryIDCommand.set(null, originalQueryIDCommand);
     }
 
     @Test
-    void testRunnableCloseContainerNonZeroExitCode()
-        throws IOException, NoSuchFieldException,
-        IllegalAccessException, InterruptedException {
+    void testRunProcessBuilder()
+        throws InterruptedException, IOException, NoSuchMethodException,
+        IllegalAccessException {
         // given: a process that has a non-zero exit value
         Process process = mock(Process.class);
         when(process.waitFor()).thenReturn(1);
         ProcessBuilder processBuilder = mock(ProcessBuilder.class);
         when(processBuilder.start()).thenReturn(process);
 
-        // inject the mocked process builder
-        Function<String, ProcessBuilder> originalFunction =
-            injectCreateDockerStopCommand(processBuilder);
-
-        // reflection to get the CLOSE_CONTAINER Runnable
-        Field closeContainerField = TestDatabase.class.getDeclaredField(
-            "CLOSE_CONTAINER"
+        // reflection to get the runProcessBuilder method
+        Method runProcessBuilder = TestDatabase.class.getDeclaredMethod(
+            "runProcessBuilder", ProcessBuilder.class, boolean.class
         );
-        closeContainerField.setAccessible(true);
-        Runnable closeContainer = (Runnable) closeContainerField.get(null);
+        runProcessBuilder.setAccessible(true);
 
-        assertThrows(
-            // then: an exception should be thrown
-            RuntimeException.class,
-
+        try {
             // when: the process is started
-            closeContainer::run,
-            "Expected RuntimeException to be thrown"
-        );
-
-        // after: the original function should be restored
-        replaceOriginalCreateDockerStopCommand(originalFunction);
+            runProcessBuilder.invoke(null, processBuilder, false);
+        } catch (InvocationTargetException e) {
+            // then: an exception should be thrown
+            assertTrue(
+                e.getCause() instanceof RuntimeException,
+                "Should throw RuntimeException "
+                    + "(process has non-zero exit value)"
+            );
+        }
     }
 
     @Test

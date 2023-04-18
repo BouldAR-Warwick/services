@@ -7,12 +7,15 @@ import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import pbrg.webservices.database.DatabaseController;
 
@@ -88,19 +91,38 @@ public final class Utils {
     /**
      * Collect output from a process.
      * @param process process
-     * @return output
+     * @return output as a string builder, each line is a new line
      */
-    private static StringBuilder collectOutput(final Process process) {
+    private static @NotNull StringBuilder collectOutput(
+        @NotNull final Process process
+    ) {
         StringBuilder output = new StringBuilder();
+        for (String line : collectOutputAsList(process)) {
+            output.append(line);
+            output.append(System.lineSeparator());
+        }
 
-        BufferedReader reader = new BufferedReader(
-            new InputStreamReader(process.getInputStream())
-        );
+        return output;
+    }
+
+    /**
+     * Collect output from a process in a list of strings.
+     * @param process process
+     * @return output as a list of strings, each string is a line
+     */
+    public static @NotNull List<String> collectOutputAsList(
+        final @NotNull Process process
+    ) {
+        List<String> output = new ArrayList<>();
 
         String line;
-        try {
+        try (
+            BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream())
+            )
+        ) {
             while ((line = reader.readLine()) != null) {
-                output.append(line).append('\n');
+                output.add(line);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

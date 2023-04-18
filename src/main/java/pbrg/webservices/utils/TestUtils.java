@@ -19,7 +19,7 @@ final class TestUtils {
     }
 
     /**
-     * Run a process.
+     * Run a process (note, from a thread - this is blocking).
      * @param pb process builder
      * @return true if the process exited with code 0, false otherwise.
      */

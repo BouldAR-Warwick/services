@@ -1,15 +1,14 @@
 package pbrg.webservices.database;
 
 import static pbrg.webservices.database.DatabaseUtils.dataSourceIsValid;
+import static pbrg.webservices.utils.Utils.collectOutputAsList;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 import javax.sql.DataSource;
 import pbrg.webservices.models.ChainingMysqlDataSource;
 
@@ -28,70 +27,81 @@ public final class TestDatabase {
     private static final String SCRIPT_PATH =
         "./scripts/database/start-mysql-test.yml";
 
+    /** query the container ID of the test database. */
+    @SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
+    private static ProcessBuilder queryIDCommand =
+        new ProcessBuilder("docker-compose", "-f", SCRIPT_PATH, "ps", "-q");
+
     /**
      * Start the test database in a separate thread.
      * Runs run docker-compose -f ./scripts/start-mysql-test.yml up
      */
     private static final Runnable START_TEST_DATABASE = () -> {
         ProcessBuilder startDatabaseCommand = new ProcessBuilder(
-                "docker-compose", "-f", SCRIPT_PATH, "up", "-d");
-        try {
-            Process startDatabase = startDatabaseCommand.start();
-            try {
-                startDatabase.waitFor();
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt();
-            }
-            startDatabase.destroy();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            "docker-compose", "-f", SCRIPT_PATH, "up", "-d"
+        );
+        runProcessBuilder(startDatabaseCommand);
     };
 
     /** Find the container ID of the test database. */
     private static final Runnable FIND_CONTAINER_ID = () -> {
-        // Store container ID
-        ProcessBuilder queryIDBuilder = new ProcessBuilder(
-                "docker-compose", "-f", SCRIPT_PATH, "ps", "-q");
-        Process queryID;
-        try {
-            queryID = queryIDBuilder.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(queryID.getInputStream()));
-        try {
-            containerId = reader.readLine();
-            reader.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        queryID.destroy();
-    };
-
-
-    /** Command to stop a Docker container by ID. */
-    private static Function<String, ProcessBuilder>
-        createDockerStopCommand = (thisContainerId) -> new ProcessBuilder(
-            "/bin/bash", "-c", "docker stop " + thisContainerId
+        List<String> output = runProcessBuilder(
+            queryIDCommand, true
         );
+        if (output.size() != 1) {
+            throw new RuntimeException("Expected one line of output");
+        }
+        containerId = output.get(0);
+    };
 
     /** Close the test database in a separate thread. */
     private static final Runnable CLOSE_CONTAINER = () -> {
-        ProcessBuilder dockerStopCommand =
-            createDockerStopCommand.apply(containerId);
+        // stop a Docker container by ID
+        ProcessBuilder closeContainerCommand = new ProcessBuilder(
+            "/bin/bash", "-c", "docker stop " + containerId
+        );
+        runProcessBuilder(closeContainerCommand);
+    };
+
+    /**
+     * Run the process builder command.
+     * @param command The command to run
+     */
+    private static void runProcessBuilder(
+        final ProcessBuilder command
+    ) {
+        runProcessBuilder(command, false);
+    }
+
+    /**
+     * Run the process builder command.
+     * @param command The command to run
+     * @param collectOutput Whether to collect the output of the command
+     * @return The output of the command
+     */
+    private static List<String> runProcessBuilder(
+        final ProcessBuilder command,
+        final boolean collectOutput
+    ) {
+        List<String> output = null;
         try {
-            Process process = dockerStopCommand.start();
+            Process process = command.start();
+            if (collectOutput) {
+                output = collectOutputAsList(process);
+            }
             int exitCode = process.waitFor();
             process.destroy();
             if (exitCode != 0) {
-                throw new InterruptedException("Docker stop failed");
+                throw new InterruptedException(
+                    "Command failed (non-zero exit code)"
+                );
             }
+            return output;
         } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
-    };
+    }
 
     /** Static class, no need to instantiate. */
     private TestDatabase() {
