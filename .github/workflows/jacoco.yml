@@ -27,7 +27,7 @@ jobs:
           cache: 'pip'
           cache-dependency-path: '**/requirements.txt'
       - name: Install Python Dependencies
-        run: pip install -r ./python-scripts/requirements.txt
+        run: pip install -r ./scripts/python/requirements.txt
       - name: Test with Maven
         run: mvn -B test
 

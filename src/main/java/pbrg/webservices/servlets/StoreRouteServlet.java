@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 
 @WebServlet(name = "StoreRouteServlet", urlPatterns = "/GetRoute")
 public class StoreRouteServlet extends MyHttpServlet {

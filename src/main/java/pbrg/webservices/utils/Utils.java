@@ -14,11 +14,20 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
+import pbrg.webservices.database.DatabaseController;
 
 /**
  * For static utils: getting database connection, file path utils, API utils.
  */
 public final class Utils {
+
+    /** The current working directory. */
+    private static final File WORKING_DIR =
+        new File(System.getProperty("user.dir"));
+
+    /** The path to the python scripts directory. */
+    private static final String PYTHON_SCRIPTS_DIR =
+        WORKING_DIR + "/scripts/python/";
 
     /**
      * Path to wall image directory.
@@ -71,7 +80,6 @@ public final class Utils {
         try {
             process = pb.start();
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
         return process;
@@ -95,7 +103,6 @@ public final class Utils {
                 output.append(line).append('\n');
             }
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
@@ -112,7 +119,6 @@ public final class Utils {
         try {
             exitCode = process.waitFor();
         } catch (InterruptedException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
         return exitCode;
@@ -155,16 +161,15 @@ public final class Utils {
      */
     public static JSONArray generateRouteMoonBoard(final int grade) {
         // path is working dir + python-scripts/plot-holds.py
-        File workingDirectory = new File(System.getProperty("user.dir"));
         File pythonFile = new File(
-            workingDirectory,
-            "python-scripts/route-gen-moon-board.py"
+            PYTHON_SCRIPTS_DIR,
+            "route-gen-moon-board.py"
         );
 
         // ensure file exists
         if (!pythonFile.exists()) {
             throw new RuntimeException(
-                "Python script " + pythonFile.toString() + " does not exist"
+                "Python script " + pythonFile + " does not exist"
             );
         }
 
@@ -182,7 +187,7 @@ public final class Utils {
         int exitCode = getExitCode(process);
         if (exitCode != 0) {
             throw new RuntimeException(
-                "Route generation failed with exit code " + exitCode + ""
+                "Route generation failed with exit code " + exitCode
             );
         }
 
@@ -236,16 +241,15 @@ public final class Utils {
         final JSONArray holdArray
     ) {
         // path is working dir + python-scripts/plot-holds.py
-        File workingDirectory = new File(System.getProperty("user.dir"));
         File pythonFile = new File(
-            workingDirectory,
-            "python-scripts/plot-holds.py"
+            PYTHON_SCRIPTS_DIR,
+            "plot-holds.py"
         );
 
         // ensure file exists
         if (!pythonFile.exists()) {
             throw new RuntimeException(
-                "Python script " + pythonFile.toString() + " does not exist"
+                "Python script " + pythonFile + " does not exist"
             );
         }
 

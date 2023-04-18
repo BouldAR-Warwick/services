@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.json.JSONObject;
 import pbrg.webservices.models.Gym;
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 
 @WebServlet(name = "GetGymServlet", urlPatterns = "/GetGym")
 public class GetGymServlet extends MyHttpServlet {

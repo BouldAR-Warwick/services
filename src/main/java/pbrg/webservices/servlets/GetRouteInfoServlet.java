@@ -9,7 +9,7 @@ import java.sql.SQLException;
 
 import org.json.JSONObject;
 
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 
 @WebServlet(name = "GetRouteInfoServlet", urlPatterns = "/GetRouteInfo")
 public class GetRouteInfoServlet extends MyHttpServlet {

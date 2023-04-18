@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Duration;
 import pbrg.webservices.models.Gym;
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "StoreGymServlet", urlPatterns = "/StoreGym")

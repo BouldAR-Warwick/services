@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 import static pbrg.webservices.utils.Utils.returnImageAsBitmap;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")

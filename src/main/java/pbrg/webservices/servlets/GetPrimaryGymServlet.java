@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 import pbrg.webservices.models.Gym;
-import pbrg.webservices.utils.DatabaseController;
+import pbrg.webservices.database.DatabaseController;
 
 @WebServlet(name = "GetPrimaryGymServlet", urlPatterns = "/GetPrimaryGym")
 public class GetPrimaryGymServlet extends MyHttpServlet {

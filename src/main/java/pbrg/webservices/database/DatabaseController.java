@@ -1,4 +1,7 @@
-package pbrg.webservices.utils;
+package pbrg.webservices.database;
+
+import static pbrg.webservices.database.ProductionDatabase.production;
+import static pbrg.webservices.database.ProductionDatabase.productionDataSource;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,9 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,30 +22,26 @@ import pbrg.webservices.models.User;
 
 public final class DatabaseController {
 
+    /** The data source. */
+    private static DataSource dataSource;
+
+    static {
+        if (production()) {
+            setDataSource(productionDataSource());
+        }
+    }
+
+    /** Static class, no need to instantiate. */
     private DatabaseController() {
+        throw new IllegalStateException("Utility class");
     }
 
     /**
-     * Get DB connection.
-     *
-     * @return DB connection
+     * Set the data source.
+     * @param newDataSource data source
      */
-    public static Connection getDbConnection() throws SQLException {
-        // TODO - pass implementation properties to InitialContext
-        Connection connection = null;
-        try {
-            Context initContext = new InitialContext();
-            Context envContext = (Context) initContext.lookup("java:/comp/env");
-            DataSource ds = (DataSource) envContext.lookup("jdbc/grabourg");
-
-            // create and return new connection
-            connection = ds.getConnection();
-        } catch (NamingException exception) {
-            System.out.println(exception.getMessage());
-        }
-
-        assert (connection != null);
-        return connection;
+    public static void setDataSource(final DataSource newDataSource) {
+        DatabaseController.dataSource = newDataSource;
     }
 
     /**
@@ -59,7 +55,7 @@ public final class DatabaseController {
     public static User signIn(
             final String username, final String password) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT * FROM users WHERE username=? AND password=?"
             )
@@ -88,15 +84,33 @@ public final class DatabaseController {
     public static boolean signUp(
         final String username, final String email, final String password
     ) throws SQLException {
-        insertUser(username, email, password);
+        boolean added = insertUser(username, email, password);
+        if (!added) {
+            return false;
+        }
+
+        // check for successful creation
         return userExists(username);
     }
 
-    private static void insertUser(
+    /**
+     * Insert a user into the database.
+     * @param username username
+     * @param email email
+     * @param password password
+     * @return true if user was added, false otherwise
+     * @throws SQLException if SQL error occurs
+     */
+    private static boolean insertUser(
         final String username, final String email, final String password
     ) throws SQLException {
+        // ensure username, email are unique
+        if (usernameExists(username) || emailExists(email)) {
+            return false;
+        }
+
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "INSERT INTO users (Username, Email, Password) VALUES (?,?,?)"
             )
@@ -107,12 +121,30 @@ public final class DatabaseController {
             }
             pst.executeUpdate();
         }
+        return true;
     }
 
-    private static boolean userExists(
-            final String username) throws SQLException {
+    /**
+     * Check if a user exists (by username).
+     * @param username username
+     * @return true if user exists, false otherwise
+     * @throws SQLException if SQL error occurs
+     */
+    static boolean userExists(
+        final String username
+    ) throws SQLException {
+        return usernameExists(username);
+    }
+
+    /**
+     * Check if a username exists.
+     * @param username username
+     * @return true if username exists, false otherwise
+     * @throws SQLException if SQL error occurs
+     */
+    static boolean usernameExists(final String username) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT EXISTS (SELECT 1 FROM users WHERE username=?)"
             )
@@ -129,6 +161,98 @@ public final class DatabaseController {
     }
 
     /**
+     * Check if an email exists.
+     * @param email email
+     * @return true if email exists, false otherwise
+     * @throws SQLException if SQL error occurs
+     */
+    static boolean emailExists(final String email) throws SQLException {
+        try (
+            Connection connection = dataSource.getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT EXISTS (SELECT 1 FROM users WHERE email=?)"
+            )
+        ) {
+            pst.setString(1, email);
+
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                return rs.getBoolean(1);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get a user's ID from their username.
+     * @param username username
+     * @return user ID
+     * @throws SQLException if SQL error occurs
+     */
+    static Integer getUserIDFromUsername(
+        final String username
+    ) throws SQLException {
+        try (
+            Connection connection = dataSource.getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT uid FROM users WHERE username=?"
+            )
+        ) {
+            pst.setString(1, username);
+
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("uid");
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get a user's ID from their email.
+     * @param email email
+     * @return user ID
+     * @throws SQLException if SQL error occurs
+     */
+    static Integer getUserIDFromEmail(final String email) throws SQLException {
+        try (
+            Connection connection = dataSource.getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT UID FROM users WHERE email=?"
+            )
+        ) {
+            pst.setString(1, email);
+
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("uid");
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Delete a user (by user ID).
+     * @param uid user ID
+     * @return true if user was deleted, false otherwise
+     * @throws SQLException if SQL error occurs
+     */
+    static boolean deleteUser(final int uid) throws SQLException {
+        try (
+            Connection connection = dataSource.getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "DELETE FROM users WHERE uid=?"
+            )
+        ) {
+            pst.setInt(1, uid);
+            return pst.executeUpdate() == 1;
+        }
+    }
+
+    /**
      * Get all gyms matching a query word in its location or name.
      *
      * @param queryWord query word
@@ -138,7 +262,7 @@ public final class DatabaseController {
     public static List<String> getGymsByQueryWord(
             final String queryWord) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT Gymname "
                     + "FROM gyms "
@@ -151,7 +275,7 @@ public final class DatabaseController {
 
             List<String> gyms = new ArrayList<>();
             while (rs.next()) {
-                gyms.add(rs.getString("Gymname"));
+                gyms.add(rs.getString("GymName"));
             }
             return gyms;
         }
@@ -167,7 +291,7 @@ public final class DatabaseController {
     public static Gym getGymByGymName(
             final String gymName) throws SQLException {
         try (
-                Connection connection = getDbConnection();
+                Connection connection = dataSource.getConnection();
                 PreparedStatement pst = connection.prepareStatement(
                         "SELECT GID, Gymname FROM gyms WHERE Gymname = ?")) {
             pst.setString(1, gymName);
@@ -175,7 +299,7 @@ public final class DatabaseController {
 
             if (rs.next()) {
                 int gid = rs.getInt("GID");
-                String rGymName = rs.getString("Gymname");
+                String rGymName = rs.getString("GymName");
                 return new Gym(gid, rGymName);
             }
         }
@@ -192,7 +316,7 @@ public final class DatabaseController {
      */
     public static Gym getGymByUserId(final int userId) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT GID, Gymname "
                     + "FROM gyms "
@@ -204,7 +328,7 @@ public final class DatabaseController {
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 int gid = rs.getInt("GID");
-                String gymName = rs.getString("Gymname");
+                String gymName = rs.getString("GymName");
                 return new Gym(gid, gymName);
             }
         }
@@ -223,7 +347,7 @@ public final class DatabaseController {
     public static List<Route> getRoutesInGymMadeByUser(
             final int gymId, final int userId) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT * "
                     + "FROM routes "
@@ -257,7 +381,7 @@ public final class DatabaseController {
     public static String getWallImageFileNameFromWallId(final int wallId)
             throws SQLException {
         try (
-                Connection connection = getDbConnection();
+                Connection connection = dataSource.getConnection();
                 PreparedStatement pst = connection.prepareStatement(
                         "SELECT walls.image_file_name "
                                 + "FROM walls "
@@ -277,7 +401,7 @@ public final class DatabaseController {
     private static RouteFull getRouteByRouteId(final int routeId)
             throws SQLException {
         try (
-                Connection connection = getDbConnection();
+                Connection connection = dataSource.getConnection();
                 PreparedStatement pst = connection.prepareStatement(
                         "SELECT * "
                                 + "FROM routes "
@@ -329,7 +453,7 @@ public final class DatabaseController {
             final int userId, final int routeId
     ) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT EXISTS("
                     + "SELECT 1 FROM routes "
@@ -359,7 +483,7 @@ public final class DatabaseController {
         final int routeId
     ) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT routes.route_content "
                     + "FROM routes "
@@ -410,7 +534,7 @@ public final class DatabaseController {
         final int routeId
     ) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT routes.WID "
                     + "FROM routes "
@@ -452,7 +576,7 @@ public final class DatabaseController {
         final int gymId
     ) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT walls.WID "
                     + "FROM walls "
@@ -484,7 +608,7 @@ public final class DatabaseController {
         final int creatorUserId, final int wallId
     ) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
             "INSERT INTO routes "
                 + "(route_content, difficulty, creator_user_id, WID) "
@@ -527,7 +651,7 @@ public final class DatabaseController {
         final int routeId, final String imageFileName
     ) throws SQLException {
         try (
-            Connection connection = getDbConnection();
+            Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "UPDATE routes "
                     + "SET image_file_name = ? "
