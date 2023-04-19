@@ -8,7 +8,7 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
-.idea/solarlint/
+.idea/solarlint/*
 *.iws
 *.iml
 *.ipr
