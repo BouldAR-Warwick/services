@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -14,20 +15,25 @@ import static org.mockito.Mockito.when;
 class GetWallImageServletTest {
 
     @Test
-    void doGet() throws IOException {
+    void doGet() {
         // ensure calls doPost()
-        new GetWallImageServlet().doGet(null, null);
+        assertDoesNotThrow(
+            () -> new GetWallImageServlet().doGet(null, null)
+        );
     }
 
     @Test
-    void emptyResponse() throws IOException {
+    void emptyResponse() {
         // given: valid request, null response
         HttpServletRequest request = mock(HttpServletRequest.class);
 
-        // Call the method to test
-        new GetWallImageServlet().doPost(request, null);
+        // then: no error
+        assertDoesNotThrow(
+            // when: post request
+            () -> new GetWallImageServlet().doPost(request, null)
+        );
 
-        // ensure the session is never called
+        // then: ensure the session is never called
         verify(request, never()).getSession();
     }
 

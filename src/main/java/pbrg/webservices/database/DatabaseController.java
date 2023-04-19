@@ -6,12 +6,11 @@ import static pbrg.webservices.database.ProductionDatabase.productionDataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import javax.sql.DataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -272,9 +271,9 @@ public final class DatabaseController {
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
-                "SELECT Gymname "
+                "SELECT GymName "
                     + "FROM gyms "
-                    + "WHERE GymLocation LIKE ? OR Gymname LIKE ?"
+                    + "WHERE GymLocation LIKE ? OR GymName LIKE ?"
             )
         ) {
             pst.setString(1, "%" + queryWord + "%");

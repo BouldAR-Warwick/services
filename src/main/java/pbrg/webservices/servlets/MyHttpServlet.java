@@ -23,7 +23,7 @@ public class MyHttpServlet extends HttpServlet {
         StringBuilder stringBuilder = new StringBuilder();
         BufferedReader bufferedReader = null;
 
-        try {
+        try  {
             InputStream inputStream = request.getInputStream();
             if (inputStream != null) {
                 bufferedReader = new BufferedReader(

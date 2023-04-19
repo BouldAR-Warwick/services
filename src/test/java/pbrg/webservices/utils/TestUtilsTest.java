@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 class TestUtilsTest {
 
     @Test
-    public void testPrivateConstructor() {
+    void testPrivateConstructor() {
         // get constructor
         Constructor<TestUtils> constructor;
         try {
@@ -43,7 +43,7 @@ class TestUtilsTest {
     }
 
     @Test
-    public void testPython3InstalledIOException() throws Exception {
+    void testPython3InstalledIOException() throws Exception {
         // given: starting process throws IOException
         ProcessBuilder mockProcessBuilder = mock(ProcessBuilder.class);
         when(mockProcessBuilder.start()).thenThrow(new IOException());
@@ -54,7 +54,7 @@ class TestUtilsTest {
     }
 
     @Test
-    public void testPython3InstalledInterruptedException() throws Exception {
+    void testPython3InstalledInterruptedException() throws Exception {
         // given: waiting for process throws IOException
         Process mockProcess = mock(Process.class);
         when(mockProcess.waitFor()).thenThrow(new InterruptedException());
@@ -68,7 +68,7 @@ class TestUtilsTest {
     }
 
     @Test
-    public void testPython3InstalledNegative() throws Exception {
+    void testPython3InstalledNegative() throws Exception {
         // given: process returns non-zero exit code
         Process mockProcess = mock(Process.class);
         when(mockProcess.waitFor()).thenReturn(1);

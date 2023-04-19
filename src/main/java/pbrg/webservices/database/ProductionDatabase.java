@@ -1,6 +1,6 @@
 package pbrg.webservices.database;
 
-import java.util.Hashtable;
+import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -39,7 +39,7 @@ public final class ProductionDatabase {
      */
     @Contract("_ -> new")
     static @NotNull InitialContext getDefaultContext(
-        final Hashtable<?, ?> environment
+        final Properties environment
     ) {
         try {
             return new InitialContext(environment);

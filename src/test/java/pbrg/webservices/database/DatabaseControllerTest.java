@@ -56,7 +56,7 @@ class DatabaseControllerTest {
     }
 
     @Test
-    public void testPrivateConstructor() {
+    void testPrivateConstructor() {
         // get constructor
         Constructor<DatabaseController> constructor;
         try {

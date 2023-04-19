@@ -62,7 +62,6 @@ public class GetRoutesServlet extends MyHttpServlet {
         JSONObject jsonObject = new JSONObject();
 
         Route[] arrayOfRoutes = routes.toArray(new Route[0]);
-        // JsonElement jsonArrayOfRoutes = new Gson().toJson(arrayOfRoutes);
 
         jsonObject.put("routes", arrayOfRoutes);
 

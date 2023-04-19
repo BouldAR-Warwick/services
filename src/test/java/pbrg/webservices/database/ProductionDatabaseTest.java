@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Hashtable;
+import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 class ProductionDatabaseTest {
 
     @Test
-    public void testPrivateConstructor() {
+    void testPrivateConstructor() {
         // get constructor
         Constructor<ProductionDatabase> constructor;
         try {
@@ -87,10 +87,7 @@ class ProductionDatabaseTest {
 
         assertThrows(
             NamingException.class,
-            () -> {
-                noProdContext.lookup("java:/comp/env");
-                noProdContext.lookup("jdbc/grabourg");
-            }
+            () -> noProdContext.lookup("jdbc/grabourg")
         );
         return noProdContext;
     }
@@ -162,8 +159,8 @@ class ProductionDatabaseTest {
     @Test
     void testGetDefaultContextFailing() {
         // given: an invalid environment
-        Hashtable<String, String> env = new Hashtable<>();
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "invalidValue");
+        Properties env = new Properties();
+        env.setProperty(Context.INITIAL_CONTEXT_FACTORY, "invalidValue");
 
         // Test for RuntimeException when NamingException is thrown
         assertThrows(

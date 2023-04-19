@@ -19,6 +19,7 @@ public class HelloServlet extends HttpServlet {
     /**
      * initialise message.
      */
+    @Override
     public void init() {
         message = "Hello World!";
     }

@@ -32,7 +32,6 @@ public class RegisterServlet extends MyHttpServlet {
         JSONObject credentials;
         try {
             credentials = new JSONObject(getBody(request));
-            // Iterator<String> it = credentials.keys();
         } catch (JSONException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;

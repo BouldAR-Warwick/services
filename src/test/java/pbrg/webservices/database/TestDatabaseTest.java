@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.DatabaseUtils.dataSourceIsValid;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
+import static pbrg.webservices.utils.TestUtils.dockerDaemonRunning;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -40,7 +41,7 @@ final class TestDatabaseTest {
     }
 
     @Test
-    public void testPrivateConstructor() {
+    void testPrivateConstructor() {
         // get constructor
         Constructor<TestDatabase> constructor;
         try {
@@ -78,7 +79,45 @@ final class TestDatabaseTest {
     }
 
     @Test
-    public void awaitDatabaseStartupTestInterruptedException()
+    void startTestDatabaseInThreadDockerDaemonInactive() {
+        // given: system where Docker daemon is not running
+
+        // use reflection to access and set dockerIsRunning to false
+        Field dockerIsRunningField;
+        try {
+            dockerIsRunningField = TestDatabase.class.getDeclaredField(
+                "dockerIsRunning"
+            );
+        } catch (NoSuchFieldException e) {
+            fail("dockerIsRunning field should exist");
+            throw new RuntimeException(e);
+        }
+
+        dockerIsRunningField.setAccessible(true);
+        try {
+            dockerIsRunningField.set(null, false);
+        } catch (IllegalAccessException e) {
+            fail("Could not set dockerIsRunning");
+        }
+
+        assertThrows(
+            // then: an IllegalStateException should be thrown
+            IllegalStateException.class,
+
+            // when: startTestDatabaseInThread is called
+            TestDatabase::startTestDatabaseInThread
+        );
+
+        // after: reset dockerIsRunning
+        try {
+            dockerIsRunningField.set(null, dockerDaemonRunning());
+        } catch (IllegalAccessException e) {
+            fail("Could not set dockerIsRunning");
+        }
+    }
+
+    @Test
+    void awaitDatabaseStartupTestInterruptedException()
         throws SQLException, NoSuchMethodException, InterruptedException {
         // use reflection to access the private method
         Method awaitDatabaseStartup = TestDatabase.class.getDeclaredMethod(
@@ -101,7 +140,7 @@ final class TestDatabaseTest {
         testThread.start();
 
         // Interrupt the testThread while it is sleeping
-        testThread.interrupt();
+        assertDoesNotThrow(testThread::interrupt);
 
         // Wait for the testThread to finish
         testThread.join();
