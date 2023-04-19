@@ -1,6 +1,7 @@
 package pbrg.webservices.database;
 
 import static pbrg.webservices.database.DatabaseUtils.dataSourceIsValid;
+import static pbrg.webservices.utils.TestUtils.dockerDaemonRunning;
 import static pbrg.webservices.utils.Utils.collectOutputAsList;
 
 import java.io.IOException;
@@ -116,16 +117,21 @@ public final class TestDatabase {
         // Use the MysqlDataSource as a DataSource
         // jdbc:mysql://localhost:3306/test_db
         return new ChainingMysqlDataSource()
-                .setServerName("localhost")
-                .setPort(DATABASE_PORT)
-                .setDatabaseName("test_db")
-                .setUser("test_user")
-                .setPassword("test_password")
-                .getMysqlDataSource();
+            .setServerName("localhost")
+            .setPort(DATABASE_PORT)
+            .setDatabaseName("test_db")
+            .setUser("test_user")
+            .setPassword("test_password")
+            .getMysqlDataSource();
     }
 
     /** Start the test database in a separate thread. */
     public static void startTestDatabaseInThread() {
+        // ensure the Docker daemon is running
+        if (!dockerDaemonRunning()) {
+            throw new RuntimeException("The Docker daemon is not running.");
+        }
+
         ExecutorService executor = Executors.newSingleThreadExecutor();
         run(executor, START_TEST_DATABASE);
 

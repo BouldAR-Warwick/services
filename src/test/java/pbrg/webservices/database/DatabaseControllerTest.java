@@ -134,12 +134,38 @@ class DatabaseControllerTest {
         assert DatabaseController.usernameExists(username);
         assert DatabaseController.emailExists(email);
 
-        // when: signing up with the same credentials
-        boolean added = DatabaseController.signUp(
-            username, email, "password"
-        );
+        // given: a non-existing username, email
+        assert !DatabaseController.usernameExists(TEST_USERNAME);
+        assert !DatabaseController.emailExists(TEST_EMAIL);
 
-        // then: the user is not added
-        assertFalse(added);
+        // when: signing up with the same credentials
+        boolean[] invalidRequests = {
+            // both match
+            DatabaseController.signUp(
+                username, email, "password"
+            ),
+
+            // email matches
+            DatabaseController.signUp(
+                TEST_USERNAME, email, "password"
+            ),
+
+            // username matches
+            DatabaseController.signUp(
+                username, TEST_EMAIL, "password"
+            )
+        };
+
+        for (boolean invalidRequest : invalidRequests) {
+            // then: the user is not added
+            assertFalse(invalidRequest);
+        }
+
+        // after: remove the users
+        assert !DatabaseController.usernameExists(TEST_USERNAME);
+
+        Integer uid = DatabaseController.getUserIDFromUsername(username);
+        assert uid != null;
+        DatabaseController.deleteUser(uid);
     }
 }

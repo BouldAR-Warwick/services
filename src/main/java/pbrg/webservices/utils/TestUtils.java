@@ -2,7 +2,7 @@ package pbrg.webservices.utils;
 
 import java.io.IOException;
 
-final class TestUtils {
+public final class TestUtils {
 
     private TestUtils() {
         throw new IllegalStateException("Utility class");
@@ -16,6 +16,16 @@ final class TestUtils {
         ProcessBuilder getPython3Version =
             new ProcessBuilder("python3", "--version");
         return runCommand(getPython3Version);
+    }
+
+    /**
+     * Check if the Docker daemon is running.
+     * @return true if the Docker daemon in running, false otherwise.
+     */
+    public static boolean dockerDaemonRunning() {
+        ProcessBuilder checkDockerDaemonCommand =
+            new ProcessBuilder("docker", "stats", "--no-stream");
+        return runCommand(checkDockerDaemonCommand);
     }
 
     /**

@@ -34,6 +34,10 @@ public final class DatabaseController {
         throw new IllegalStateException("Utility class");
     }
 
+    /**
+     * Set the data source.
+     * @param inProduction true if in production, false otherwise
+     */
     public static void setDataSource(final boolean inProduction) {
         if (inProduction) {
             setDataSource(productionDataSource());
