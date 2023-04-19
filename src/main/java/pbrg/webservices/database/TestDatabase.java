@@ -18,6 +18,9 @@ public final class TestDatabase {
     /** Store the Docker container ID of the test database. */
     private static String containerId;
 
+    /** Store whether the Docker daemon is running. */
+    private static boolean dockerIsRunning = dockerDaemonRunning();
+
     /** Database port. */
     private static final int DATABASE_PORT = 3306;
 
@@ -126,10 +129,13 @@ public final class TestDatabase {
     }
 
     /** Start the test database in a separate thread. */
-    public static void startTestDatabaseInThread() {
+    public static void startTestDatabaseInThread()
+        throws IllegalStateException {
         // ensure the Docker daemon is running
-        if (!dockerDaemonRunning()) {
-            throw new RuntimeException("The Docker daemon is not running.");
+        if (!dockerIsRunning) {
+            throw new IllegalStateException(
+                "The Docker daemon is not running."
+            );
         }
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
