@@ -1,0 +1,785 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DatabaseController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">pbrg.webservices.database</a>
+</div>
+
+<h1>Coverage Summary for Class: DatabaseController (pbrg.webservices.database)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DatabaseController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (12/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    24.8%
+  </span>
+  <span class="absValue">
+    (54/218)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package pbrg.webservices.database;
+&nbsp;
+&nbsp;import static pbrg.webservices.database.ProductionDatabase.production;
+&nbsp;import static pbrg.webservices.database.ProductionDatabase.productionDataSource;
+&nbsp;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Statement;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import javax.sql.DataSource;
+&nbsp;import org.jetbrains.annotations.Nullable;
+&nbsp;import org.json.JSONArray;
+&nbsp;import org.json.JSONObject;
+&nbsp;import pbrg.webservices.models.Gym;
+&nbsp;import pbrg.webservices.models.Route;
+&nbsp;import pbrg.webservices.models.RouteFull;
+&nbsp;import pbrg.webservices.models.User;
+&nbsp;
+&nbsp;public final class DatabaseController {
+&nbsp;
+&nbsp;    /** The data source. */
+&nbsp;    private static DataSource dataSource;
+&nbsp;
+&nbsp;    static {
+<b class="fc">&nbsp;        setDataSource(production());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** Static class, no need to instantiate. */
+<b class="nc">&nbsp;    private DatabaseController() {</b>
+<b class="nc">&nbsp;        throw new IllegalStateException(&quot;Utility class&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set the data source.
+&nbsp;     * @param inProduction true if in production, false otherwise
+&nbsp;     */
+&nbsp;    public static void setDataSource(final boolean inProduction) {
+<b class="fc">&nbsp;        if (inProduction) {</b>
+<b class="nc">&nbsp;            setDataSource(productionDataSource());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set the data source.
+&nbsp;     * @param newDataSource data source
+&nbsp;     */
+&nbsp;    public static void setDataSource(final DataSource newDataSource) {
+<b class="fc">&nbsp;        DatabaseController.dataSource = newDataSource;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the data source.
+&nbsp;     * @return data source
+&nbsp;     */
+&nbsp;    public static DataSource getDataSource() {
+<b class="fc">&nbsp;        return dataSource;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sign a user in.
+&nbsp;     *
+&nbsp;     * @param username username
+&nbsp;     * @param password password
+&nbsp;     * @return user object
+&nbsp;     * @throws SQLException if the SQL query fails
+&nbsp;     */
+&nbsp;    public static @Nullable User signIn(
+&nbsp;            final String username, final String password) throws SQLException {
+<b class="fc">&nbsp;        try (</b>
+<b class="fc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="fc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT * FROM users WHERE username=? AND password=?&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="fc">&nbsp;            pst.setString(1, username);</b>
+<b class="fc">&nbsp;            pst.setString(2, password);</b>
+&nbsp;
+<b class="fc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+<b class="fc">&nbsp;            if (rs.next()) {</b>
+<b class="fc">&nbsp;                return new User(rs.getInt(&quot;uid&quot;), rs.getString(&quot;username&quot;));</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sign a user up.
+&nbsp;     *
+&nbsp;     * @param username username
+&nbsp;     * @param email    email
+&nbsp;     * @param password password
+&nbsp;     * @return true if user was added, false otherwise
+&nbsp;     * @throws SQLException if SQL error occurs
+&nbsp;     */
+&nbsp;    public static boolean signUp(
+&nbsp;        final String username, final String email, final String password
+&nbsp;    ) throws SQLException {
+<b class="fc">&nbsp;        boolean added = insertUser(username, email, password);</b>
+<b class="fc">&nbsp;        if (!added) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // check for successful creation
+<b class="fc">&nbsp;        return userExists(username);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Insert a user into the database.
+&nbsp;     * @param username username
+&nbsp;     * @param email email
+&nbsp;     * @param password password
+&nbsp;     * @return true if user was added, false otherwise
+&nbsp;     * @throws SQLException if SQL error occurs
+&nbsp;     */
+&nbsp;    private static boolean insertUser(
+&nbsp;        final String username, final String email, final String password
+&nbsp;    ) throws SQLException {
+&nbsp;        // ensure username, email are unique
+<b class="fc">&nbsp;        if (usernameExists(username) || emailExists(email)) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        try (</b>
+<b class="fc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="fc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;INSERT INTO users (Username, Email, Password) VALUES (?,?,?)&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="fc">&nbsp;            String[] values = {username, email, password};</b>
+<b class="fc">&nbsp;            for (int i = 1; i &lt;= values.length; i++) {</b>
+<b class="fc">&nbsp;                pst.setString(i, values[i - 1]);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            pst.executeUpdate();</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if a user exists (by username).
+&nbsp;     * @param username username
+&nbsp;     * @return true if user exists, false otherwise
+&nbsp;     * @throws SQLException if SQL error occurs
+&nbsp;     */
+&nbsp;    static boolean userExists(
+&nbsp;        final String username
+&nbsp;    ) throws SQLException {
+<b class="fc">&nbsp;        return usernameExists(username);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if a username exists.
+&nbsp;     * @param username username
+&nbsp;     * @return true if username exists, false otherwise
+&nbsp;     * @throws SQLException if SQL error occurs
+&nbsp;     */
+&nbsp;    static boolean usernameExists(final String username) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="fc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="fc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT EXISTS (SELECT 1 FROM users WHERE username=?)&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="fc">&nbsp;            pst.setString(1, username);</b>
+&nbsp;
+<b class="fc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+<b class="fc">&nbsp;            if (rs.next()) {</b>
+<b class="fc">&nbsp;                return rs.getBoolean(1);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if an email exists.
+&nbsp;     * @param email email
+&nbsp;     * @return true if email exists, false otherwise
+&nbsp;     * @throws SQLException if SQL error occurs
+&nbsp;     */
+&nbsp;    static boolean emailExists(final String email) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="fc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="fc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT EXISTS (SELECT 1 FROM users WHERE email=?)&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="fc">&nbsp;            pst.setString(1, email);</b>
+&nbsp;
+<b class="fc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+<b class="fc">&nbsp;            if (rs.next()) {</b>
+<b class="fc">&nbsp;                return rs.getBoolean(1);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a user&#39;s ID from their username.
+&nbsp;     * @param username username
+&nbsp;     * @return user ID
+&nbsp;     * @throws SQLException if SQL error occurs
+&nbsp;     */
+&nbsp;    static Integer getUserIDFromUsername(
+&nbsp;        final String username
+&nbsp;    ) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="fc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="fc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT uid FROM users WHERE username=?&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="fc">&nbsp;            pst.setString(1, username);</b>
+&nbsp;
+<b class="fc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+<b class="fc">&nbsp;            if (rs.next()) {</b>
+<b class="fc">&nbsp;                return rs.getInt(&quot;uid&quot;);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a user&#39;s ID from their email.
+&nbsp;     * @param email email
+&nbsp;     * @return user ID
+&nbsp;     * @throws SQLException if SQL error occurs
+&nbsp;     */
+&nbsp;    static Integer getUserIDFromEmail(final String email) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT UID FROM users WHERE email=?&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="nc">&nbsp;            pst.setString(1, email);</b>
+&nbsp;
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+<b class="nc">&nbsp;            if (rs.next()) {</b>
+<b class="nc">&nbsp;                return rs.getInt(&quot;uid&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete a user (by user ID).
+&nbsp;     * @param uid user ID
+&nbsp;     * @return true if user was deleted, false otherwise
+&nbsp;     * @throws SQLException if SQL error occurs
+&nbsp;     */
+&nbsp;    static boolean deleteUser(final int uid) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="fc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="fc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;DELETE FROM users WHERE uid=?&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="fc">&nbsp;            pst.setInt(1, uid);</b>
+<b class="fc">&nbsp;            return pst.executeUpdate() == 1;</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all gyms matching a query word in its location or name.
+&nbsp;     *
+&nbsp;     * @param queryWord query word
+&nbsp;     * @return list of gyms
+&nbsp;     * @throws SQLException if database error
+&nbsp;     */
+&nbsp;    public static List&lt;String&gt; getGymsByQueryWord(
+&nbsp;            final String queryWord) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT GymName &quot;
+&nbsp;                    + &quot;FROM gyms &quot;
+&nbsp;                    + &quot;WHERE GymLocation LIKE ? OR GymName LIKE ?&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="nc">&nbsp;            pst.setString(1, &quot;%&quot; + queryWord + &quot;%&quot;);</b>
+<b class="nc">&nbsp;            pst.setString(2, &quot;%&quot; + queryWord + &quot;%&quot;);</b>
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;String&gt; gyms = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            while (rs.next()) {</b>
+<b class="nc">&nbsp;                gyms.add(rs.getString(&quot;GymName&quot;));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return gyms;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a gym by name.
+&nbsp;     *
+&nbsp;     * @param gymName The name of the gym.
+&nbsp;     * @return The gym.
+&nbsp;     * @throws SQLException If SQL query fails.
+&nbsp;     */
+&nbsp;    public static Gym getGymByGymName(
+&nbsp;            final String gymName) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;                Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;                PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                        &quot;SELECT GID, Gymname FROM gyms WHERE Gymname = ?&quot;)) {
+<b class="nc">&nbsp;            pst.setString(1, gymName);</b>
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+&nbsp;
+<b class="nc">&nbsp;            if (rs.next()) {</b>
+<b class="nc">&nbsp;                int gid = rs.getInt(&quot;GID&quot;);</b>
+<b class="nc">&nbsp;                String rGymName = rs.getString(&quot;GymName&quot;);</b>
+<b class="nc">&nbsp;                return new Gym(gid, rGymName);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a gym by a user ID.
+&nbsp;     *
+&nbsp;     * @param userId user ID
+&nbsp;     * @return a gym
+&nbsp;     * @throws SQLException if SQL error occurs
+&nbsp;     */
+&nbsp;    public static Gym getGymByUserId(final int userId) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT GID, Gymname &quot;
+&nbsp;                    + &quot;FROM gyms &quot;
+&nbsp;                    + &quot;WHERE GID = (SELECT GID FROM user_in_gym WHERE UID = ?)&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="nc">&nbsp;            pst.setInt(1, userId);</b>
+&nbsp;
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+<b class="nc">&nbsp;            if (rs.next()) {</b>
+<b class="nc">&nbsp;                int gid = rs.getInt(&quot;GID&quot;);</b>
+<b class="nc">&nbsp;                String gymName = rs.getString(&quot;GymName&quot;);</b>
+<b class="nc">&nbsp;                return new Gym(gid, gymName);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a list of routes in a gym, created by a user.
+&nbsp;     *
+&nbsp;     * @param gymId  gym ID
+&nbsp;     * @param userId creator user ID
+&nbsp;     * @return list of routes
+&nbsp;     * @throws SQLException if SQL error occurs
+&nbsp;     */
+&nbsp;    public static List&lt;Route&gt; getRoutesInGymMadeByUser(
+&nbsp;            final int gymId, final int userId) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT * &quot;
+&nbsp;                    + &quot;FROM routes &quot;
+&nbsp;                    + &quot;INNER JOIN walls ON routes.WID = walls.WID &quot;
+&nbsp;                    + &quot;INNER JOIN gyms ON walls.GID = gyms.GID &quot;
+&nbsp;                    + &quot;WHERE gyms.GID = ? AND routes.creator_user_id = ?&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="nc">&nbsp;            pst.setInt(1, gymId);</b>
+<b class="nc">&nbsp;            pst.setInt(2, userId);</b>
+&nbsp;
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+<b class="nc">&nbsp;            List&lt;Route&gt; routes = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            while (rs.next()) {</b>
+<b class="nc">&nbsp;                routes.add(new Route(</b>
+<b class="nc">&nbsp;                        rs.getInt(&quot;RID&quot;),</b>
+<b class="nc">&nbsp;                        rs.getInt(&quot;Difficulty&quot;),</b>
+<b class="nc">&nbsp;                        &quot;Route #&quot; + rs.getInt(&quot;RID&quot;)));</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            return routes;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a wall image file name by wall id.
+&nbsp;     * @param wallId the wall id
+&nbsp;     * @return the wall image file name
+&nbsp;     * @throws SQLException If the query fails
+&nbsp;     */
+&nbsp;    public static String getWallImageFileNameFromWallId(final int wallId)
+&nbsp;            throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;                Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;                PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                        &quot;SELECT walls.image_file_name &quot;
+&nbsp;                                + &quot;FROM walls &quot;
+&nbsp;                                + &quot;WHERE WID = ?&quot;)) {
+<b class="nc">&nbsp;            pst.setInt(1, wallId);</b>
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+&nbsp;
+&nbsp;            // get name of wall image
+<b class="nc">&nbsp;            if (rs.next()) {</b>
+<b class="nc">&nbsp;                return rs.getString(&quot;image_file_name&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static RouteFull getRouteByRouteId(final int routeId)
+&nbsp;            throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;                Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;                PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                        &quot;SELECT * &quot;
+&nbsp;                                + &quot;FROM routes &quot;
+&nbsp;                                + &quot;WHERE routes.RID = ?&quot;)) {
+<b class="nc">&nbsp;            pst.setInt(1, routeId);</b>
+&nbsp;
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+<b class="nc">&nbsp;            if (rs.next()) {</b>
+<b class="nc">&nbsp;                return new RouteFull(</b>
+<b class="nc">&nbsp;                        rs.getInt(&quot;RID&quot;),</b>
+<b class="nc">&nbsp;                        rs.getInt(&quot;WID&quot;),</b>
+<b class="nc">&nbsp;                        rs.getInt(&quot;creator_user_id&quot;),</b>
+<b class="nc">&nbsp;                        rs.getInt(&quot;Difficulty&quot;),</b>
+<b class="nc">&nbsp;                        rs.getString(&quot;RouteContent&quot;),</b>
+<b class="nc">&nbsp;                        rs.getString(&quot;image_file_name&quot;));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a route image file name for a given route id.
+&nbsp;     *
+&nbsp;     * @param routeId the route id of the route
+&nbsp;     * @return the route image file name
+&nbsp;     * @throws SQLException if there is an error with the database
+&nbsp;     */
+&nbsp;    public static String getRouteImageFileNamesByRouteId(
+&nbsp;            final int routeId) throws SQLException {
+<b class="nc">&nbsp;        RouteFull route = getRouteByRouteId(routeId);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (route == null) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return route.getImageFileName();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if a user, by ID, has created a route, by ID.
+&nbsp;     *
+&nbsp;     * @param userId  creator user ID
+&nbsp;     * @param routeId route ID
+&nbsp;     * @return user has created route
+&nbsp;     * @throws SQLException Query or database get fails
+&nbsp;     */
+&nbsp;    public static boolean userOwnsRoute(
+&nbsp;            final int userId, final int routeId
+&nbsp;    ) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT EXISTS(&quot;
+&nbsp;                    + &quot;SELECT 1 FROM routes &quot;
+&nbsp;                    + &quot;WHERE routes.RID=? AND routes.creator_user_id = ?&quot;
+&nbsp;                    + &quot;)&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="nc">&nbsp;            pst.setInt(1, routeId);</b>
+<b class="nc">&nbsp;            pst.setInt(2, userId);</b>
+&nbsp;
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+<b class="nc">&nbsp;            if (rs.next()) {</b>
+<b class="nc">&nbsp;                return rs.getBoolean(1);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a route&#39;s contents (list of holds) as a String.
+&nbsp;     * @param routeId route identifier
+&nbsp;     * @return list of holds in JSON
+&nbsp;     * @throws SQLException database issues
+&nbsp;     */
+&nbsp;    public static String getRouteContent(
+&nbsp;        final int routeId
+&nbsp;    ) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT routes.route_content &quot;
+&nbsp;                    + &quot;FROM routes &quot;
+&nbsp;                    + &quot;WHERE RID = ?&quot;)) {
+<b class="nc">&nbsp;            pst.setInt(1, routeId);</b>
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+&nbsp;
+&nbsp;            // get JSON list of holds
+<b class="nc">&nbsp;            if (rs.next()) {</b>
+<b class="nc">&nbsp;                return rs.getString(&quot;route_content&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a route&#39;s contents (list of holds) as a JSON array.
+&nbsp;     * @param routeId route identifier
+&nbsp;     * @return list of holds in JSON
+&nbsp;     * @throws SQLException database issues
+&nbsp;     */
+&nbsp;    public static JSONArray getRouteContentJSONArray(
+&nbsp;        final int routeId
+&nbsp;    ) throws SQLException {
+<b class="nc">&nbsp;        return new JSONArray(Objects.requireNonNull(getRouteContent(routeId)));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a route&#39;s contents (list of holds) as a JSON object.
+&nbsp;     * @param routeId route identifier
+&nbsp;     * @return list of holds in JSON
+&nbsp;     * @throws SQLException database issues
+&nbsp;     */
+&nbsp;    public static JSONObject getRouteContentJSONObject(
+&nbsp;        final int routeId
+&nbsp;    ) throws SQLException {
+<b class="nc">&nbsp;        return new JSONObject(Objects.requireNonNull(getRouteContent(routeId)));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a wall ID from a route ID.
+&nbsp;     * @param routeId route identifier
+&nbsp;     * @return wall identifier
+&nbsp;     * @throws SQLException database issues
+&nbsp;     */
+&nbsp;    public static Integer getWallIdFromRouteId(
+&nbsp;        final int routeId
+&nbsp;    ) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT routes.WID &quot;
+&nbsp;                    + &quot;FROM routes &quot;
+&nbsp;                    + &quot;WHERE RID = ?&quot;)) {
+<b class="nc">&nbsp;            pst.setInt(1, routeId);</b>
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+&nbsp;
+&nbsp;            // get JSON list of holds
+<b class="nc">&nbsp;            if (rs.next()) {</b>
+<b class="nc">&nbsp;                return Integer.parseInt(rs.getString(&quot;WID&quot;));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the wall image file name based on the route ID.
+&nbsp;     * @param routeId the route ID
+&nbsp;     * @return the wall image file name if found, null otherwise
+&nbsp;     * @throws SQLException if there is an error accessing the database
+&nbsp;     */
+&nbsp;    public static String getWallImageFileNameFromRouteId(
+&nbsp;        final int routeId
+&nbsp;    ) throws SQLException {
+<b class="nc">&nbsp;        Integer wallId = getWallIdFromRouteId(routeId);</b>
+<b class="nc">&nbsp;        if (wallId == null) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return getWallImageFileNameFromWallId(wallId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a gym ID from a gym ID.
+&nbsp;     * @param gymId gym identifier
+&nbsp;     * @return wall identifier
+&nbsp;     */
+&nbsp;    public static Integer getWallIdFromGymId(
+&nbsp;        final int gymId
+&nbsp;    ) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;SELECT walls.WID &quot;
+&nbsp;                    + &quot;FROM walls &quot;
+&nbsp;                    + &quot;WHERE GID = ?&quot;)
+&nbsp;        ) {
+<b class="nc">&nbsp;            pst.setInt(1, gymId);</b>
+<b class="nc">&nbsp;            ResultSet rs = pst.executeQuery();</b>
+&nbsp;
+&nbsp;            // get JSON list of holds
+<b class="nc">&nbsp;            if (rs.next()) {</b>
+<b class="nc">&nbsp;                return Integer.parseInt(rs.getString(&quot;WID&quot;));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        throw new RuntimeException(&quot;No wall against gym ID &quot; + gymId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create a new route (without image) in the database.
+&nbsp;     * @param routeContent route content (list of holds)
+&nbsp;     * @param difficulty route difficulty
+&nbsp;     * @param creatorUserId creator user identifier
+&nbsp;     * @param wallId wall identifier
+&nbsp;     * @return route identifier
+&nbsp;     * @throws SQLException database issues
+&nbsp;     */
+&nbsp;    public static Integer createRoute(
+&nbsp;        final String routeContent, final int difficulty,
+&nbsp;        final int creatorUserId, final int wallId
+&nbsp;    ) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;            &quot;INSERT INTO routes &quot;
+&nbsp;                + &quot;(route_content, difficulty, creator_user_id, WID) &quot;
+&nbsp;                + &quot;VALUES (?, ?, ?, ?) &quot;,
+&nbsp;                Statement.RETURN_GENERATED_KEYS
+&nbsp;            )
+&nbsp;        ) {
+<b class="nc">&nbsp;            Object[] values = {routeContent, difficulty, creatorUserId, wallId};</b>
+<b class="nc">&nbsp;            String[] types = {&quot;String&quot;, &quot;int&quot;, &quot;int&quot;, &quot;int&quot;};</b>
+&nbsp;
+<b class="nc">&nbsp;            for (int i = 1; i &lt;= values.length; i++) {</b>
+<b class="nc">&nbsp;                Object value = values[i];</b>
+<b class="nc">&nbsp;                String type = types[i];</b>
+&nbsp;
+<b class="nc">&nbsp;                if (type.equals(&quot;String&quot;)) {</b>
+<b class="nc">&nbsp;                    pst.setString(i, (String) value);</b>
+<b class="nc">&nbsp;                } else if (type.equals(&quot;int&quot;)) {</b>
+<b class="nc">&nbsp;                    pst.setInt(i, (int) value);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            pst.executeUpdate();</b>
+<b class="nc">&nbsp;            ResultSet rs = pst.getGeneratedKeys();</b>
+&nbsp;
+<b class="nc">&nbsp;            if (rs.next()) {</b>
+&nbsp;                // the route ID
+<b class="nc">&nbsp;                return rs.getInt(1);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        throw new RuntimeException(&quot;Route creation: no keys returned.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add a route image to an existing route.
+&nbsp;     * @param routeId route identifier
+&nbsp;     * @param imageFileName route image file name
+&nbsp;     * @throws SQLException database issues
+&nbsp;     */
+&nbsp;    public static void addImageToRoute(
+&nbsp;        final int routeId, final String imageFileName
+&nbsp;    ) throws SQLException {
+<b class="nc">&nbsp;        try (</b>
+<b class="nc">&nbsp;            Connection connection = dataSource.getConnection();</b>
+<b class="nc">&nbsp;            PreparedStatement pst = connection.prepareStatement(</b>
+&nbsp;                &quot;UPDATE routes &quot;
+&nbsp;                    + &quot;SET image_file_name = ? &quot;
+&nbsp;                    + &quot;WHERE RID = ?&quot;
+&nbsp;            )
+&nbsp;        ) {
+<b class="nc">&nbsp;            pst.setString(1, imageFileName);</b>
+<b class="nc">&nbsp;            pst.setInt(2, routeId);</b>
+<b class="nc">&nbsp;            pst.executeUpdate();</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-04-20 15:59</div>
+</div>
+</body>
+</html>

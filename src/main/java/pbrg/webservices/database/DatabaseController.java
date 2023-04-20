@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.sql.DataSource;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pbrg.webservices.models.Gym;
@@ -52,6 +55,14 @@ public final class DatabaseController {
     }
 
     /**
+     * Get the data source.
+     * @return data source
+     */
+    public static DataSource getDataSource() {
+        return dataSource;
+    }
+
+    /**
      * Sign a user in.
      *
      * @param username username
@@ -59,8 +70,9 @@ public final class DatabaseController {
      * @return user object
      * @throws SQLException if the SQL query fails
      */
-    public static User signIn(
+    public static @Nullable User signIn(
             final String username, final String password) throws SQLException {
+        User user = null;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -72,11 +84,11 @@ public final class DatabaseController {
 
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                return new User(rs.getInt("uid"), rs.getString("username"));
+                user = new User(rs.getInt("uid"), rs.getString("username"));
             }
         }
 
-        return null;
+        return user;
     }
 
     /**
@@ -150,6 +162,7 @@ public final class DatabaseController {
      * @throws SQLException if SQL error occurs
      */
     static boolean usernameExists(final String username) throws SQLException {
+        boolean exists = false;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -159,12 +172,13 @@ public final class DatabaseController {
             pst.setString(1, username);
 
             ResultSet rs = pst.executeQuery();
+
             if (rs.next()) {
-                return rs.getBoolean(1);
+                exists = rs.getBoolean(1);
             }
         }
 
-        return false;
+        return exists;
     }
 
     /**
@@ -174,6 +188,7 @@ public final class DatabaseController {
      * @throws SQLException if SQL error occurs
      */
     static boolean emailExists(final String email) throws SQLException {
+        boolean exists = false;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -184,11 +199,11 @@ public final class DatabaseController {
 
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                return rs.getBoolean(1);
+                exists = rs.getBoolean(1);
             }
         }
 
-        return false;
+        return exists;
     }
 
     /**
@@ -197,9 +212,10 @@ public final class DatabaseController {
      * @return user ID
      * @throws SQLException if SQL error occurs
      */
-    static Integer getUserIDFromUsername(
+    static @Nullable Integer getUserIDFromUsername(
         final String username
     ) throws SQLException {
+        Integer uid = null;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -210,11 +226,11 @@ public final class DatabaseController {
 
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                return rs.getInt("uid");
+                uid = rs.getInt("uid");
             }
         }
 
-        return null;
+        return uid;
     }
 
     /**
@@ -224,6 +240,7 @@ public final class DatabaseController {
      * @throws SQLException if SQL error occurs
      */
     static Integer getUserIDFromEmail(final String email) throws SQLException {
+        Integer uid = null;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -234,11 +251,11 @@ public final class DatabaseController {
 
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                return rs.getInt("uid");
+                uid = rs.getInt("uid");
             }
         }
 
-        return null;
+        return uid;
     }
 
     /**
@@ -248,6 +265,7 @@ public final class DatabaseController {
      * @throws SQLException if SQL error occurs
      */
     static boolean deleteUser(final int uid) throws SQLException {
+        boolean deleted;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -255,8 +273,9 @@ public final class DatabaseController {
             )
         ) {
             pst.setInt(1, uid);
-            return pst.executeUpdate() == 1;
+            deleted = pst.executeUpdate() == 1;
         }
+        return deleted;
     }
 
     /**
@@ -268,6 +287,7 @@ public final class DatabaseController {
      */
     public static List<String> getGymsByQueryWord(
             final String queryWord) throws SQLException {
+        List<String> gyms = new ArrayList<>();
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -280,12 +300,11 @@ public final class DatabaseController {
             pst.setString(2, "%" + queryWord + "%");
             ResultSet rs = pst.executeQuery();
 
-            List<String> gyms = new ArrayList<>();
             while (rs.next()) {
                 gyms.add(rs.getString("GymName"));
             }
-            return gyms;
         }
+        return gyms;
     }
 
     /**
@@ -296,22 +315,25 @@ public final class DatabaseController {
      * @throws SQLException If SQL query fails.
      */
     public static Gym getGymByGymName(
-            final String gymName) throws SQLException {
+        final String gymName
+    ) throws SQLException {
+        Gym gym = null;
         try (
-                Connection connection = dataSource.getConnection();
-                PreparedStatement pst = connection.prepareStatement(
-                        "SELECT GID, Gymname FROM gyms WHERE Gymname = ?")) {
+            Connection connection = dataSource.getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT GID, Gymname FROM gyms WHERE Gymname = ?")
+        ) {
             pst.setString(1, gymName);
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
                 int gid = rs.getInt("GID");
                 String rGymName = rs.getString("GymName");
-                return new Gym(gid, rGymName);
+                gym = new Gym(gid, rGymName);
             }
         }
 
-        return null;
+        return gym;
     }
 
     /**
@@ -322,6 +344,7 @@ public final class DatabaseController {
      * @throws SQLException if SQL error occurs
      */
     public static Gym getGymByUserId(final int userId) throws SQLException {
+        Gym gym = null;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -336,11 +359,11 @@ public final class DatabaseController {
             if (rs.next()) {
                 int gid = rs.getInt("GID");
                 String gymName = rs.getString("GymName");
-                return new Gym(gid, gymName);
+                gym = new Gym(gid, gymName);
             }
         }
 
-        return null;
+        return gym;
     }
 
     /**
@@ -352,7 +375,9 @@ public final class DatabaseController {
      * @throws SQLException if SQL error occurs
      */
     public static List<Route> getRoutesInGymMadeByUser(
-            final int gymId, final int userId) throws SQLException {
+        final int gymId, final int userId
+    ) throws SQLException {
+        List<Route> routes = new ArrayList<>();
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -367,16 +392,15 @@ public final class DatabaseController {
             pst.setInt(2, userId);
 
             ResultSet rs = pst.executeQuery();
-            List<Route> routes = new ArrayList<>();
             while (rs.next()) {
                 routes.add(new Route(
-                        rs.getInt("RID"),
-                        rs.getInt("Difficulty"),
-                        "Route #" + rs.getInt("RID")));
+                    rs.getInt("RID"),
+                    rs.getInt("Difficulty"),
+                    "Route #" + rs.getInt("RID")
+                ));
             }
-
-            return routes;
         }
+        return routes;
     }
 
     /**
@@ -385,49 +409,58 @@ public final class DatabaseController {
      * @return the wall image file name
      * @throws SQLException If the query fails
      */
-    public static String getWallImageFileNameFromWallId(final int wallId)
-            throws SQLException {
+    public static String getWallImageFileNameFromWallId(
+        final int wallId
+    ) throws SQLException {
+        String fileName = null;
         try (
-                Connection connection = dataSource.getConnection();
-                PreparedStatement pst = connection.prepareStatement(
-                        "SELECT walls.image_file_name "
-                                + "FROM walls "
-                                + "WHERE WID = ?")) {
+            Connection connection = dataSource.getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT walls.image_file_name "
+                        + "FROM walls "
+                        + "WHERE WID = ?"
+            )
+        ) {
             pst.setInt(1, wallId);
             ResultSet rs = pst.executeQuery();
 
             // get name of wall image
             if (rs.next()) {
-                return rs.getString("image_file_name");
+                fileName = rs.getString("image_file_name");
             }
         }
 
-        return null;
+        return fileName;
     }
 
-    private static RouteFull getRouteByRouteId(final int routeId)
-            throws SQLException {
+    private static RouteFull getRouteByRouteId(
+        final int routeId
+    ) throws SQLException {
+        RouteFull route = null;
         try (
-                Connection connection = dataSource.getConnection();
-                PreparedStatement pst = connection.prepareStatement(
-                        "SELECT * "
-                                + "FROM routes "
-                                + "WHERE routes.RID = ?")) {
+            Connection connection = dataSource.getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT * "
+                    + "FROM routes "
+                    + "WHERE routes.RID = ?"
+            )
+        ) {
             pst.setInt(1, routeId);
 
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                return new RouteFull(
-                        rs.getInt("RID"),
-                        rs.getInt("WID"),
-                        rs.getInt("creator_user_id"),
-                        rs.getInt("Difficulty"),
-                        rs.getString("RouteContent"),
-                        rs.getString("image_file_name"));
+                route = new RouteFull(
+                    rs.getInt("RID"),
+                    rs.getInt("WID"),
+                    rs.getInt("creator_user_id"),
+                    rs.getInt("Difficulty"),
+                    rs.getString("RouteContent"),
+                    rs.getString("image_file_name")
+                );
             }
         }
 
-        return null;
+        return route;
     }
 
     /**
@@ -437,7 +470,7 @@ public final class DatabaseController {
      * @return the route image file name
      * @throws SQLException if there is an error with the database
      */
-    public static String getRouteImageFileNamesByRouteId(
+    public static @Nullable String getRouteImageFileNamesByRouteId(
             final int routeId) throws SQLException {
         RouteFull route = getRouteByRouteId(routeId);
 
@@ -459,6 +492,7 @@ public final class DatabaseController {
     public static boolean userOwnsRoute(
             final int userId, final int routeId
     ) throws SQLException {
+        boolean ownsRoute = false;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -473,11 +507,11 @@ public final class DatabaseController {
 
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                return rs.getBoolean(1);
+                ownsRoute = rs.getBoolean(1);
             }
         }
 
-        return false;
+        return ownsRoute;
     }
 
     /**
@@ -489,22 +523,25 @@ public final class DatabaseController {
     public static String getRouteContent(
         final int routeId
     ) throws SQLException {
+        String holds = null;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT routes.route_content "
                     + "FROM routes "
-                    + "WHERE RID = ?")) {
+                    + "WHERE RID = ?"
+            )
+        ) {
             pst.setInt(1, routeId);
             ResultSet rs = pst.executeQuery();
 
             // get JSON list of holds
             if (rs.next()) {
-                return rs.getString("route_content");
+                holds = rs.getString("route_content");
             }
         }
 
-        return null;
+        return holds;
     }
 
     /**
@@ -513,7 +550,8 @@ public final class DatabaseController {
      * @return list of holds in JSON
      * @throws SQLException database issues
      */
-    public static JSONArray getRouteContentJSONArray(
+    @Contract("_ -> new")
+    public static @NotNull JSONArray getRouteContentJSONArray(
         final int routeId
     ) throws SQLException {
         return new JSONArray(Objects.requireNonNull(getRouteContent(routeId)));
@@ -525,7 +563,8 @@ public final class DatabaseController {
      * @return list of holds in JSON
      * @throws SQLException database issues
      */
-    public static JSONObject getRouteContentJSONObject(
+    @Contract("_ -> new")
+    public static @NotNull JSONObject getRouteContentJSONObject(
         final int routeId
     ) throws SQLException {
         return new JSONObject(Objects.requireNonNull(getRouteContent(routeId)));
@@ -537,25 +576,28 @@ public final class DatabaseController {
      * @return wall identifier
      * @throws SQLException database issues
      */
-    public static Integer getWallIdFromRouteId(
+    public static @Nullable Integer getWallIdFromRouteId(
         final int routeId
     ) throws SQLException {
+        Integer wallId = null;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT routes.WID "
                     + "FROM routes "
-                    + "WHERE RID = ?")) {
+                    + "WHERE RID = ?"
+            )
+        ) {
             pst.setInt(1, routeId);
             ResultSet rs = pst.executeQuery();
 
             // get JSON list of holds
             if (rs.next()) {
-                return Integer.parseInt(rs.getString("WID"));
+                wallId = Integer.parseInt(rs.getString("WID"));
             }
         }
 
-        return null;
+        return wallId;
     }
 
     /**
@@ -564,7 +606,7 @@ public final class DatabaseController {
      * @return the wall image file name if found, null otherwise
      * @throws SQLException if there is an error accessing the database
      */
-    public static String getWallImageFileNameFromRouteId(
+    public static @Nullable String getWallImageFileNameFromRouteId(
         final int routeId
     ) throws SQLException {
         Integer wallId = getWallIdFromRouteId(routeId);
@@ -582,23 +624,25 @@ public final class DatabaseController {
     public static Integer getWallIdFromGymId(
         final int gymId
     ) throws SQLException {
+        Integer wallId = null;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT walls.WID "
                     + "FROM walls "
-                    + "WHERE GID = ?")
+                    + "WHERE GID = ?"
+            )
         ) {
             pst.setInt(1, gymId);
             ResultSet rs = pst.executeQuery();
 
             // get JSON list of holds
             if (rs.next()) {
-                return Integer.parseInt(rs.getString("WID"));
+                wallId = Integer.parseInt(rs.getString("WID"));
             }
         }
 
-        throw new RuntimeException("No wall against gym ID " + gymId);
+        return wallId;
     }
 
     /**
@@ -614,16 +658,18 @@ public final class DatabaseController {
         final String routeContent, final int difficulty,
         final int creatorUserId, final int wallId
     ) throws SQLException {
+        Integer routeId = null;
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement pst = connection.prepareStatement(
             "INSERT INTO routes "
-                + "(route_content, difficulty, creator_user_id, WID) "
-                + "VALUES (?, ?, ?, ?) ",
+                    + "(route_content, difficulty, creator_user_id, WID) "
+                    + "VALUES (?, ?, ?, ?) ",
                 Statement.RETURN_GENERATED_KEYS
             )
         ) {
-            Object[] values = {routeContent, difficulty, creatorUserId, wallId};
+            Object[] values =
+                {routeContent, difficulty, creatorUserId, wallId};
             String[] types = {"String", "int", "int", "int"};
 
             for (int i = 1; i <= values.length; i++) {
@@ -641,11 +687,12 @@ public final class DatabaseController {
 
             if (rs.next()) {
                 // the route ID
-                return rs.getInt(1);
+                routeId = rs.getInt(1);
             }
         }
 
-        throw new RuntimeException("Route creation: no keys returned.");
+        // Route creation: no keys returned.
+        return routeId;
     }
 
     /**

@@ -19,6 +19,7 @@ public final class TestDatabase {
     private static String containerId;
 
     /** Store whether the Docker daemon is running. */
+    @SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
     private static boolean dockerIsRunning = dockerDaemonRunning();
 
     /** Database port. */
