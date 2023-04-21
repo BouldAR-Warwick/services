@@ -8,8 +8,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONObject;
+import pbrg.webservices.database.GymController;
 import pbrg.webservices.models.GymList;
-import pbrg.webservices.database.DatabaseController;
 
 @WebServlet(name = "SearchGymServlet", urlPatterns = "/SearchGym")
 public class SearchGymServlet extends MyHttpServlet {
@@ -41,7 +41,7 @@ public class SearchGymServlet extends MyHttpServlet {
         // get all gyms matching query_word
         List<String> gyms = null;
         try {
-            gyms = DatabaseController.getGymsByQueryWord(queryWord);
+            gyms = GymController.getGymsByQueryWord(queryWord);
         } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }

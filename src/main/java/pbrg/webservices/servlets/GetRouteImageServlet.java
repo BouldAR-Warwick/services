@@ -1,5 +1,7 @@
 package pbrg.webservices.servlets;
 
+import static pbrg.webservices.database.RouteController.getRouteImageFileNamesByRouteId;
+
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,7 +11,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import org.apache.commons.io.FilenameUtils;
-import pbrg.webservices.database.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetRouteImageServlet", urlPatterns = "/GetRouteImage")
@@ -47,8 +48,7 @@ public class GetRouteImageServlet extends MyHttpServlet {
         // get the route image file name
         String imageFileName;
         try {
-            imageFileName = DatabaseController.getRouteImageFileNamesByRouteId(
-                    routeId);
+            imageFileName = getRouteImageFileNamesByRouteId(routeId);
         } catch (SQLException exception) {
             response.getWriter().println(exception.getMessage());
             return;

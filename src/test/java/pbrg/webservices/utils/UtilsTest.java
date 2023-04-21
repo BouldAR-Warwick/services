@@ -1,8 +1,7 @@
 package pbrg.webservices.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.util.Objects;
 import org.json.JSONArray;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,12 +23,12 @@ class UtilsTest {
 
     @Test
     void getContentType() {
-        assert Objects.equals(Utils.getContentType("jpg"), "image/jpeg");
+        assertEquals("image/jpeg", Utils.getContentType("jpg"));
 
         // ensure non keys are mapped to null
         String[] nonKeys = {null, "", "not-in-map"};
         for (String nonKey : nonKeys) {
-            assert Objects.equals(Utils.getContentType(nonKey), null);
+            assertEquals(null, Utils.getContentType(nonKey));
         }
     }
 

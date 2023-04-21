@@ -1,5 +1,7 @@
 package pbrg.webservices.servlets;
 
+import static pbrg.webservices.database.CredentialController.signIn;
+
 import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.Cookie;
@@ -13,7 +15,6 @@ import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.models.User;
-import pbrg.webservices.database.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")
@@ -55,7 +56,7 @@ public class LoginServlet extends MyHttpServlet {
         // select user
         User user;
         try {
-            user = DatabaseController.signIn(username, password);
+            user = signIn(username, password);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;

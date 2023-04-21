@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-
-import pbrg.webservices.database.DatabaseController;
+import static pbrg.webservices.database.WallController.getWallIdFromGymId;
+import static pbrg.webservices.database.WallController.getWallImageFileNameFromWallId;
 import static pbrg.webservices.utils.Utils.returnImageAsBitmap;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
@@ -38,9 +38,8 @@ public class GetWallImageServlet extends MyHttpServlet {
         // get wall image file name from gym id
         String imageFileName;
         try {
-            Integer wallId = DatabaseController.getWallIdFromGymId(gymId);
-            imageFileName = DatabaseController
-                .getWallImageFileNameFromWallId(wallId);
+            Integer wallId = getWallIdFromGymId(gymId);
+            imageFileName = getWallImageFileNameFromWallId(wallId);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;

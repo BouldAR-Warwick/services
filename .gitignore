@@ -8,7 +8,6 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
-.idea/solarlint/*
 *.iws
 *.iml
 *.ipr
@@ -37,3 +36,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### IntelliJ code coverage report ###
+/htmlReport/

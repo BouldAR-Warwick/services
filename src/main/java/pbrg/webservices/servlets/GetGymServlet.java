@@ -7,8 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.json.JSONObject;
+import pbrg.webservices.database.GymController;
 import pbrg.webservices.models.Gym;
-import pbrg.webservices.database.DatabaseController;
 
 @WebServlet(name = "GetGymServlet", urlPatterns = "/GetGym")
 public class GetGymServlet extends MyHttpServlet {
@@ -45,7 +45,7 @@ public class GetGymServlet extends MyHttpServlet {
 
         Gym gym = null;
         try {
-            gym = DatabaseController.getGymByGymName(gymName);
+            gym = GymController.getGymByGymName(gymName);
         } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }

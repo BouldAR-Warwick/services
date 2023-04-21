@@ -1,5 +1,8 @@
 package pbrg.webservices.utils;
 
+import static pbrg.webservices.database.RouteController.getRouteContentJSONArray;
+import static pbrg.webservices.database.WallController.getWallImageFileNameFromRouteId;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +20,6 @@ import jakarta.servlet.http.HttpSession;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
-import pbrg.webservices.database.DatabaseController;
 
 /**
  * For static utils: getting database connection, file path utils, API utils.
@@ -231,12 +233,10 @@ public final class Utils {
         final int routeId
     ) throws SQLException {
         // Load the image file
-        String wallImageFileName = DatabaseController
-            .getWallImageFileNameFromRouteId(routeId);
+        String wallImageFileName = getWallImageFileNameFromRouteId(routeId);
 
         // Parse the JSON string into a JSON array
-        JSONArray holdArray = DatabaseController
-            .getRouteContentJSONArray(routeId);
+        JSONArray holdArray = getRouteContentJSONArray(routeId);
 
         // plot holds on image by calling python script
         return plotHoldsOnImagePython(

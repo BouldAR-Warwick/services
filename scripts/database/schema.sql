@@ -14,7 +14,7 @@ CREATE TABLE users(
  
 CREATE TABLE gyms(
     GID            INTEGER       NOT NULL   AUTO_INCREMENT,
-    GymLocation    VARCHAR(10)   UNIQUE NOT NULL,
+    GymLocation    VARCHAR(32)   NOT NULL,
     GymName        VARCHAR(64)   UNIQUE NOT NULL,
     PRIMARY KEY (GID)
 )AUTO_INCREMENT = 1;

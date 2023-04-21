@@ -8,8 +8,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Duration;
+import pbrg.webservices.database.GymController;
 import pbrg.webservices.models.Gym;
-import pbrg.webservices.database.DatabaseController;
 import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "StoreGymServlet", urlPatterns = "/StoreGym")
@@ -38,7 +38,7 @@ public class StoreGymServlet extends MyHttpServlet {
 
         Gym gym = null;
         try {
-            gym = DatabaseController.getGymByUserId(userId);
+            gym = GymController.getGymByUserId(userId);
         } catch (SQLException exception) {
             response.getWriter().println(exception.getMessage());
         }

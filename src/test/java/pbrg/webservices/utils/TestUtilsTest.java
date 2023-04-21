@@ -39,7 +39,10 @@ class TestUtilsTest {
 
     @Test
     void python3Installed() {
-        assertTrue(TestUtils.python3Installed(), "ensure python3 is installed");
+        assertTrue(
+            TestUtils.python3Installed(),
+            "ensure python3 is installed"
+        );
     }
 
     @Test

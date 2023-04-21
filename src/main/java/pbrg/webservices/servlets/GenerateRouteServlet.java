@@ -13,8 +13,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.sql.SQLException;
 
-import pbrg.webservices.database.DatabaseController;
 import pbrg.webservices.utils.Utils;
+
+import static pbrg.webservices.database.RouteController.addImageToRoute;
+import static pbrg.webservices.database.RouteController.createRoute;
+import static pbrg.webservices.database.WallController.getWallIdFromGymId;
 import static pbrg.webservices.utils.Utils.returnImageAsBitmap;
 
 /**
@@ -92,7 +95,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         // get the wall ID
         int wallID;
         try {
-            wallID = DatabaseController.getWallIdFromGymId(gymId);
+            wallID = getWallIdFromGymId(gymId);
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -102,7 +105,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         // store the route as a new route in the database
         int routeId;
         try {
-            routeId = DatabaseController.createRoute(
+            routeId = createRoute(
                 route.toString(), grade, userId, wallID
             );
         } catch (Exception e) {
@@ -123,7 +126,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
 
         // store route image in database
         try {
-            DatabaseController.addImageToRoute(routeId, newFile);
+            addImageToRoute(routeId, newFile);
         } catch (SQLException e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

@@ -1,5 +1,7 @@
 package pbrg.webservices.servlets;
 
+import static pbrg.webservices.database.RouteController.userOwnsRoute;
+
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,7 +10,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import pbrg.webservices.database.DatabaseController;
 
 @WebServlet(name = "StoreRouteServlet", urlPatterns = "/GetRoute")
 public class StoreRouteServlet extends MyHttpServlet {
@@ -52,8 +53,7 @@ public class StoreRouteServlet extends MyHttpServlet {
         // ensure this user created this route
         boolean userCreatedRoute;
         try {
-            userCreatedRoute = DatabaseController
-                .userOwnsRoute(userID, routeID);
+            userCreatedRoute = userOwnsRoute(userID, routeID);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;

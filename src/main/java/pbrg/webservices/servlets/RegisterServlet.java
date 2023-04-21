@@ -1,5 +1,8 @@
 package pbrg.webservices.servlets;
 
+import static pbrg.webservices.database.CredentialController.signIn;
+import static pbrg.webservices.database.CredentialController.signUp;
+
 import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +14,6 @@ import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.models.User;
-import pbrg.webservices.database.DatabaseController;
 
 @WebServlet(name = "RegisterServlet", urlPatterns = "/Register")
 public class RegisterServlet extends MyHttpServlet {
@@ -52,7 +54,7 @@ public class RegisterServlet extends MyHttpServlet {
         // create new user
         boolean added = false;
         try {
-            added = DatabaseController.signUp(username, email, password);
+            added = signUp(username, email, password);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
         }
@@ -66,7 +68,7 @@ public class RegisterServlet extends MyHttpServlet {
         // select user
         User user = null;
         try {
-            user = DatabaseController.signIn(username, password);
+            user = signIn(username, password);
         } catch (Exception e) {
             response.getWriter().println(e.getMessage());
         }
