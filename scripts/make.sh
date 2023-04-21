@@ -11,7 +11,7 @@ rm -rv ~/tomcat-10.0.27/webapps/webservices-1.0-SNAPSHOT
 rm -v ~/tomcat-10.0.27/webapps/webservices-1.0-SNAPSHOT.war
 
 # clean and make war
-mvn --file ~/Projects/pbrg_services/pom.xml clean package
+mvn --file ~/Projects/pbrg_services/pom.xml clean package -Dmaven.test.skip
 # chmod 755 ~/Projects/pbrg_services/target/webservices-1.0-SNAPSHOT.war
 
 # migrate war to tomcat server
