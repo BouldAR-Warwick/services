@@ -2,6 +2,8 @@ package pbrg.webservices.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import org.json.JSONArray;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -28,7 +30,7 @@ class UtilsTest {
         // ensure non keys are mapped to null
         String[] nonKeys = {null, "", "not-in-map"};
         for (String nonKey : nonKeys) {
-            assertEquals(null, Utils.getContentType(nonKey));
+            assertNull(Utils.getContentType(nonKey));
         }
     }
 

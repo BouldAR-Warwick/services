@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class MyHttpServlet extends HttpServlet {
@@ -17,40 +16,27 @@ public class MyHttpServlet extends HttpServlet {
      * @param request the http servlet request
      * @return request body as a json object
      */
-    public static String getBody(final HttpServletRequest request) {
+    public static String getBody(final HttpServletRequest request)
+        throws IOException {
 
-        String body;
+        // for constructing the body
         StringBuilder stringBuilder = new StringBuilder();
-        BufferedReader bufferedReader = null;
 
-        try  {
-            InputStream inputStream = request.getInputStream();
-            if (inputStream != null) {
-                bufferedReader = new BufferedReader(
-                    new InputStreamReader(inputStream)
-                );
-                int size = inputStream.available();
-                char[] charBuffer = new char[size];
-                int bytesRead;
-                while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
-                    stringBuilder.append(charBuffer, 0, bytesRead);
-                }
-            }
-        } catch (IOException ex) {
-            // throw ex;
-            return "";
-        } finally {
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException ignored) {
-
-                }
+        try (
+            BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(request.getInputStream())
+            )
+        ) {
+            int size = request.getInputStream().available();
+            char[] charBuffer = new char[size];
+            int bytesRead;
+            while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+                stringBuilder.append(charBuffer, 0, bytesRead);
             }
         }
 
-        body = stringBuilder.toString();
-        return body;
+        // return the body
+        return stringBuilder.toString();
     }
 
     /**

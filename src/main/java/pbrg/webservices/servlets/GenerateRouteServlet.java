@@ -4,17 +4,12 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
-import java.util.Arrays;
 import java.sql.SQLException;
-
 import pbrg.webservices.utils.Utils;
-
 import static pbrg.webservices.database.RouteController.addImageToRoute;
 import static pbrg.webservices.database.RouteController.createRoute;
 import static pbrg.webservices.database.WallController.getWallIdFromGymId;
@@ -66,20 +61,27 @@ public class GenerateRouteServlet extends MyHttpServlet {
         try {
             arguments = new JSONObject(getBody(request));
         } catch (JSONException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "Issue parsing body as JSON."
+            );
             return;
         }
 
         // ensure request has all credentials
-        String[] requiredArguments = {"difficulty"};
-        if (!Arrays.stream(requiredArguments).allMatch(arguments::has)) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        String difficultyKey = "difficulty";
+        if (!arguments.has(difficultyKey)) {
+            response.getWriter().println("Missing difficulty");
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "Body missing difficulty."
+            );
             return;
         }
 
         int userId = (int) session.getAttribute("uid");
         int gymId = (int) session.getAttribute("gid");
-        int grade = arguments.getInt("difficulty");
+        int grade = arguments.getInt(difficultyKey);
 
         // generate the route
         JSONArray route;

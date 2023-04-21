@@ -11,7 +11,7 @@ CREATE TABLE users(
     Password    VARCHAR(64)   NOT NULL,
     PRIMARY KEY (UID)
 )AUTO_INCREMENT = 1;
- 
+
 CREATE TABLE gyms(
     GID            INTEGER       NOT NULL   AUTO_INCREMENT,
     GymLocation    VARCHAR(32)   NOT NULL,
@@ -37,20 +37,16 @@ CREATE TABLE routes(
     route_content    MEDIUMTEXT  NOT NULL,
     image_file_name VARCHAR(255),
     PRIMARY KEY (RID),
-    FOREIGN KEY (WID)
-        REFERENCES walls(WID),
-    FOREIGN KEY (creator_user_id)
-        REFERENCES users(UID)
+    FOREIGN KEY (WID) REFERENCES walls(WID),
+    FOREIGN KEY (creator_user_id) REFERENCES users(UID)
 )AUTO_INCREMENT = 1;
 
 CREATE TABLE user_in_gym(
     UID         INTEGER       NOT NULL,
     GID         INTEGER       NOT NULL,
     PRIMARY KEY (UID),
-    FOREIGN KEY (UID) 
-        REFERENCES users(UID),
-    FOREIGN KEY (GID) 
-        REFERENCES gyms(GID)
+    FOREIGN KEY (UID) REFERENCES users(UID),
+    FOREIGN KEY (GID) REFERENCES gyms(GID)
 );
 
 INSERT INTO `users` (Username, Email, Password)
