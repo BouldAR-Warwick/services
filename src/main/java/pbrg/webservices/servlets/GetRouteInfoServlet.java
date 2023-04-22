@@ -1,14 +1,13 @@
 package pbrg.webservices.servlets;
 
-import static pbrg.webservices.database.RouteController
-    .getRouteContentJSONObject;
-
+import static pbrg.webservices.database.RouteController.getRouteContentJSONArray;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 @WebServlet(name = "GetRouteInfoServlet", urlPatterns = "/GetRouteInfo")
@@ -43,17 +42,17 @@ public class GetRouteInfoServlet extends MyHttpServlet {
         // collect gym id, user id from cookies
         int routeId = (int) session.getAttribute("rid");
 
-        JSONObject listOfHolds;
+        JSONArray listOfHolds;
         try {
-            listOfHolds = getRouteContentJSONObject(routeId);
+            listOfHolds = getRouteContentJSONArray(routeId);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;
         }
 
-        // write list of holds as JSON
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(listOfHolds.toString());
+        // return: nest the hold array in a JSON object under key info
+        JSONObject info = new JSONObject();
+        info.put("info", listOfHolds);
+        response.getWriter().println(info);
     }
 }

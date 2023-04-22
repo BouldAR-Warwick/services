@@ -158,7 +158,7 @@ public final class RouteController {
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT routes.route_content "
                     + "FROM routes "
-                    + "WHERE creator_user_id = ?"
+                    + "WHERE RID = ?"
             )
         ) {
             pst.setInt(1, routeId);
@@ -169,7 +169,6 @@ public final class RouteController {
                 holds = rs.getString("route_content");
             }
         }
-
         return holds;
     }
 
@@ -284,7 +283,7 @@ public final class RouteController {
     public static boolean deleteRoute(
         final int creatorUserId, final int wallId
     ) {
-        boolean removed = false;
+        boolean removed;
         try (
             Connection connection = getDataSource().getConnection();
             PreparedStatement pst = connection.prepareStatement(

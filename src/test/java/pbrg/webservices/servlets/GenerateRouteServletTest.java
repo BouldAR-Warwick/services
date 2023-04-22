@@ -90,5 +90,9 @@ class GenerateRouteServletTest {
 
         assertTrue(deleteUser(uid));
         assertFalse(userExists(uid));
+
+        // then: verify the response contains the route Id
+        String responseString = sw.getBuffer().toString().trim();
+        System.out.println(responseString);
     }
 }

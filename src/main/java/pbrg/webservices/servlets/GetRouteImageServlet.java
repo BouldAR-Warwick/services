@@ -2,17 +2,14 @@ package pbrg.webservices.servlets;
 
 import static pbrg.webservices.database.RouteController
     .getRouteImageFileNamesByRouteId;
+import static pbrg.webservices.utils.Utils.returnRouteImageAsBitmap;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.SQLException;
-import org.apache.commons.io.FilenameUtils;
-import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetRouteImageServlet", urlPatterns = "/GetRouteImage")
 public class GetRouteImageServlet extends MyHttpServlet {
@@ -47,45 +44,20 @@ public class GetRouteImageServlet extends MyHttpServlet {
         Integer routeId = (Integer) session.getAttribute("rid");
 
         // get the route image file name
-        String imageFileName;
+        String routeImageFileName;
         try {
-            imageFileName = getRouteImageFileNamesByRouteId(routeId);
+            routeImageFileName = getRouteImageFileNamesByRouteId(routeId);
         } catch (SQLException exception) {
             response.getWriter().println(exception.getMessage());
             return;
         }
 
         // route does not exist
-        if (imageFileName == null) {
+        if (routeImageFileName == null) {
             response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
 
-        // get the file extension, lookup & set content type
-        String ext = FilenameUtils.getExtension(imageFileName);
-        String contentType = Utils.getContentType(ext);
-        response.setContentType(contentType);
-
-        // read-in image file
-        byte[] imageBuffer;
-        try (
-            FileInputStream fis = new FileInputStream(
-                Utils.routeImagePath + imageFileName
-            )
-        ) {
-            int size = fis.available();
-            imageBuffer = new byte[size];
-            int bytesRead = fis.read(imageBuffer);
-
-            if (size != bytesRead) {
-                response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
-                return;
-            }
-        }
-
-        try (OutputStream outputStream = response.getOutputStream()) {
-            outputStream.write(imageBuffer);
-            outputStream.flush();
-        }
+        returnRouteImageAsBitmap(response, routeImageFileName);
     }
 }

@@ -509,4 +509,23 @@ public class GymControllerTest {
         // then: the gym id is not found
         assertNull(gymId);
     }
+
+    @Test
+    void getGymIdByGymNameValid() throws SQLException {
+        // given: an existing gym
+        Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
+        assertNotNull(gymId);
+        assertTrue(gymExists(gymId));
+
+        // when: getting the gym id
+        Integer gymIdByName = getGymIdByGymName(TEST_GYM_NAME);
+
+        // then: the gym id is found
+        assertNotNull(gymId);
+        assertEquals(gymId, gymIdByName);
+
+        // after: remove the gym
+        assertTrue(deleteGym(gymId));
+        assertFalse(gymExists(TEST_GYM_NAME));
+    }
 }

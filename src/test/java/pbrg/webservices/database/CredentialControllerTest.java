@@ -17,6 +17,7 @@ import static pbrg.webservices.database.CredentialController.emailExists;
 import static pbrg.webservices.database.CredentialController
     .getUserIDFromUsername;
 import static pbrg.webservices.database.CredentialController.signUp;
+import static pbrg.webservices.database.CredentialController.userExists;
 import static pbrg.webservices.database.CredentialController.usernameExists;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
@@ -458,9 +459,7 @@ public class CredentialControllerTest {
         assertFalse(usernameExists(TEST_USERNAME));
     }
 
-    @Test
-    void usernameExistsNoResults() throws SQLException {
-        // given: a data source such that the result set is empty
+    static DataSource mockEmptyResultSet() throws SQLException {
         DataSource dataSource = mock(DataSource.class);
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
@@ -471,6 +470,14 @@ public class CredentialControllerTest {
             .thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
+
+        return dataSource;
+    }
+
+    @Test
+    void usernameExistsNoResults() throws SQLException {
+        // given: a data source such that the result set is empty
+        DataSource dataSource = mockEmptyResultSet();
 
         // use the mocked data source, storing the original
         DataSource originalDataSource = DatabaseController.getDataSource();
@@ -487,16 +494,7 @@ public class CredentialControllerTest {
     @Test
     void emailExistsNoResults() throws SQLException {
         // given: a data source such that the result set is empty
-        DataSource dataSource = mock(DataSource.class);
-        Connection connection = mock(Connection.class);
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        ResultSet resultSet = mock(ResultSet.class);
-
-        when(dataSource.getConnection()).thenReturn(connection);
-        when(connection.prepareStatement(anyString()))
-            .thenReturn(preparedStatement);
-        when(preparedStatement.executeQuery()).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(false);
+        DataSource dataSource = mockEmptyResultSet();
 
         // use the mocked data source, storing the original
         DataSource originalDataSource = DatabaseController.getDataSource();
@@ -505,6 +503,23 @@ public class CredentialControllerTest {
         // when: checking if the email exists
         // then: should not exist
         assertFalse(emailExists(TEST_EMAIL));
+
+        // after: reset data source
+        DatabaseController.setDataSource(originalDataSource);
+    }
+
+    @Test
+    void userExistsNoResults() throws SQLException {
+        // given: a data source such that the result set is empty
+        DataSource dataSource = mockEmptyResultSet();
+
+        // use the mocked data source, storing the original
+        DataSource originalDataSource = DatabaseController.getDataSource();
+        DatabaseController.setDataSource(dataSource);
+
+        // when: checking if the email exists
+        // then: should not exist
+        assertFalse(userExists(-1));
 
         // after: reset data source
         DatabaseController.setDataSource(originalDataSource);

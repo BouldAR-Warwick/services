@@ -12,12 +12,13 @@ import java.sql.SQLException;
 import pbrg.webservices.utils.Utils;
 import static pbrg.webservices.database.RouteController.addImageToRoute;
 import static pbrg.webservices.database.RouteController.createRoute;
+import static pbrg.webservices.database.RouteController.getRouteContentJSONArray;
 import static pbrg.webservices.database.WallController.addWall;
 import static pbrg.webservices.database.WallController.getWallIdFromGymId;
 import static pbrg.webservices.database.WallController.gymHasWall;
 import static pbrg.webservices.utils.Utils.createRouteImagePython;
 import static pbrg.webservices.utils.Utils.generateRouteMoonBoard;
-import static pbrg.webservices.utils.Utils.returnImageAsBitmap;
+import static pbrg.webservices.utils.Utils.returnRouteImageAsBitmap;
 
 /**
  * prototyping only for the MoonBoard wall.
@@ -111,6 +112,9 @@ public class GenerateRouteServlet extends MyHttpServlet {
         JSONArray route;
         try {
             route = generateRouteMoonBoard(grade);
+            if (route.isEmpty()) {
+                throw new RuntimeException();
+            }
         } catch (RuntimeException e) {
             System.out.println("Route generation failed");
             e.printStackTrace();
@@ -151,18 +155,30 @@ public class GenerateRouteServlet extends MyHttpServlet {
             return;
         }
 
+        // Parse the JSON string into a JSON array
+        JSONArray holdArray;
+        try {
+            holdArray = getRouteContentJSONArray(routeId);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        if (holdArray.isEmpty()) {
+            throw new RuntimeException(
+                "Route " + routeId + " has no holds"
+            );
+        }
+
         System.out.println("Route created: " + route);
         System.out.println("Route ID: " + routeId);
 
-        /*
         // set wall and route images path to resources
         Utils.wallImagePath = "src/main/resources/";
         Utils.routeImagePath = "src/main/resources/";
 
         // generate route image, store filename
-        String newFile;
+        String routeImageFileName;
         try {
-            newFile = createRouteImagePython(gymId);
+            routeImageFileName = createRouteImagePython(routeId);
 
             // reset directories
             Utils.wallImagePath = Utils.DEFAULT_WALL_IMAGE_PATH;
@@ -179,7 +195,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
 
         // store route image in database
         try {
-            addImageToRoute(routeId, newFile);
+            addImageToRoute(routeId, routeImageFileName);
         } catch (SQLException e) {
             System.out.println("Failed to add image to route.");
             e.printStackTrace();
@@ -189,27 +205,13 @@ public class GenerateRouteServlet extends MyHttpServlet {
             );
             return;
         }
-         */
 
         System.out.println("Route generated successfully.");
-        //returnImageAsBitmap(response, newFile);
 
-        // return the route
-        JSONObject routeJSON = new JSONObject();
-        try {
-            routeJSON.put("route", route);
-        } catch (JSONException e) {
-            System.out.println("Failed to create JSON object.");
-            e.printStackTrace();
-            response.sendError(
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Failed to create JSON object."
-            );
-            return;
-        }
-
+        // return the route id and route
+        JSONObject responseJSON = new JSONObject();
+        responseJSON.put("routeId", routeId);
         response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(routeJSON.toString());
+        response.getWriter().write(responseJSON.toString());
     }
 }

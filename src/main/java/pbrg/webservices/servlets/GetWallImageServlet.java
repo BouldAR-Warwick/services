@@ -12,7 +12,7 @@ import static pbrg.webservices.database.WallController
     .getWallIdFromGymId;
 import static pbrg.webservices.database.WallController
     .getWallImageFileNameFromWallId;
-import static pbrg.webservices.utils.Utils.returnImageAsBitmap;
+import static pbrg.webservices.utils.Utils.returnWallImageAsBitmap;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
 public class GetWallImageServlet extends MyHttpServlet {
@@ -38,23 +38,23 @@ public class GetWallImageServlet extends MyHttpServlet {
         int gymId = (int) session.getAttribute("gid");
 
         // get wall image file name from gym id
-        String imageFileName;
+        String wallImageFileName;
         try {
             Integer wallId = getWallIdFromGymId(gymId);
-            imageFileName = getWallImageFileNameFromWallId(wallId);
+            wallImageFileName = getWallImageFileNameFromWallId(wallId);
         } catch (SQLException e) {
             response.getWriter().println(e.getMessage());
             return;
         }
 
         // wall query failed or no wall against gym
-        if (imageFileName == null) {
+        if (wallImageFileName == null) {
             // case gym has no wall! - TODO
             response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
             return;
         }
 
-        returnImageAsBitmap(response, imageFileName);
+        returnWallImageAsBitmap(response, wallImageFileName);
     }
 
     private boolean validatePreconditions(

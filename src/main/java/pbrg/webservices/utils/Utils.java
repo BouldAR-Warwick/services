@@ -247,6 +247,12 @@ public final class Utils {
             );
         }
 
+        if (wallImageFileName == null) {
+            throw new RuntimeException(
+                "Route " + routeId + " has no wall image"
+            );
+        }
+
         // plot holds on image by calling python script
         return plotHoldsOnImagePython(
             routeId, wallImageFileName,
@@ -313,14 +319,14 @@ public final class Utils {
     /**
      * Return an image as a bitmap.
      * @param response response
-     * @param fileName file name
+     * @param filePath file name
      * @throws IOException file errors
      */
-    public static void returnImageAsBitmap(
-        final HttpServletResponse response, final String fileName
+    private static void returnImageAsBitmap(
+        final HttpServletResponse response, final String filePath
     ) throws IOException {
         // get the file extension, lookup & set content type
-        String ext = FilenameUtils.getExtension(fileName);
+        String ext = FilenameUtils.getExtension(filePath);
         String contentType = Utils.getContentType(ext);
         response.setContentType(contentType);
 
@@ -328,7 +334,7 @@ public final class Utils {
         byte[] imageBuffer;
         try (
             FileInputStream fis = new FileInputStream(
-                Utils.wallImagePath + fileName
+                filePath
             )
         ) {
             int size = fis.available();
@@ -345,5 +351,29 @@ public final class Utils {
             outputStream.write(imageBuffer);
             outputStream.flush();
         }
+    }
+
+    /**
+     * Return a wall image as a bitmap.
+     * @param response response
+     * @param fileName file name
+     * @throws IOException file errors
+     */
+    public static void returnWallImageAsBitmap(
+        final HttpServletResponse response, final String fileName
+    ) throws IOException {
+        returnImageAsBitmap(response, Utils.wallImagePath + fileName);
+    }
+
+    /**
+     * Return a route image as a bitmap.
+     * @param response response
+     * @param fileName file name
+     * @throws IOException file errors
+     */
+    public static void returnRouteImageAsBitmap(
+        final HttpServletResponse response, final String fileName
+    ) throws IOException {
+        returnImageAsBitmap(response, Utils.routeImagePath + fileName);
     }
 }
