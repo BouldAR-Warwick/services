@@ -40,7 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pbrg.webservices.models.Gym;
 
-public class GymControllerTest {
+public final class GymControllerTest {
 
     /** The test gym name. */
     private static final String TEST_GYM_NAME = "gym_name";
@@ -48,6 +48,11 @@ public class GymControllerTest {
     /** The test gym location. */
     private static final String TEST_GYM_LOCATION = "Warwick, UK";
 
+    /**
+     * Create a test gym using the test gym credentials.
+     * @return the gym ID
+     * @throws SQLException if SQL error occurs
+     */
     public static int createTestGym() throws SQLException {
         // ensure the test gym does not exist
         if (gymExists(TEST_GYM_NAME)) {
@@ -61,6 +66,55 @@ public class GymControllerTest {
         Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
         assertNotNull(gymId);
         return gymId;
+    }
+
+    /**
+     * Mocks a data source that returns an empty result set.
+     * @return the mocked data source
+     * @throws SQLException if the data source cannot be mocked
+     */
+    private static @NotNull DataSource mockEmptyResultSet()
+        throws SQLException {
+        // mock the result set
+        ResultSet resultSet = mock(ResultSet.class);
+        when(resultSet.next()).thenReturn(false);
+
+        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+
+        Connection connection = mock(Connection.class);
+        when(connection.prepareStatement(
+            anyString(), eq(Statement.RETURN_GENERATED_KEYS)
+        )).thenReturn(preparedStatement);
+        when(connection.prepareStatement(anyString()))
+            .thenReturn(preparedStatement);
+
+        DataSource dataSource = mock(DataSource.class);
+        when(dataSource.getConnection()).thenReturn(connection);
+
+        return dataSource;
+    }
+
+    /**
+     * Mocks a data source that returns an empty result set.
+     *
+     * @return the mocked data source
+     * @throws SQLException if the data source cannot be mocked
+     */
+    private static DataSource mockExecuteUpdateReturningZero()
+        throws SQLException {
+        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+        when(preparedStatement.executeUpdate()).thenReturn(0);
+
+        Connection connection = mock(Connection.class);
+        when(connection.prepareStatement(anyString()))
+            .thenReturn(preparedStatement);
+
+        DataSource dataSource = mock(DataSource.class);
+        when(dataSource.getConnection()).thenReturn(connection);
+
+        return dataSource;
     }
 
     @BeforeAll
@@ -215,29 +269,6 @@ public class GymControllerTest {
         assertFalse(gymExists(TEST_GYM_NAME));
     }
 
-    private static @NotNull DataSource mockEmptyResultSet()
-        throws SQLException {
-        // mock the result set
-        ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.next()).thenReturn(false);
-
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
-        when(preparedStatement.executeQuery()).thenReturn(resultSet);
-
-        Connection connection = mock(Connection.class);
-        when(connection.prepareStatement(
-            anyString(), eq(Statement.RETURN_GENERATED_KEYS)
-        )).thenReturn(preparedStatement);
-        when(connection.prepareStatement(anyString()))
-            .thenReturn(preparedStatement);
-
-        DataSource dataSource = mock(DataSource.class);
-        when(dataSource.getConnection()).thenReturn(connection);
-
-        return dataSource;
-    }
-
     @Test
     void insertGymEmptyResultSet() throws SQLException,
         IllegalAccessException, InvocationTargetException {
@@ -380,27 +411,6 @@ public class GymControllerTest {
         assertTrue(deleteUser(uid));
         assertTrue(deleteGym(gid));
         assertFalse(gymExists(gid));
-    }
-
-    /**
-     * Mocks a data source that returns an empty result set.
-     *
-     * @return the mocked data source
-     * @throws SQLException if the data source cannot be mocked
-     */
-    private static DataSource mockExecuteUpdateReturningZero()
-        throws SQLException {
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        when(preparedStatement.executeUpdate()).thenReturn(0);
-
-        Connection connection = mock(Connection.class);
-        when(connection.prepareStatement(anyString()))
-            .thenReturn(preparedStatement);
-
-        DataSource dataSource = mock(DataSource.class);
-        when(dataSource.getConnection()).thenReturn(connection);
-
-        return dataSource;
     }
 
     @Test

@@ -37,9 +37,19 @@ public final class WallController {
                 Statement.RETURN_GENERATED_KEYS
             )
         ) {
-            pst.setInt(1, gymId);
-            pst.setString(2, wallContent);
-            pst.setString(3, imageFileName);
+            Object[] values = {gymId, wallContent, imageFileName};
+            String[] types = {"int", "String", "String"};
+
+            for (int i = 0; i < values.length; i++) {
+                Object value = values[i];
+                String type = types[i];
+
+                if (type.equals("String")) {
+                    pst.setString(i + 1, (String) value);
+                } else {
+                    pst.setInt(i + 1, (int) value);
+                }
+            }
 
             // get keys
             pst.executeUpdate();

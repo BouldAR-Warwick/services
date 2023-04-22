@@ -10,8 +10,6 @@ import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.DatabaseUtils.dataSourceIsValid;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.utils.TestUtils.dockerDaemonRunning;
-
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -188,35 +186,6 @@ final class TestDatabaseTest {
 
         // after: reset queryIDCommand
         queryIDCommand.set(null, originalQueryIDCommand);
-    }
-
-    @Test
-    void testRunProcessBuilder()
-        throws InterruptedException, IOException, NoSuchMethodException,
-        IllegalAccessException {
-        // given: a process that has a non-zero exit value
-        Process process = mock(Process.class);
-        when(process.waitFor()).thenReturn(1);
-        ProcessBuilder processBuilder = mock(ProcessBuilder.class);
-        when(processBuilder.start()).thenReturn(process);
-
-        // reflection to get the runProcessBuilder method
-        Method runProcessBuilder = TestDatabase.class.getDeclaredMethod(
-            "runProcessBuilder", ProcessBuilder.class, boolean.class
-        );
-        runProcessBuilder.setAccessible(true);
-
-        try {
-            // when: the process is started
-            runProcessBuilder.invoke(null, processBuilder, false);
-        } catch (InvocationTargetException e) {
-            // then: an exception should be thrown
-            assertTrue(
-                e.getCause() instanceof RuntimeException,
-                "Should throw RuntimeException "
-                    + "(process has non-zero exit value)"
-            );
-        }
     }
 
     @Test

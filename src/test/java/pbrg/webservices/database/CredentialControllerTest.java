@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import pbrg.webservices.models.User;
 
-public class CredentialControllerTest {
+public final class CredentialControllerTest {
 
     /** The test username. */
     private static final String TEST_USERNAME = "username_test";
@@ -570,5 +570,4 @@ public class CredentialControllerTest {
         // then: the user is not deleted
         assertFalse(CredentialController.deleteUser(-1));
     }
-
 }

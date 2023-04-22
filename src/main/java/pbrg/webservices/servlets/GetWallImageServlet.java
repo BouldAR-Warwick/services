@@ -12,7 +12,7 @@ import static pbrg.webservices.database.WallController
     .getWallIdFromGymId;
 import static pbrg.webservices.database.WallController
     .getWallImageFileNameFromWallId;
-import static pbrg.webservices.utils.Utils.returnWallImageAsBitmap;
+import static pbrg.webservices.utils.ServletUtils.returnWallImageAsBitmap;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
 public class GetWallImageServlet extends MyHttpServlet {

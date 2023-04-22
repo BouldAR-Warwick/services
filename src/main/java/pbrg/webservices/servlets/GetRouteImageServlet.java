@@ -2,7 +2,7 @@ package pbrg.webservices.servlets;
 
 import static pbrg.webservices.database.RouteController
     .getRouteImageFileNamesByRouteId;
-import static pbrg.webservices.utils.Utils.returnRouteImageAsBitmap;
+import static pbrg.webservices.utils.ServletUtils.returnRouteImageAsBitmap;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;

@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 import pbrg.webservices.database.GymController;
 import pbrg.webservices.models.Gym;
-import pbrg.webservices.utils.Utils;
+import pbrg.webservices.utils.ServletUtils;
 
 @WebServlet(name = "StoreGymServlet", urlPatterns = "/StoreGym")
 public class StoreGymServlet extends MyHttpServlet {
@@ -55,7 +55,7 @@ public class StoreGymServlet extends MyHttpServlet {
 
         // set expired time to 7 days
         int sevenDaysInSeconds =
-            (int) Duration.ofDays(Utils.SEVEN_DAYS).getSeconds();
+            (int) Duration.ofDays(ServletUtils.SEVEN_DAYS).getSeconds();
         gymIdCookie.setMaxAge(sevenDaysInSeconds);
 
         // send cookie back to client for authentication next time

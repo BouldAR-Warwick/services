@@ -11,7 +11,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.junit.jupiter.api.Test;
 
-class TestUtilsTest {
+class TestServletUtilsTest {
 
     @Test
     void testPrivateConstructor() {

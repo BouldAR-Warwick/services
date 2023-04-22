@@ -98,7 +98,7 @@ public final class CredentialController {
     }
 
     /**
-     * Check if a user exists by id
+     * Check if a user exists by id.
      * @param uid user id
      * @return true if user exists, false otherwise
      * @throws SQLException if SQL error occurs

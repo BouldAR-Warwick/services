@@ -2,9 +2,7 @@ package pbrg.webservices.database;
 
 import static pbrg.webservices.database.DatabaseUtils.dataSourceIsValid;
 import static pbrg.webservices.utils.TestUtils.dockerDaemonRunning;
-import static pbrg.webservices.utils.Utils.collectOutputAsList;
-
-import java.io.IOException;
+import static pbrg.webservices.utils.ProcessUtils.runProcessBuilder;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -67,46 +65,6 @@ public final class TestDatabase {
         );
         runProcessBuilder(closeContainerCommand);
     };
-
-    /**
-     * Run the process builder command.
-     * @param command The command to run
-     */
-    private static void runProcessBuilder(
-        final ProcessBuilder command
-    ) {
-        runProcessBuilder(command, false);
-    }
-
-    /**
-     * Run the process builder command.
-     * @param command The command to run
-     * @param collectOutput Whether to collect the output of the command
-     * @return The output of the command
-     */
-    private static List<String> runProcessBuilder(
-        final ProcessBuilder command,
-        final boolean collectOutput
-    ) {
-        List<String> output = null;
-        try {
-            Process process = command.start();
-            if (collectOutput) {
-                output = collectOutputAsList(process);
-            }
-            int exitCode = process.waitFor();
-            process.destroy();
-            if (exitCode != 0) {
-                throw new InterruptedException(
-                    "Command failed (non-zero exit code)"
-                );
-            }
-            return output;
-        } catch (IOException | InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        }
-    }
 
     /** Static class, no need to instantiate. */
     private TestDatabase() {

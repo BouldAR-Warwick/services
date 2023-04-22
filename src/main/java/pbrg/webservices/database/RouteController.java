@@ -235,9 +235,9 @@ public final class RouteController {
                 String type = types[i];
 
                 if (type.equals("String")) {
-                    pst.setString(i+1, (String) value);
+                    pst.setString(i + 1, (String) value);
                 } else {
-                    pst.setInt(i+1, (int) value);
+                    pst.setInt(i + 1, (int) value);
                 }
             }
             pst.executeUpdate();

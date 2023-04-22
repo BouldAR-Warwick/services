@@ -9,16 +9,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.sql.SQLException;
-import pbrg.webservices.utils.Utils;
 import static pbrg.webservices.database.RouteController.addImageToRoute;
 import static pbrg.webservices.database.RouteController.createRoute;
-import static pbrg.webservices.database.RouteController.getRouteContentJSONArray;
 import static pbrg.webservices.database.WallController.addWall;
 import static pbrg.webservices.database.WallController.getWallIdFromGymId;
 import static pbrg.webservices.database.WallController.gymHasWall;
-import static pbrg.webservices.utils.Utils.createRouteImagePython;
-import static pbrg.webservices.utils.Utils.generateRouteMoonBoard;
-import static pbrg.webservices.utils.Utils.returnRouteImageAsBitmap;
+import static pbrg.webservices.utils.RouteUtils.createRouteImagePython;
+import static pbrg.webservices.utils.RouteUtils.generateRouteMoonBoard;
 
 /**
  * prototyping only for the MoonBoard wall.
@@ -155,35 +152,11 @@ public class GenerateRouteServlet extends MyHttpServlet {
             return;
         }
 
-        // Parse the JSON string into a JSON array
-        JSONArray holdArray;
-        try {
-            holdArray = getRouteContentJSONArray(routeId);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        if (holdArray.isEmpty()) {
-            throw new RuntimeException(
-                "Route " + routeId + " has no holds"
-            );
-        }
-
-        System.out.println("Route created: " + route);
-        System.out.println("Route ID: " + routeId);
-
-        // set wall and route images path to resources
-        Utils.wallImagePath = "src/main/resources/";
-        Utils.routeImagePath = "src/main/resources/";
-
         // generate route image, store filename
         String routeImageFileName;
         try {
             routeImageFileName = createRouteImagePython(routeId);
-
-            // reset directories
-            Utils.wallImagePath = Utils.DEFAULT_WALL_IMAGE_PATH;
-            Utils.routeImagePath = Utils.DEFAULT_ROUTE_IMAGE_PATH;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Failed to create route image.");
             e.printStackTrace();
             response.sendError(

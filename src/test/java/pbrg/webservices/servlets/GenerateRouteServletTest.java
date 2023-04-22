@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.CredentialController.deleteUser;
 import static pbrg.webservices.database.CredentialController.userExists;
@@ -14,6 +15,7 @@ import static pbrg.webservices.database.GymController.deleteGym;
 import static pbrg.webservices.database.GymController.gymExists;
 import static pbrg.webservices.database.GymControllerTest.createTestGym;
 import static pbrg.webservices.database.RouteController.deleteRoute;
+import static pbrg.webservices.database.RouteController.userOwnsRoute;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
@@ -25,11 +27,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.sql.SQLException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import pbrg.webservices.database.DatabaseController;
 
 class GenerateRouteServletTest {
@@ -73,26 +76,29 @@ class GenerateRouteServletTest {
 
         // mock response
         HttpServletResponse response = mock(HttpServletResponse.class);
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        when(response.getWriter()).thenReturn(pw);
+        PrintWriter writer = mock(PrintWriter.class);
+        when(response.getWriter()).thenReturn(writer);
 
         // when: the servlet is called
         new GenerateRouteServlet().doPost(request, response);
 
-        // after: remove models
+        // then: verify the response contains the route id
 
+        // capture the content written to the writer
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(writer).write(captor.capture());
+        JSONObject content = new JSONObject(captor.getValue());
+
+        assertTrue(content.has("routeId"));
+        int routeId = content.getInt("routeId");
+        assertTrue(userOwnsRoute(uid, routeId));
+
+        // after: remove models
         assertTrue(deleteRoute(uid, wallId));
         assertTrue(deleteWall(wallId));
-
         assertTrue(deleteGym(gid));
         assertFalse(gymExists(gid));
-
         assertTrue(deleteUser(uid));
         assertFalse(userExists(uid));
-
-        // then: verify the response contains the route Id
-        String responseString = sw.getBuffer().toString().trim();
-        System.out.println(responseString);
     }
 }

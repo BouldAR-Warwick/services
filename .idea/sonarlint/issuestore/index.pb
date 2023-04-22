@@ -2,8 +2,6 @@
 :
 
 .gitignore,a/5/a5cc2925ca8258af241be7e5b0381edf30266302
-c
-3src/test/java/pbrg/webservices/utils/UtilsTest.java,6/9/69ea90401ea5c369d799a0af2c27a1ffc0f39b18
 o
 ?src/main/java/pbrg/webservices/database/DatabaseController.java,e/e/ee6bc3f42feac2ecc3d1067825ae115cdccc07ec
 j
@@ -12,8 +10,6 @@ j
 :src/main/java/pbrg/webservices/database/GymController.java,4/1/41a6ea97777570fe46bf93ba15047b3bda1817a8
 o
 ?src/main/java/pbrg/webservices/database/ProductionDatabase.java,e/4/e47c4a027c07efe7a6736da90c9ebd530ff0afb8
-i
-9src/main/java/pbrg/webservices/database/TestDatabase.java,6/5/6541f9632df6108451bb5e53e032d7fd6a0b0103
 r
 Bsrc/main/java/pbrg/webservices/models/ChainingMysqlDataSource.java,c/b/cbd05d4b3a61a21ce256bb4a6517a17591733387
 ^
@@ -28,8 +24,6 @@ d
 4src/main/java/pbrg/webservices/models/RouteFull.java,1/7/174669be432ea1f28b3c439842818eb55bb24c28
 _
 /src/main/java/pbrg/webservices/models/User.java,1/5/15b2ad0a704a057442ddb512320f6c5b3da15104
-i
-9src/main/java/pbrg/webservices/servlets/LoginServlet.java,f/c/fc564c739e2db5f0663a8c46215bab1d1336fa0f
 j
 :src/main/java/pbrg/webservices/servlets/LogoutServlet.java,4/c/4c421f48c10077cae54cf796de33f574132b6b9c
 l
@@ -38,8 +32,6 @@ m
 =src/main/java/pbrg/webservices/servlets/SearchGymServlet.java,c/1/c1384eda5753447e49acc50533827e8ca74050cd
 n
 >src/main/java/pbrg/webservices/servlets/StoreRouteServlet.java,b/f/bf0c220b17bdbc9ec78909ce7d2d9b0e7fb4171c
-c
-3src/main/java/pbrg/webservices/utils/TestUtils.java,e/8/e88b851de1184dfcdda04906a2e9ac621ef4252f
 `
 0src/main/java/pbrg/webservices/HelloServlet.java,0/f/0f6dc3aa46a6a2190e14dd390446c58ba1e54758
 s
@@ -52,8 +44,6 @@ t
 Dsrc/test/java/pbrg/webservices/servlets/GetWallImageServletTest.java,7/2/723dff0668a38ff077cd01a98a215df109d24854
 n
 >src/test/java/pbrg/webservices/database/DatabaseUtilsTest.java,f/3/f390da8963cf6a481bc11edd470259fee659ab3d
-m
-=src/test/java/pbrg/webservices/database/TestDatabaseTest.java,e/a/eac26a77d265d7d2da38ef9a73793fa357f275d2
 l
 <src/main/java/pbrg/webservices/servlets/StoreGymServlet.java,4/2/4286b1054744f338eaec80b9cb35f43446751280
 q

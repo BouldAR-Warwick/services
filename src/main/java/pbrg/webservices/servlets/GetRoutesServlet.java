@@ -2,6 +2,7 @@ package pbrg.webservices.servlets;
 
 import static pbrg.webservices.database.RouteController
     .getRoutesInGymMadeByUser;
+import static pbrg.webservices.utils.ServletUtils.sessionHasAttributes;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +13,6 @@ import java.sql.SQLException;
 import java.util.List;
 import org.json.JSONObject;
 import pbrg.webservices.models.Route;
-import pbrg.webservices.utils.Utils;
 
 @WebServlet(name = "GetRoutesServlet", urlPatterns = "/GetRoutes")
 public class GetRoutesServlet extends MyHttpServlet {
@@ -39,7 +39,7 @@ public class GetRoutesServlet extends MyHttpServlet {
 
         // ensure session has required attributes: gym id, user id
         String[] requiredSessionAttributes = {"gid", "uid"};
-        if (!Utils.sessionHasAttributes(session, requiredSessionAttributes)) {
+        if (!sessionHasAttributes(session, requiredSessionAttributes)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

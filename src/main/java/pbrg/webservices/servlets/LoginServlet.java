@@ -15,7 +15,7 @@ import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.models.User;
-import pbrg.webservices.utils.Utils;
+import pbrg.webservices.utils.ServletUtils;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/Login")
 public class LoginServlet extends MyHttpServlet {
@@ -83,7 +83,7 @@ public class LoginServlet extends MyHttpServlet {
 
             // set expired time to 7 days
             int sevenDaysInSeconds =
-                (int) Duration.ofDays(Utils.SEVEN_DAYS).getSeconds();
+                (int) Duration.ofDays(ServletUtils.SEVEN_DAYS).getSeconds();
             cookie1.setMaxAge(sevenDaysInSeconds);
             cookie2.setMaxAge(sevenDaysInSeconds);
 
