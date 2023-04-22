@@ -4,6 +4,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +38,8 @@ public class GenerateRouteServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     ) throws IOException {
         doPost(request, response);
     }
@@ -47,7 +49,8 @@ public class GenerateRouteServlet extends MyHttpServlet {
      * */
     @Override
     protected final void doPost(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     ) throws IOException {
         // get session
         HttpSession session = getSession(request);

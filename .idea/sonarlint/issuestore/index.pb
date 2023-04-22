@@ -24,14 +24,6 @@ d
 4src/main/java/pbrg/webservices/models/RouteFull.java,1/7/174669be432ea1f28b3c439842818eb55bb24c28
 _
 /src/main/java/pbrg/webservices/models/User.java,1/5/15b2ad0a704a057442ddb512320f6c5b3da15104
-j
-:src/main/java/pbrg/webservices/servlets/LogoutServlet.java,4/c/4c421f48c10077cae54cf796de33f574132b6b9c
-l
-<src/main/java/pbrg/webservices/servlets/RegisterServlet.java,3/6/36c2fa8a2bcd6143395962f9cdb47a50cf625e41
-m
-=src/main/java/pbrg/webservices/servlets/SearchGymServlet.java,c/1/c1384eda5753447e49acc50533827e8ca74050cd
-n
->src/main/java/pbrg/webservices/servlets/StoreRouteServlet.java,b/f/bf0c220b17bdbc9ec78909ce7d2d9b0e7fb4171c
 `
 0src/main/java/pbrg/webservices/HelloServlet.java,0/f/0f6dc3aa46a6a2190e14dd390446c58ba1e54758
 s
@@ -40,11 +32,5 @@ s
 Csrc/test/java/pbrg/webservices/database/ProductionDatabaseTest.java,6/4/647794f7b33fe21938d3d18150af756c4d4db4e1
 i
 9src/test/java/pbrg/webservices/SystemEnvironmentTest.java,2/4/2402ed009ba6d46d70806016f3e84d2cf52d631d
-t
-Dsrc/test/java/pbrg/webservices/servlets/GetWallImageServletTest.java,7/2/723dff0668a38ff077cd01a98a215df109d24854
 n
 >src/test/java/pbrg/webservices/database/DatabaseUtilsTest.java,f/3/f390da8963cf6a481bc11edd470259fee659ab3d
-l
-<src/main/java/pbrg/webservices/servlets/StoreGymServlet.java,4/2/4286b1054744f338eaec80b9cb35f43446751280
-q
-Asrc/main/java/pbrg/webservices/servlets/GetPrimaryGymServlet.java,e/7/e737bc39cd8c4293ee6bd8f1d4edb81f1d5a41c2

@@ -1,4 +1,4 @@
-package pbrg.webservices;
+package pbrg.webservices.servlets;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,10 +10,7 @@ import java.io.PrintWriter;
 @WebServlet(name = "helloServlet", value = "/hello-servlet")
 public class HelloServlet extends HttpServlet {
 
-
-    /**
-     * test message.
-     */
+    /** test message. */
     private String message;
 
     /**
@@ -30,7 +27,8 @@ public class HelloServlet extends HttpServlet {
      */
     @Override
     public final void doGet(
-        final HttpServletRequest request, final HttpServletResponse response
+        final HttpServletRequest request,
+        final HttpServletResponse response
     ) throws IOException {
         response.setContentType("text/html");
 

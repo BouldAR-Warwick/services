@@ -7,6 +7,8 @@ import static pbrg.webservices.utils.ProcessUtils.getExitCode;
 import static pbrg.webservices.utils.ProcessUtils.runProcess;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.sql.SQLException;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -53,7 +55,12 @@ public final class RouteUtils {
 
         // run py script, collect results
         Process process = runProcess(pb);
-        StringBuilder output = collectOutput(process);
+        StringBuilder output;
+        try {
+            output = collectOutput(process);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
 
         // ensure success
         int exitCode = getExitCode(process);

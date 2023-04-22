@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+
 import static pbrg.webservices.database.WallController
     .getWallIdFromGymId;
 import static pbrg.webservices.database.WallController
@@ -19,14 +21,16 @@ public class GetWallImageServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     ) throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected final void doPost(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     ) throws IOException {
         // validate request, session, session requires gid
         if (!validatePreconditions(request, response)) {
@@ -49,8 +53,10 @@ public class GetWallImageServlet extends MyHttpServlet {
 
         // wall query failed or no wall against gym
         if (wallImageFileName == null) {
-            // case gym has no wall! - TODO
-            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+            response.sendError(
+                HttpServletResponse.SC_EXPECTATION_FAILED,
+                "Gym has no wall"
+            );
             return;
         }
 
@@ -62,41 +68,9 @@ public class GetWallImageServlet extends MyHttpServlet {
     ) {
         String[] requiredAttributes = {"gid"};
 
-        // validate the response
-        if (!validateResponse(response)) {
-            System.out.println("Invalid response");
-            return false;
-        }
-
-        // validate the request
-        if (!validateRequest(request, response)) {
-            return false;
-        }
-
         // validate the session
         HttpSession session = getSession(request);
         return validateSession(session, requiredAttributes, response);
-    }
-
-    private boolean validateRequest(
-        final HttpServletRequest request, final HttpServletResponse response
-    ) {
-        // ensure request is not null
-        if (request == null) {
-            try {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return false;
-        }
-        return true;
-    }
-
-    private boolean validateResponse(
-        final HttpServletResponse response
-    ) {
-        return response != null;
     }
 
     private boolean validateSession(

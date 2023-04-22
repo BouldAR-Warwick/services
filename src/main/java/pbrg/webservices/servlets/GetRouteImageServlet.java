@@ -10,20 +10,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
+import org.jetbrains.annotations.NotNull;
 
 @WebServlet(name = "GetRouteImageServlet", urlPatterns = "/GetRouteImage")
 public class GetRouteImageServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     ) throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected final void doPost(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     ) throws IOException {
 
         HttpSession session = getSession(request);

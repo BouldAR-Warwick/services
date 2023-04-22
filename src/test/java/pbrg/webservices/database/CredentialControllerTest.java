@@ -67,6 +67,11 @@ public final class CredentialControllerTest {
         }
     }
 
+    /**
+     * Creates a test user in the database.
+     * @return the test user's uid
+     * @throws SQLException if an error occurs while creating the test user
+     */
     public static int createTestUser() throws SQLException {
         // remove the test user credentials if they exist
         clearTestUser();
@@ -184,7 +189,6 @@ public final class CredentialControllerTest {
                 // when: closing the connection
                 mockedConnection::close
             );
-
 
             DataSource originalDataSource = DatabaseController.getDataSource();
             DatabaseController.setDataSource(mockedDataSource);

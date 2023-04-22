@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Arrays;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.models.User;
@@ -22,14 +23,16 @@ public class LoginServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     ) throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected final void doPost(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     ) throws IOException {
 
         // convert request body to json object

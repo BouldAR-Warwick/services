@@ -3,6 +3,7 @@ package pbrg.webservices.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ public final class ProcessUtils {
      * @return The output of the command
      */
     public static List<String> runProcessBuilder(
-        final ProcessBuilder command,
+        final @NotNull ProcessBuilder command,
         final boolean collectOutput
     ) {
         List<String> output = null;
@@ -65,7 +66,7 @@ public final class ProcessUtils {
         try {
             process = pb.start();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
         return process;
     }
@@ -77,13 +78,12 @@ public final class ProcessUtils {
      */
     static @NotNull StringBuilder collectOutput(
         @NotNull final Process process
-    ) {
+    ) throws IOException {
         StringBuilder output = new StringBuilder();
         for (String line : collectOutputAsList(process)) {
             output.append(line);
             output.append(System.lineSeparator());
         }
-
         return output;
     }
 
@@ -94,7 +94,7 @@ public final class ProcessUtils {
      */
     public static @NotNull List<String> collectOutputAsList(
         final @NotNull Process process
-    ) {
+    ) throws IOException {
         List<String> output = new ArrayList<>();
 
         String line;
@@ -106,8 +106,6 @@ public final class ProcessUtils {
             while ((line = reader.readLine()) != null) {
                 output.add(line);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
 
         return output;
@@ -123,7 +121,7 @@ public final class ProcessUtils {
         try {
             exitCode = process.waitFor();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            return -1;
         }
         return exitCode;
     }

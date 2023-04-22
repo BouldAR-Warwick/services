@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import pbrg.webservices.database.GymController;
 import pbrg.webservices.models.Gym;
@@ -15,7 +16,8 @@ public class GetGymServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     )
         throws IOException {
         doPost(request, response);
@@ -23,14 +25,9 @@ public class GetGymServlet extends MyHttpServlet {
 
     @Override
     protected final void doPost(
-        final HttpServletRequest request, final HttpServletResponse response
-    )
-        throws IOException {
-
-        if (request == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
+    ) throws IOException {
 
         // get session or return unauthorized error message
         HttpSession session = request.getSession(false);

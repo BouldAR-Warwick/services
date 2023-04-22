@@ -3,10 +3,8 @@ package pbrg.webservices.servlets;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -14,11 +12,18 @@ import static org.mockito.Mockito.when;
 
 class GetWallImageServletTest {
 
+    /** The servlet to test. */
+    private static final GetWallImageServlet SERVLET =
+        new GetWallImageServlet();
+
     @Test
-    void doGet() {
-        // ensure calls doPost()
-        assertDoesNotThrow(
-            () -> new GetWallImageServlet().doGet(null, null)
+    void doGetWithNulls() {
+        assertThrows(
+            // then: throws NullPointerException
+            NullPointerException.class,
+
+            // when: requested with null request and response
+            () -> SERVLET.doGet(null, null)
         );
     }
 
@@ -27,10 +32,12 @@ class GetWallImageServletTest {
         // given: valid request, null response
         HttpServletRequest request = mock(HttpServletRequest.class);
 
-        // then: no error
-        assertDoesNotThrow(
-            // when: post request
-            () -> new GetWallImageServlet().doPost(request, null)
+        assertThrows(
+            // then: throws NullPointerException
+            NullPointerException.class,
+
+            // when: requested with null request and response
+            () -> SERVLET.doGet(request, null)
         );
 
         // then: ensure the session is never called
@@ -47,7 +54,7 @@ class GetWallImageServletTest {
         when(request.getSession()).thenReturn(null);
 
         // Call the method to test
-        new GetWallImageServlet().doPost(request, response);
+        SERVLET.doPost(request, response);
 
         // check response has HttpServletResponse.SC_UNAUTHORIZED
         verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);

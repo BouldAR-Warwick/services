@@ -1,14 +1,60 @@
 package pbrg.webservices.servlets;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class MyHttpServlet extends HttpServlet {
+
+    // add @NotNull to doGet params
+
+    /**
+     * Override doGet method to support non-null params.
+     * @param request an {@link HttpServletRequest} object that contains
+     *                the request the client has made of the servlet
+     *
+     * @param response an {@link HttpServletResponse} object that contains
+     *                 the response the servlet sends to the client
+     *
+     * @throws IOException if an input or output error is detected when
+     * @throws ServletException if the request for the GET could not be handled
+     * @throws IllegalArgumentException if either argument is null
+     */
+    @Override
+    protected void doGet(
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
+    ) throws IOException, ServletException, IllegalArgumentException {
+        super.doGet(request, response);
+    }
+
+    /**
+     * Override doPost method to support non-null params.
+     * @param request an {@link HttpServletRequest} object that contains
+     *                the request the client has made of the servlet
+     *
+     * @param response an {@link HttpServletResponse} object that contains
+     *                 the response the servlet sends to the client
+     *
+     * @throws IOException if an input or output error is detected when
+     * @throws ServletException if the request for the GET could not be handled
+     * @throws IllegalArgumentException if either argument is null
+     */
+    @Override
+    protected void doPost(
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
+    ) throws IOException, ServletException, IllegalArgumentException {
+        super.doPost(request, response);
+    }
 
     /**
      * Get json object in the request body.
@@ -16,8 +62,9 @@ public class MyHttpServlet extends HttpServlet {
      * @param request the http servlet request
      * @return request body as a json object
      */
-    public static String getBody(final HttpServletRequest request)
-        throws IOException {
+    public static @NotNull String getBody(
+        final @NotNull HttpServletRequest request
+    ) throws IOException {
 
         // for constructing the body
         StringBuilder stringBuilder = new StringBuilder();
@@ -45,7 +92,9 @@ public class MyHttpServlet extends HttpServlet {
      * @param request the http servlet request
      * @return the HttpSession from an HttpServletRequest
      */
-    public static HttpSession getSession(final HttpServletRequest request) {
+    public static @Nullable HttpSession getSession(
+        final @NotNull HttpServletRequest request
+    ) {
         HttpSession session = request.getSession(false);
 
         if (session != null) {

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import pbrg.webservices.database.GymController;
 import pbrg.webservices.models.GymList;
@@ -16,14 +17,16 @@ public class SearchGymServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     ) throws IOException {
         doPost(request, response);
     }
 
     @Override
     protected final void doPost(
-        final HttpServletRequest request, final HttpServletResponse response
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response
     ) throws IOException {
 
         HttpSession session = getSession(request);
