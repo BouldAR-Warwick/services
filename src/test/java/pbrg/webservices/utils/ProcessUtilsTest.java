@@ -6,13 +6,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static pbrg.webservices.utils.ProcessUtils.collectOutput;
+import static pbrg.webservices.utils.ProcessUtils.collectOutputAsList;
 import static pbrg.webservices.utils.ProcessUtils.getExitCode;
-import static pbrg.webservices.utils.ProcessUtils.runProcess;
 import static pbrg.webservices.utils.ProcessUtils.runProcessBuilder;
+import static pbrg.webservices.utils.ProcessUtils.runProcessEnsureSuccess;
+import static pbrg.webservices.utils.RouteUtils.generateRouteMoonBoard;
+import static pbrg.webservices.utils.RouteUtils.getPythonScriptsDir;
+import static pbrg.webservices.utils.RouteUtils.plotHoldsOnImagePython;
+import static pbrg.webservices.utils.RouteUtils.setPythonScriptsDir;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import org.json.JSONArray;
 import org.junit.jupiter.api.Test;
 
 class ProcessUtilsTest {
@@ -73,7 +82,7 @@ class ProcessUtilsTest {
     }
 
     @Test
-    void testRunProcessThrowsIOException() throws IOException {
+    void testRunProcessEnsureSuccessThrowsIOException() throws IOException {
         // mock the ProcessBuilder class
         ProcessBuilder mockedPb = mock(ProcessBuilder.class);
 
@@ -82,7 +91,10 @@ class ProcessUtilsTest {
 
         // call the runProcess method
         // and assert that a RuntimeException is thrown
-        assertThrows(UncheckedIOException.class, () -> runProcess(mockedPb));
+        assertThrows(
+            UncheckedIOException.class,
+            () -> runProcessEnsureSuccess(mockedPb)
+        );
     }
 
     @Test
@@ -97,5 +109,82 @@ class ProcessUtilsTest {
 
         // call the getExitCode method
         assertNotEquals(0, getExitCode(mockedProcess));
+    }
+
+    @Test
+    void generateRouteMoonBoardFileDoesNotExist() {
+        // given: a file path that does not exist
+        String originalPath = getPythonScriptsDir();
+        setPythonScriptsDir("/dev/null/");
+
+        assertThrows(
+            // then: an exception should be thrown
+            RuntimeException.class,
+
+            // when: the file is checked
+            () -> generateRouteMoonBoard(1)
+        );
+
+        // after: reset the path
+        setPythonScriptsDir(originalPath);
+    }
+
+    @Test
+    void plotHoldsOnImagePythonFileDoesNotExist() {
+        // given: a file path that does not exist
+        String originalPath = getPythonScriptsDir();
+        setPythonScriptsDir("/dev/null/");
+
+        assertThrows(
+            // then: an exception should be thrown
+            RuntimeException.class,
+
+            // when: the file is checked
+            () -> plotHoldsOnImagePython(
+                mock(Integer.class),
+                mock(String.class),
+                mock(String.class),
+                mock(String.class),
+                mock(JSONArray.class)
+            )
+        );
+
+        // after: reset the path
+        setPythonScriptsDir(originalPath);
+    }
+
+    @Test
+    void testRunProcessEnsureSuccessThrowsRuntimeException()
+        throws InterruptedException, IOException {
+        // mock the ProcessBuilder and Process classes
+        ProcessBuilder mockedPb = mock(ProcessBuilder.class);
+        Process mockedProcess = mock(Process.class);
+        when(mockedPb.start()).thenReturn(mockedProcess);
+
+        // make the waitFor method return a non-zero exit code
+        when(mockedProcess.waitFor()).thenReturn(1);
+
+        // call the runProcessEnsureSuccess method
+        // and assert that a RuntimeException is thrown
+        assertThrows(
+            RuntimeException.class,
+            () -> runProcessEnsureSuccess(mockedPb)
+        );
+    }
+
+    @Test
+    void collectOutputAsListEmpty() throws IOException {
+        ProcessBuilder pb = new ProcessBuilder("true");
+        Process process = pb.start();
+        List<String> output = collectOutputAsList(process);
+        assertTrue(output.isEmpty());
+    }
+
+    @Test
+    void collectOutputEmpty () throws IOException {
+        ProcessBuilder pb = new ProcessBuilder("true");
+        Process process = pb.start();
+        StringBuilder output = collectOutput(process);
+        assertTrue(output.toString().isEmpty());
     }
 }

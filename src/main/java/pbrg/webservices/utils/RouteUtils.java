@@ -3,8 +3,7 @@ package pbrg.webservices.utils;
 import static pbrg.webservices.database.RouteController.getRouteContentJSONArray;
 import static pbrg.webservices.database.WallController.getWallImageFileNameFromRouteId;
 import static pbrg.webservices.utils.ProcessUtils.collectOutput;
-import static pbrg.webservices.utils.ProcessUtils.getExitCode;
-import static pbrg.webservices.utils.ProcessUtils.runProcess;
+import static pbrg.webservices.utils.ProcessUtils.runProcessEnsureSuccess;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,13 +18,33 @@ public final class RouteUtils {
     private static final File WORKING_DIR =
         new File(System.getProperty("user.dir"));
 
-    /** The path to the python scripts directory. */
-    private static final String PYTHON_SCRIPTS_DIR =
+    /** The default path to the python scripts directory. */
+    private static final String DEFAULT_PYTHON_SCRIPTS_DIR =
         WORKING_DIR + "/scripts/python/";
+
+    /** The path to the python scripts directory. */
+    private static String pythonScriptsDir =
+        DEFAULT_PYTHON_SCRIPTS_DIR;
 
     /** Util class, no instances. */
     private RouteUtils() {
         throw new IllegalStateException("Utility class");
+    }
+
+    /**
+     * Set the path to the python scripts directory.
+     * @param dir path to the python scripts directory
+     */
+    static void setPythonScriptsDir(final String dir) {
+        pythonScriptsDir = dir;
+    }
+
+    /**
+     * Get the path to the python scripts directory.
+     * @return path to the python scripts directory
+     */
+    static String getPythonScriptsDir() {
+        return pythonScriptsDir;
     }
 
     /**
@@ -36,7 +55,7 @@ public final class RouteUtils {
     public static JSONArray generateRouteMoonBoard(final int grade) {
         // path is working dir + python-scripts/plot-holds.py
         File pythonFile = new File(
-            PYTHON_SCRIPTS_DIR,
+            pythonScriptsDir,
             "route-gen-moon-board.py"
         );
 
@@ -54,20 +73,12 @@ public final class RouteUtils {
         );
 
         // run py script, collect results
-        Process process = runProcess(pb);
+        Process process = runProcessEnsureSuccess(pb);
         StringBuilder output;
         try {
             output = collectOutput(process);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
-        }
-
-        // ensure success
-        int exitCode = getExitCode(process);
-        if (exitCode != 0) {
-            throw new RuntimeException(
-                "Route generation failed with exit code " + exitCode
-            );
         }
 
         // comma separated list of coordinates (hold positions to be used)
@@ -130,7 +141,7 @@ public final class RouteUtils {
     ) {
         // path is working dir + python-scripts/plot-holds.py
         File pythonFile = new File(
-            PYTHON_SCRIPTS_DIR,
+            pythonScriptsDir,
             "plot-holds.py"
         );
 
@@ -153,15 +164,7 @@ public final class RouteUtils {
         );
 
         // run hold plotting script
-        Process process = runProcess(pb);
-
-        // ensure success
-        int exitCode = getExitCode(process);
-        if (exitCode != 0) {
-            throw new RuntimeException(
-                "Route thumbnail generation failed with exit code " + exitCode
-            );
-        }
+        runProcessEnsureSuccess(pb);
 
         // return the file name of the route image
         return "r" + routeId + "-" + wallImageFileName;

@@ -56,17 +56,24 @@ public final class ProcessUtils {
     }
 
     /**
-     * Run a process.
+     * Run a process, throwing a RuntimeException if the process fails.
      * @param pb process builder
      * @return process
      */
-    static Process runProcess(@NotNull final ProcessBuilder pb) {
+    static Process runProcessEnsureSuccess(@NotNull final ProcessBuilder pb) {
         // read the output printed by the python script
         Process process;
         try {
             process = pb.start();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+        // ensure success
+        int exitCode = getExitCode(process);
+        if (exitCode != 0) {
+            throw new RuntimeException(
+                "Route thumbnail generation failed with exit code " + exitCode
+            );
         }
         return process;
     }
