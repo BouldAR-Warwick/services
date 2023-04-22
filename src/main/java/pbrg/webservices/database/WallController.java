@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import org.jetbrains.annotations.Nullable;
 
 public final class WallController {
@@ -13,6 +14,43 @@ public final class WallController {
     /** Static class, no need to instantiate. */
     private WallController() {
         throw new IllegalStateException("Utility class");
+    }
+
+    /**
+     * Create a wall at a gym.
+     * @param gymId the gym id
+     * @param wallContent the wall content
+     * @param imageFileName the image file name
+     * @return the wall id
+     */
+    public static Integer addWall(
+        final int gymId,
+        final String wallContent,
+        final String imageFileName
+    ) {
+        Integer wallId = null;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "INSERT INTO walls (gid, wallContent, image_file_name) "
+                    + "VALUES (?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS
+            )
+        ) {
+            pst.setInt(1, gymId);
+            pst.setString(2, wallContent);
+            pst.setString(3, imageFileName);
+
+            // get keys
+            pst.executeUpdate();
+            ResultSet rs = pst.getGeneratedKeys();
+            if (rs.next()) {
+                wallId = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            return null;
+        }
+        return wallId;
     }
 
     /**
@@ -95,6 +133,7 @@ public final class WallController {
      * Get a gym ID from a gym ID.
      * @param gymId gym identifier
      * @return wall identifier
+     * @throws SQLException database issues
      */
     public static Integer getWallIdFromGymId(
         final int gymId
@@ -116,7 +155,55 @@ public final class WallController {
                 wallId = Integer.parseInt(rs.getString("WID"));
             }
         }
-
         return wallId;
+    }
+
+    /**
+     * Check if a gym has a wall.
+     * @param gymId the gym id
+     * @return true if the gym has a wall, false otherwise
+     */
+    public static boolean gymHasWall(final int gymId) {
+        boolean has = false;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT EXISTS (SELECT walls.WID "
+                    + "FROM walls "
+                    + "WHERE GID = ?)"
+            )
+        ) {
+            pst.setInt(1, gymId);
+            ResultSet rs = pst.executeQuery();
+
+            // get JSON list of holds
+            if (rs.next()) {
+                has = rs.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+        return has;
+    }
+
+    /**
+     * Delete a wall by wall ID.
+     * @param wallId the wall id
+     * @return true if the wall was deleted, false otherwise
+     */
+    public static boolean deleteWall(final int wallId) {
+        boolean removed;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "DELETE FROM walls WHERE WID = ?"
+            )
+        ) {
+            pst.setInt(1, wallId);
+            removed = pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
+        return removed;
     }
 }

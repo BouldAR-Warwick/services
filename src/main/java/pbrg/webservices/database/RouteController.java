@@ -158,7 +158,7 @@ public final class RouteController {
             PreparedStatement pst = connection.prepareStatement(
                 "SELECT routes.route_content "
                     + "FROM routes "
-                    + "WHERE RID = ?"
+                    + "WHERE creator_user_id = ?"
             )
         ) {
             pst.setInt(1, routeId);
@@ -183,7 +183,11 @@ public final class RouteController {
     public static @NotNull JSONArray getRouteContentJSONArray(
         final int routeId
     ) throws SQLException {
-        return new JSONArray(Objects.requireNonNull(getRouteContent(routeId)));
+        String routeContent = getRouteContent(routeId);
+        if (routeContent == null) {
+            return new JSONArray();
+        }
+        return new JSONArray(Objects.requireNonNull(routeContent));
     }
 
     /**
@@ -227,14 +231,14 @@ public final class RouteController {
                 {routeContent, difficulty, creatorUserId, wallId};
             String[] types = {"String", "int", "int", "int"};
 
-            for (int i = 1; i <= values.length; i++) {
+            for (int i = 0; i < values.length; i++) {
                 Object value = values[i];
                 String type = types[i];
 
                 if (type.equals("String")) {
-                    pst.setString(i, (String) value);
-                } else if (type.equals("int")) {
-                    pst.setInt(i, (int) value);
+                    pst.setString(i+1, (String) value);
+                } else {
+                    pst.setInt(i+1, (int) value);
                 }
             }
             pst.executeUpdate();
@@ -245,8 +249,6 @@ public final class RouteController {
                 routeId = rs.getInt(1);
             }
         }
-
-        // Route creation: no keys returned.
         return routeId;
     }
 
@@ -271,5 +273,31 @@ public final class RouteController {
             pst.setInt(2, routeId);
             pst.executeUpdate();
         }
+    }
+
+    /**
+     * Delete a route from the database.
+     * @param creatorUserId creator user identifier
+     * @param wallId wall identifier
+     * @return true if route was deleted, false otherwise
+     */
+    public static boolean deleteRoute(
+        final int creatorUserId, final int wallId
+    ) {
+        boolean removed = false;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "DELETE FROM routes "
+                    + "WHERE creator_user_id = ? AND WID = ?"
+            )
+        ) {
+            pst.setInt(1, creatorUserId);
+            pst.setInt(2, wallId);
+            removed = pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
+        return removed;
     }
 }

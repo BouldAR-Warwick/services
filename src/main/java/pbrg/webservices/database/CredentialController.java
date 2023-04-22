@@ -98,6 +98,30 @@ public final class CredentialController {
     }
 
     /**
+     * Check if a user exists by id
+     * @param uid user id
+     * @return true if user exists, false otherwise
+     * @throws SQLException if SQL error occurs
+     */
+    public static boolean userExists(final int uid) throws SQLException {
+        boolean exists = false;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT EXISTS (SELECT 1 FROM users WHERE uid=?)"
+            )
+        ) {
+            pst.setInt(1, uid);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                exists = rs.getBoolean(1);
+            }
+        }
+
+        return exists;
+    }
+
+    /**
      * Check if a username exists.
      * @param username username
      * @return true if username exists, false otherwise
@@ -112,9 +136,7 @@ public final class CredentialController {
             )
         ) {
             pst.setString(1, username);
-
             ResultSet rs = pst.executeQuery();
-
             if (rs.next()) {
                 exists = rs.getBoolean(1);
             }
@@ -206,7 +228,7 @@ public final class CredentialController {
      * @return true if user was deleted, false otherwise
      * @throws SQLException if SQL error occurs
      */
-    static boolean deleteUser(final int uid) throws SQLException {
+    public static boolean deleteUser(final int uid) throws SQLException {
         boolean deleted;
         try (
             Connection connection = getDataSource().getConnection();

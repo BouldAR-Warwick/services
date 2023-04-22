@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import pbrg.webservices.models.User;
 
-class CredentialControllerTest {
+public class CredentialControllerTest {
 
     /** The test username. */
     private static final String TEST_USERNAME = "username_test";
@@ -66,7 +66,7 @@ class CredentialControllerTest {
         }
     }
 
-    static int createTestUser() throws SQLException {
+    public static int createTestUser() throws SQLException {
         // remove the test user credentials if they exist
         clearTestUser();
 

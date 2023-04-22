@@ -70,7 +70,7 @@ public class GetRouteImageServlet extends MyHttpServlet {
         byte[] imageBuffer;
         try (
             FileInputStream fis = new FileInputStream(
-                Utils.ROUTE_IMAGE_PATH + imageFileName
+                Utils.routeImagePath + imageFileName
             )
         ) {
             int size = fis.available();

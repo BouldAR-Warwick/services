@@ -37,14 +37,18 @@ public final class Utils {
     /**
      * Path to wall image directory.
      */
-    public static final String WALL_IMAGE_PATH =
+    public static final String DEFAULT_WALL_IMAGE_PATH =
         System.getProperty("user.home") + "/wall-images/";
+
+    public static String wallImagePath = DEFAULT_WALL_IMAGE_PATH;
 
     /**
      * Path to route image directory.
      */
-    public static final String ROUTE_IMAGE_PATH =
+    public static final String DEFAULT_ROUTE_IMAGE_PATH =
         System.getProperty("user.home") + "/route-images/";
+
+    public static String routeImagePath = DEFAULT_ROUTE_IMAGE_PATH;
 
     /**
      * Map from file extensions to content types.
@@ -79,7 +83,7 @@ public final class Utils {
      * @param pb process builder
      * @return process
      */
-    private static Process runProcess(final ProcessBuilder pb) {
+    private static Process runProcess(@NotNull final ProcessBuilder pb) {
         // read the output printed by the python script
         Process process;
         try {
@@ -237,11 +241,16 @@ public final class Utils {
 
         // Parse the JSON string into a JSON array
         JSONArray holdArray = getRouteContentJSONArray(routeId);
+        if (holdArray.isEmpty()) {
+            throw new RuntimeException(
+                "Route " + routeId + " has no holds"
+            );
+        }
 
         // plot holds on image by calling python script
         return plotHoldsOnImagePython(
             routeId, wallImageFileName,
-            Utils.WALL_IMAGE_PATH, Utils.ROUTE_IMAGE_PATH,
+            Utils.wallImagePath, Utils.routeImagePath,
             holdArray
         );
     }
@@ -257,10 +266,10 @@ public final class Utils {
      */
     public static String plotHoldsOnImagePython(
         final int routeId,
-        final String wallImageFileName,
-        final String wallImageFilePath,
-        final String routeImageFilePath,
-        final JSONArray holdArray
+        @NotNull final String wallImageFileName,
+        @NotNull final String wallImageFilePath,
+        @NotNull final String routeImageFilePath,
+        @NotNull final JSONArray holdArray
     ) {
         // path is working dir + python-scripts/plot-holds.py
         File pythonFile = new File(
@@ -319,7 +328,7 @@ public final class Utils {
         byte[] imageBuffer;
         try (
             FileInputStream fis = new FileInputStream(
-                Utils.WALL_IMAGE_PATH + fileName
+                Utils.wallImagePath + fileName
             )
         ) {
             int size = fis.available();

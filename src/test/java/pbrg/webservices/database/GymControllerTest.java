@@ -40,7 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pbrg.webservices.models.Gym;
 
-class GymControllerTest {
+public class GymControllerTest {
 
     /** The test gym name. */
     private static final String TEST_GYM_NAME = "gym_name";
@@ -48,7 +48,7 @@ class GymControllerTest {
     /** The test gym location. */
     private static final String TEST_GYM_LOCATION = "Warwick, UK";
 
-    static int createTestGym() throws SQLException {
+    public static int createTestGym() throws SQLException {
         // ensure the test gym does not exist
         if (gymExists(TEST_GYM_NAME)) {
             // get the gym id, delete
