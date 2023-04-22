@@ -1,6 +1,7 @@
 package pbrg.webservices.servlets;
 
-import static pbrg.webservices.database.RouteController.getRoutesInGymMadeByUser;
+import static pbrg.webservices.database.RouteController
+    .getRoutesInGymMadeByUser;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +19,7 @@ public class GetRoutesServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
-            final HttpServletRequest request, final HttpServletResponse response
+        final HttpServletRequest request, final HttpServletResponse response
     ) throws IOException {
         doPost(request, response);
     }

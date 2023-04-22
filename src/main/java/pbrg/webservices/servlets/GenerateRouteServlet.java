@@ -90,7 +90,10 @@ public class GenerateRouteServlet extends MyHttpServlet {
         } catch (RuntimeException e) {
             System.out.println("Route generation failed");
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+            response.sendError(
+                HttpServletResponse.SC_EXPECTATION_FAILED,
+                "Route generation failed"
+            );
             return;
         }
 
@@ -100,7 +103,10 @@ public class GenerateRouteServlet extends MyHttpServlet {
             wallID = getWallIdFromGymId(gymId);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.sendError(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Failed to get wall ID from gym ID."
+            );
             return;
         }
 
@@ -112,7 +118,10 @@ public class GenerateRouteServlet extends MyHttpServlet {
             );
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.sendError(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Failed to create route."
+            );
             return;
         }
 
@@ -122,7 +131,10 @@ public class GenerateRouteServlet extends MyHttpServlet {
             newFile = Utils.createRouteImagePython(gymId);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.sendError(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Failed to create route image."
+            );
             return;
         }
 
@@ -131,7 +143,10 @@ public class GenerateRouteServlet extends MyHttpServlet {
             addImageToRoute(routeId, newFile);
         } catch (SQLException e) {
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.sendError(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Failed to add image to route."
+            );
             return;
         }
 

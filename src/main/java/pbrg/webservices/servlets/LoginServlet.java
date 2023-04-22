@@ -42,7 +42,8 @@ public class LoginServlet extends MyHttpServlet {
         }
 
         // ensure request has all credentials
-        String[] requiredCredentials = {"username", "password", "stayLoggedIn"};
+        String[] requiredCredentials =
+            {"username", "password", "stayLoggedIn"};
         if (!Arrays.stream(requiredCredentials).allMatch(credentials::has)) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;

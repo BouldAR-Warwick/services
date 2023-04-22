@@ -239,8 +239,8 @@ class GymControllerTest {
     }
 
     @Test
-    void insertGymEmptyResultSet()
-        throws SQLException, IllegalAccessException, InvocationTargetException {
+    void insertGymEmptyResultSet() throws SQLException,
+        IllegalAccessException, InvocationTargetException {
 
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();

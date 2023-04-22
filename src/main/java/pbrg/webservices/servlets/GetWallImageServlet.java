@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-import static pbrg.webservices.database.WallController.getWallIdFromGymId;
-import static pbrg.webservices.database.WallController.getWallImageFileNameFromWallId;
+import static pbrg.webservices.database.WallController
+    .getWallIdFromGymId;
+import static pbrg.webservices.database.WallController
+    .getWallImageFileNameFromWallId;
 import static pbrg.webservices.utils.Utils.returnImageAsBitmap;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
@@ -113,7 +115,8 @@ public class GetWallImageServlet extends MyHttpServlet {
         }
 
         // ensure session has attributes
-        List<String> attributes = Collections.list(session.getAttributeNames());
+        List<String> attributes =
+            Collections.list(session.getAttributeNames());
         for (String attribute: requiredAttributes) {
             if (!attributes.contains(attribute)) {
                 try {

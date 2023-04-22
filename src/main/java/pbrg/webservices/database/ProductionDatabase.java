@@ -56,7 +56,9 @@ public final class ProductionDatabase {
         final InitialContext newInitialContext
     ) {
         if (newInitialContext == null) {
-            throw new IllegalArgumentException("initialContext cannot be null");
+            throw new IllegalArgumentException(
+                "initialContext cannot be null"
+            );
         }
         ProductionDatabase.initialContext = newInitialContext;
     }
@@ -64,7 +66,7 @@ public final class ProductionDatabase {
 
     /**
      * Check if the application is running in production.
-     * @return true if the application is running in production, false otherwise
+     * @return true if the application is running in production, else false
      */
     public static boolean production() {
         try {

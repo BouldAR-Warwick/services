@@ -14,7 +14,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.CredentialController.emailExists;
-import static pbrg.webservices.database.CredentialController.getUserIDFromUsername;
+import static pbrg.webservices.database.CredentialController
+    .getUserIDFromUsername;
 import static pbrg.webservices.database.CredentialController.signUp;
 import static pbrg.webservices.database.CredentialController.usernameExists;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;

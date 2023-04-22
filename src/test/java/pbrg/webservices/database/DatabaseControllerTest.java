@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import javax.naming.InitialContext;

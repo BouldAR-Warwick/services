@@ -196,7 +196,8 @@ public final class RouteController {
     public static @NotNull JSONObject getRouteContentJSONObject(
         final int routeId
     ) throws SQLException {
-        return new JSONObject(Objects.requireNonNull(getRouteContent(routeId)));
+        return new
+            JSONObject(Objects.requireNonNull(getRouteContent(routeId)));
     }
 
     /**
