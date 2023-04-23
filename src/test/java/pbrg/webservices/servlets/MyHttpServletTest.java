@@ -1,5 +1,6 @@
 package pbrg.webservices.servlets;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -28,6 +29,9 @@ class MyHttpServletTest {
 
     /** The average Hueco grade. */
     private static final int AVERAGE_GRADE = 6;
+
+    /** An example user id. */
+    private static final int USER_ID = 123;
 
     static HttpServletRequest mockRequestWithBody(final String body)
         throws IOException {
@@ -124,7 +128,9 @@ class MyHttpServletTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getSession(false)).thenReturn(null);
         when(request.getCookies())
-            .thenReturn(new Cookie[] {new Cookie("uid", "123")});
+            .thenReturn(new Cookie[] {
+                new Cookie("uid", String.valueOf(USER_ID))
+            });
         when(request.getSession(true)).thenReturn(session);
 
         // act
@@ -135,7 +141,7 @@ class MyHttpServletTest {
         verify(request).getSession(false);
         verify(request).getCookies();
         verify(request).getSession(true);
-        verify(session).setAttribute("uid", 123);
+        verify(session).setAttribute("uid", USER_ID);
     }
 
     @Test
@@ -173,17 +179,21 @@ class MyHttpServletTest {
 
     @Test
     void hitPost() throws ServletException, IOException {
-        new MyHttpServlet().doPost(
-            mock(HttpServletRequest.class),
-            mock(HttpServletResponse.class)
+        assertDoesNotThrow(() ->
+            new MyHttpServlet().doPost(
+                mock(HttpServletRequest.class),
+                mock(HttpServletResponse.class)
+            )
         );
     }
 
     @Test
     void hitGet() throws ServletException, IOException {
-        new MyHttpServlet().doGet(
-            mock(HttpServletRequest.class),
-            mock(HttpServletResponse.class)
+        assertDoesNotThrow(() ->
+            new MyHttpServlet().doGet(
+                mock(HttpServletRequest.class),
+                mock(HttpServletResponse.class)
+            )
         );
     }
 }
