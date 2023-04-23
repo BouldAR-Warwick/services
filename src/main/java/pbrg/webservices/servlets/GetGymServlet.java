@@ -1,5 +1,7 @@
 package pbrg.webservices.servlets;
 
+import static pbrg.webservices.database.GymController.getGymByGymName;
+
 import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,8 +9,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 import org.json.JSONObject;
-import pbrg.webservices.database.GymController;
 import pbrg.webservices.models.Gym;
 
 @WebServlet(name = "GetGymServlet", urlPatterns = "/GetGym")
@@ -37,21 +39,28 @@ public class GetGymServlet extends MyHttpServlet {
         }
 
         // get json object in the request body
-        JSONObject jObj = new JSONObject(getBody(request));
-        String gymName = jObj.getString("gymname");
-
-        Gym gym = null;
+        String gymNameKey = "gymname";
+        JSONObject bodyObject;
         try {
-            gym = GymController.getGymByGymName(gymName);
-        } catch (Exception e) {
-            response.getWriter().println(e.getMessage());
+            bodyObject = new JSONObject(getBody(request));
+            if (!bodyObject.has(gymNameKey)) {
+                throw new JSONException("gym name is null");
+            }
+        } catch (JSONException e) {
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                e.getMessage()
+            );
+            return;
         }
+        String gymName = bodyObject.getString(gymNameKey);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        // when no gyms are matched
+        Gym gym = getGymByGymName(gymName);
         if (gym == null) {
+            // when no gyms are matched
             response.getWriter().write("{}");
             return;
         }

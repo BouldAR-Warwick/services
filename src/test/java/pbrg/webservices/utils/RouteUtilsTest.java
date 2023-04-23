@@ -236,11 +236,21 @@ final class RouteUtilsTest {
     void getRouteImageFileNameByRouteIdValid() throws SQLException {
         // given: a route that empty hold array
         String routeContent = "[{x: 0, y: 0}]";
+        routeContent = "[{x: 0.570, y: 0.655},"
+            + " {x: 0.433, y: 0.694},"
+            + " {x: 0.529, y: 0.600},"
+            + " {x: 0.346, y: 0.542},"
+            + " {x: 0.480, y: 0.476},"
+            + " {x: 0.394, y: 0.396},"
+            + " {x: 0.527, y: 0.333},"
+            + " {x: 0.383, y: 0.236},"
+            + " {x: 0.482, y: 0.237},"
+            + " {x: 0.472, y: 0.079}]";
         Integer userId = addUser("test", "test", "test");
         assertNotNull(userId);
         Integer gymId = addGym("Test Gym", "Test City");
         assertNotNull(gymId);
-        Integer wallId = addWall(gymId, "Test Wall", "MoonBoard2016.jpg");
+        Integer wallId = addWall(gymId, "Test Wall", "wall1.jpg");
         assertNotNull(wallId);
         Integer routeId = addRoute(routeContent, AVERAGE_GRADE, userId, wallId);
         assertNotNull(routeId);

@@ -13,10 +13,6 @@ d
 4src/main/java/pbrg/webservices/models/RouteFull.java,1/7/174669be432ea1f28b3c439842818eb55bb24c28
 _
 /src/main/java/pbrg/webservices/models/User.java,1/5/15b2ad0a704a057442ddb512320f6c5b3da15104
-K
-scripts/database/schema.sql,9/7/970907d4dbe8202b1b02348fb9f0f2afb308f21a
-j
-:src/main/java/pbrg/webservices/servlets/GetGymServlet.java,4/1/41b9dc1e8268ba90389aee9c9cdce9bcb5e8a679
 q
 Asrc/main/java/pbrg/webservices/servlets/GetPrimaryGymServlet.java,e/7/e737bc39cd8c4293ee6bd8f1d4edb81f1d5a41c2
 m

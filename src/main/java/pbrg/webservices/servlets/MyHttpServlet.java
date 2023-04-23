@@ -31,7 +31,7 @@ public class MyHttpServlet extends HttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException, ServletException, IllegalArgumentException {
-        super.doGet(request, response);
+        // Override doPost method to support non-null params
     }
 
     /**
@@ -51,7 +51,7 @@ public class MyHttpServlet extends HttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException, ServletException, IllegalArgumentException {
-        super.doPost(request, response);
+        // Override doPost method to support non-null params
     }
 
     /**
@@ -62,7 +62,7 @@ public class MyHttpServlet extends HttpServlet {
      */
     public static @NotNull String getBody(
         final @NotNull HttpServletRequest request
-    ) throws IOException {
+    ) {
 
         // for constructing the body
         StringBuilder stringBuilder = new StringBuilder();
@@ -78,6 +78,8 @@ public class MyHttpServlet extends HttpServlet {
             while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
                 stringBuilder.append(charBuffer, 0, bytesRead);
             }
+        } catch (IOException e) {
+            return "";
         }
 
         // return the body

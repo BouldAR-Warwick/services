@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.Nullable;
 import pbrg.webservices.models.Gym;
 
 public final class GymController {
@@ -187,9 +188,9 @@ public final class GymController {
      * @return The gym.
      * @throws SQLException If SQL query fails.
      */
-    public static Gym getGymByGymName(
+    public static @Nullable Gym getGymByGymName(
         final String gymName
-    ) throws SQLException {
+    ) {
         Gym gym;
         try (
             Connection connection = getDataSource().getConnection();
@@ -198,8 +199,9 @@ public final class GymController {
         ) {
             pst.setString(1, gymName);
             gym = extractGym(pst);
+        } catch (SQLException e) {
+            return null;
         }
-
         return gym;
     }
 

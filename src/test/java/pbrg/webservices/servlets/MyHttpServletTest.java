@@ -2,15 +2,22 @@ package pbrg.webservices.servlets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.servlets.MyHttpServlet.getBody;
+import static pbrg.webservices.servlets.MyHttpServlet.getSession;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.json.JSONObject;
@@ -93,5 +100,90 @@ class MyHttpServletTest {
         JSONObject bodyAsJson = new JSONObject(body);
         assertTrue(bodyAsJson.has(key));
         assertEquals(value, bodyAsJson.getInt(key));
+    }
+
+    @Test
+    void testGetSessionWhenSessionExists() {
+        // arrange
+        HttpSession session = mock(HttpSession.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getSession(false)).thenReturn(session);
+
+        // act
+        HttpSession result = getSession(request);
+
+        // assert
+        assertEquals(session, result);
+        verify(request).getSession(false);
+    }
+
+    @Test
+    void testGetSessionWhenSessionDoesNotExistAndCookieHasUid() {
+        // arrange
+        HttpSession session = mock(HttpSession.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getSession(false)).thenReturn(null);
+        when(request.getCookies())
+            .thenReturn(new Cookie[] {new Cookie("uid", "123")});
+        when(request.getSession(true)).thenReturn(session);
+
+        // act
+        HttpSession result = getSession(request);
+
+        // assert
+        assertEquals(session, result);
+        verify(request).getSession(false);
+        verify(request).getCookies();
+        verify(request).getSession(true);
+        verify(session).setAttribute("uid", 123);
+    }
+
+    @Test
+    void testGetSessionWhenSessionDoesNotExistAndCookieHasNoUid() {
+        // arrange
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getSession(false)).thenReturn(null);
+        when(request.getCookies())
+            .thenReturn(new Cookie[] {new Cookie("name", "Alice")});
+
+        // act
+        HttpSession result = getSession(request);
+
+        // assert
+        assertNull(result);
+        verify(request).getSession(false);
+        verify(request).getCookies();
+    }
+
+    @Test
+    void testGetSessionWhenSessionDoesNotExistAndCookieIsNull() {
+        // arrange
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getSession(false)).thenReturn(null);
+        when(request.getCookies()).thenReturn(null);
+
+        // act
+        HttpSession result = getSession(request);
+
+        // assert
+        assertNull(result);
+        verify(request).getSession(false);
+        verify(request).getCookies();
+    }
+
+    @Test
+    void hitPost() throws ServletException, IOException {
+        new MyHttpServlet().doPost(
+            mock(HttpServletRequest.class),
+            mock(HttpServletResponse.class)
+        );
+    }
+
+    @Test
+    void hitGet() throws ServletException, IOException {
+        new MyHttpServlet().doGet(
+            mock(HttpServletRequest.class),
+            mock(HttpServletResponse.class)
+        );
     }
 }
