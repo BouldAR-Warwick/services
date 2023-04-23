@@ -9,8 +9,6 @@ b
 2src/main/java/pbrg/webservices/models/GymList.java,0/c/0c8d77ea3581cb377ae2863266c5fd1254a9bc04
 g
 7src/main/java/pbrg/webservices/models/package-info.java,1/1/11e4862e1379d7c646ef1e6dac59b1a395ba6e50
-`
-0src/main/java/pbrg/webservices/models/Route.java,1/2/12870277023c33e8673483c804765aeaac6cbb4d
 d
 4src/main/java/pbrg/webservices/models/RouteFull.java,1/7/174669be432ea1f28b3c439842818eb55bb24c28
 _
@@ -21,10 +19,6 @@ j
 :src/main/java/pbrg/webservices/servlets/GetGymServlet.java,4/1/41b9dc1e8268ba90389aee9c9cdce9bcb5e8a679
 q
 Asrc/main/java/pbrg/webservices/servlets/GetPrimaryGymServlet.java,e/7/e737bc39cd8c4293ee6bd8f1d4edb81f1d5a41c2
-q
-Asrc/main/java/pbrg/webservices/servlets/GetRouteImageServlet.java,2/6/26eb62bf0ca87240f073e2267bb7abb0703c1e21
-p
-@src/main/java/pbrg/webservices/servlets/GetRouteInfoServlet.java,9/e/9ef7bbfc0a200a37c06a4c6ae8fcb4a2609531fc
 m
 =src/main/java/pbrg/webservices/servlets/GetRoutesServlet.java,3/6/367201c31c6b82119ce91445004a32f134f17391
 m

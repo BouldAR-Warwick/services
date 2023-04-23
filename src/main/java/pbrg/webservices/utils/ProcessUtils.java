@@ -87,8 +87,7 @@ public final class ProcessUtils {
         @NotNull final ProcessBuilder pb
     ) throws IOException {
         Process process = runProcessEnsureSuccess(pb);
-        StringBuilder output = collectOutput(process);
-        return output;
+        return collectOutput(process);
     }
 
     /**

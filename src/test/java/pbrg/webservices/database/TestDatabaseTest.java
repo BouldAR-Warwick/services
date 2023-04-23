@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static pbrg.webservices.database.DatabaseUtils.dataSourceIsValid;
+import static pbrg.webservices.utils.DatabaseUtils.dataSourceIsValid;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.utils.TestUtils.dockerDaemonRunning;
 import java.lang.reflect.Constructor;

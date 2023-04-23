@@ -8,12 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.CredentialController.deleteUser;
 import static pbrg.webservices.database.CredentialControllerTest
     .createTestUser;
+import static pbrg.webservices.database.DatabaseTestMethods.mockEmptyResultSet;
 import static pbrg.webservices.database.GymController.addGym;
 import static pbrg.webservices.database.GymController.deleteGym;
 import static pbrg.webservices.database.GymController.getGymByUserId;
@@ -29,11 +29,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import javax.sql.DataSource;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,34 +63,6 @@ public final class GymControllerTest {
         Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
         assertNotNull(gymId);
         return gymId;
-    }
-
-    /**
-     * Mocks a data source that returns an empty result set.
-     * @return the mocked data source
-     * @throws SQLException if the data source cannot be mocked
-     */
-    private static @NotNull DataSource mockEmptyResultSet()
-        throws SQLException {
-        // mock the result set
-        ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.next()).thenReturn(false);
-
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
-        when(preparedStatement.executeQuery()).thenReturn(resultSet);
-
-        Connection connection = mock(Connection.class);
-        when(connection.prepareStatement(
-            anyString(), eq(Statement.RETURN_GENERATED_KEYS)
-        )).thenReturn(preparedStatement);
-        when(connection.prepareStatement(anyString()))
-            .thenReturn(preparedStatement);
-
-        DataSource dataSource = mock(DataSource.class);
-        when(dataSource.getConnection()).thenReturn(connection);
-
-        return dataSource;
     }
 
     /**

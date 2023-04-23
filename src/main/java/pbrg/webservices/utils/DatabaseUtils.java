@@ -1,4 +1,4 @@
-package pbrg.webservices.database;
+package pbrg.webservices.utils;
 
 import java.sql.Connection;
 import java.sql.SQLException;

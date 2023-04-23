@@ -1,14 +1,18 @@
 package pbrg.webservices.utils;
 
-import static pbrg.webservices.database.RouteController.getRouteContentJSONArray;
 import static pbrg.webservices.database.WallController.getWallImageFileNameFromRouteId;
 import static pbrg.webservices.utils.ProcessUtils.runProcessEnsureSuccess;
 import static pbrg.webservices.utils.ProcessUtils.runProcessGetOutputEnsureSuccess;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.sql.SQLException;
+import java.util.Objects;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
+import pbrg.webservices.database.RouteController;
+import pbrg.webservices.models.RouteFull;
 
 public final class RouteUtils {
 
@@ -60,9 +64,9 @@ public final class RouteUtils {
 
         // ensure file exists
         if (!pythonFile.exists()) {
-            throw new RuntimeException(
+            throw new UncheckedIOException(new IOException(
                 "Python script " + pythonFile + " does not exist"
-            );
+            ));
         }
 
         ProcessBuilder pb = new ProcessBuilder(
@@ -138,9 +142,9 @@ public final class RouteUtils {
 
         // ensure file exists
         if (!pythonFile.exists()) {
-            throw new RuntimeException(
+            throw new UncheckedIOException(new IOException(
                 "Python script " + pythonFile + " does not exist"
-            );
+            ));
         }
 
         // python script with arguments: wallImageFileName, routeID, holdArray
@@ -159,5 +163,43 @@ public final class RouteUtils {
 
         // return the file name of the route image
         return "r" + routeId + "-" + wallImageFileName;
+    }
+
+    /**
+     * Get a route's contents (list of holds) as a JSON array.
+     * @param routeId route identifier
+     * @return list of holds in JSON
+     * @throws SQLException database issues
+     */
+    @Contract("_ -> new")
+    public static @NotNull JSONArray getRouteContentJSONArray(
+        final int routeId
+    ) throws SQLException {
+        String routeContent = RouteController.getRouteContent(routeId);
+        if (routeContent == null) {
+            throw new IllegalArgumentException(
+                "Route " + routeId + " has no content"
+            );
+        }
+        return new JSONArray(Objects.requireNonNull(routeContent));
+    }
+
+    /**
+     * Returns a route image file name for a given route id.
+     *
+     * @param routeId the route id of the route
+     * @return the route image file name
+     * @throws SQLException if there is an error with the database
+     */
+    public static @NotNull String getRouteImageFileNameByRouteId(
+        final int routeId) throws SQLException {
+        RouteFull route = RouteController.getRouteByRouteId(routeId);
+        if (route == null) {
+            throw new IllegalArgumentException(
+                "Route " + routeId + " has no image"
+            );
+        }
+
+        return route.getImageFileName();
     }
 }

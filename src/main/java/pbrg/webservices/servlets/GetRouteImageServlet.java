@@ -1,7 +1,6 @@
 package pbrg.webservices.servlets;
 
-import static pbrg.webservices.database.RouteController
-    .getRouteImageFileNamesByRouteId;
+import static pbrg.webservices.utils.RouteUtils.getRouteImageFileNameByRouteId;
 import static pbrg.webservices.utils.ServletUtils.returnRouteImageAsBitmap;
 
 import jakarta.servlet.annotation.WebServlet;
@@ -49,15 +48,12 @@ public class GetRouteImageServlet extends MyHttpServlet {
         // get the route image file name
         String routeImageFileName;
         try {
-            routeImageFileName = getRouteImageFileNamesByRouteId(routeId);
+            routeImageFileName = getRouteImageFileNameByRouteId(routeId);
         } catch (SQLException exception) {
-            response.getWriter().println(exception.getMessage());
-            return;
-        }
-
-        // route does not exist
-        if (routeImageFileName == null) {
-            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+            response.sendError(
+                HttpServletResponse.SC_EXPECTATION_FAILED,
+                exception.getMessage()
+            );
             return;
         }
 

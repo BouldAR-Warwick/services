@@ -1,6 +1,6 @@
 package pbrg.webservices.servlets;
 
-import static pbrg.webservices.database.RouteController.getRouteContentJSONArray;
+import static pbrg.webservices.utils.RouteUtils.getRouteContentJSONArray;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

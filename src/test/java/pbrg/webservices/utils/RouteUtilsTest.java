@@ -10,6 +10,7 @@ import static pbrg.webservices.database.CredentialController.addUser;
 import static pbrg.webservices.database.CredentialController.deleteUser;
 import static pbrg.webservices.database.GymController.addGym;
 import static pbrg.webservices.database.GymController.deleteGym;
+import static pbrg.webservices.database.RouteController.addImageToRoute;
 import static pbrg.webservices.database.RouteController.addRoute;
 import static pbrg.webservices.database.RouteController.deleteRoute;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
@@ -20,10 +21,13 @@ import static pbrg.webservices.database.WallController.deleteWall;
 import static pbrg.webservices.utils.RouteUtils.createRouteImagePython;
 import static pbrg.webservices.utils.RouteUtils.generateRouteMoonBoard;
 import static pbrg.webservices.utils.RouteUtils.getPythonScriptsDir;
+import static pbrg.webservices.utils.RouteUtils.getRouteContentJSONArray;
+import static pbrg.webservices.utils.RouteUtils.getRouteImageFileNameByRouteId;
 import static pbrg.webservices.utils.RouteUtils.plotHoldsOnImagePython;
 import static pbrg.webservices.utils.RouteUtils.setPythonScriptsDir;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
@@ -34,11 +38,16 @@ import org.junit.jupiter.api.Test;
 import pbrg.webservices.database.DatabaseController;
 
 final class RouteUtilsTest {
+
     /** The average bouldering grade worldwide is V5. */
     private static final int AVERAGE_GRADE = 5;
 
     /** The example route ID. */
     private static final int EXAMPLE_ROUTE_ID = 500;
+
+
+    /** The example invalid route ID. */
+    private static final int INVALID_ROUTE_ID = -1;
 
     @BeforeAll
     static void startResources() throws IllegalStateException {
@@ -117,8 +126,8 @@ final class RouteUtilsTest {
         setPythonScriptsDir("/dev/null/");
 
         assertThrows(
-            // then: an exception should be thrown
-            RuntimeException.class,
+            // then: an UncheckedIOException should be thrown
+            UncheckedIOException.class,
 
             // when: the file is checked
             () -> generateRouteMoonBoard(1)
@@ -142,8 +151,8 @@ final class RouteUtilsTest {
         assertFalse(pythonFile.exists());
 
         assertThrows(
-            // then: an exception should be thrown
-            RuntimeException.class,
+            // then: an UncheckedIOException should be thrown
+            UncheckedIOException.class,
 
             // when: the file is checked
             () -> plotHoldsOnImagePython(
@@ -198,4 +207,59 @@ final class RouteUtilsTest {
         assertTrue(deleteGym(gymId));
         assertTrue(deleteUser(userId));
     }
+
+    @Test
+    void getRouteContentJSONArrayWithInvalidRoute() {
+        assertThrows(
+            // then: an IllegalArgumentException should be thrown
+            IllegalArgumentException.class,
+
+            // given: a route ID that does not exist
+            // when: trying to getRouteContentJSONArray
+            () -> getRouteContentJSONArray(INVALID_ROUTE_ID)
+        );
+    }
+
+    @Test
+    void getRouteImageFileNameByRouteIdWithInvalidRoute() {
+        assertThrows(
+            // then: an IllegalArgumentException should be thrown
+            IllegalArgumentException.class,
+
+            // given: a route ID that does not exist
+            // when: trying to getRouteImageFileNamesByRouteId
+            () -> getRouteImageFileNameByRouteId(INVALID_ROUTE_ID)
+        );
+    }
+
+    @Test
+    void getRouteImageFileNameByRouteIdValid() throws SQLException {
+        // given: a route that empty hold array
+        String routeContent = "[{x: 0, y: 0}]";
+        Integer userId = addUser("test", "test", "test");
+        assertNotNull(userId);
+        Integer gymId = addGym("Test Gym", "Test City");
+        assertNotNull(gymId);
+        Integer wallId = addWall(gymId, "Test Wall", "MoonBoard2016.jpg");
+        assertNotNull(wallId);
+        Integer routeId = addRoute(routeContent, AVERAGE_GRADE, userId, wallId);
+        assertNotNull(routeId);
+
+        // generate the route image, add to route
+        String routeImage = createRouteImagePython(routeId);
+        assertTrue(addImageToRoute(routeId, routeImage));
+
+        // when: getting the route image file name
+        String routeImageFileName = getRouteImageFileNameByRouteId(routeId);
+
+        // then: the file name is not null
+        assertNotNull(routeImageFileName);
+
+        // after: delete models
+        assertTrue(deleteRoute(routeId));
+        assertTrue(deleteWall(wallId));
+        assertTrue(deleteGym(gymId));
+        assertTrue(deleteUser(userId));
+    }
+
 }

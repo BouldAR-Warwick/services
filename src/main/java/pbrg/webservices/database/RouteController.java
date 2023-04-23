@@ -9,12 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import pbrg.webservices.models.Route;
 import pbrg.webservices.models.RouteFull;
 
@@ -33,7 +28,7 @@ public final class RouteController {
      * @return list of routes
      * @throws SQLException if SQL error occurs
      */
-    public static List<Route> getRoutesInGymMadeByUser(
+    public static @NotNull List<Route> getRoutesInGymMadeByUser(
         final int gymId, final int userId
     ) throws SQLException {
         List<Route> routes = new ArrayList<>();
@@ -62,7 +57,13 @@ public final class RouteController {
         return routes;
     }
 
-    private static RouteFull getRouteByRouteId(
+    /**
+     * Get a route by its ID.
+     * @param routeId route ID
+     * @return route
+     * @throws SQLException if SQL error occurs
+     */
+    public static RouteFull getRouteByRouteId(
         final int routeId
     ) throws SQLException {
         RouteFull route = null;
@@ -83,31 +84,12 @@ public final class RouteController {
                     rs.getInt("WID"),
                     rs.getInt("creator_user_id"),
                     rs.getInt("Difficulty"),
-                    rs.getString("RouteContent"),
+                    rs.getString("route_content"),
                     rs.getString("image_file_name")
                 );
             }
         }
-
         return route;
-    }
-
-    /**
-     * Returns a route image file name for a given route id.
-     *
-     * @param routeId the route id of the route
-     * @return the route image file name
-     * @throws SQLException if there is an error with the database
-     */
-    public static @Nullable String getRouteImageFileNamesByRouteId(
-        final int routeId) throws SQLException {
-        RouteFull route = getRouteByRouteId(routeId);
-
-        if (route == null) {
-            return null;
-        }
-
-        return route.getImageFileName();
     }
 
     /**
@@ -133,13 +115,11 @@ public final class RouteController {
         ) {
             pst.setInt(1, routeId);
             pst.setInt(2, userId);
-
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 ownsRoute = rs.getBoolean(1);
             }
         }
-
         return ownsRoute;
     }
 
@@ -170,37 +150,6 @@ public final class RouteController {
             }
         }
         return holds;
-    }
-
-    /**
-     * Get a route's contents (list of holds) as a JSON array.
-     * @param routeId route identifier
-     * @return list of holds in JSON
-     * @throws SQLException database issues
-     */
-    @Contract("_ -> new")
-    public static @NotNull JSONArray getRouteContentJSONArray(
-        final int routeId
-    ) throws SQLException {
-        String routeContent = getRouteContent(routeId);
-        if (routeContent == null) {
-            return new JSONArray();
-        }
-        return new JSONArray(Objects.requireNonNull(routeContent));
-    }
-
-    /**
-     * Get a route's contents (list of holds) as a JSON object.
-     * @param routeId route identifier
-     * @return list of holds in JSON
-     * @throws SQLException database issues
-     */
-    @Contract("_ -> new")
-    public static @NotNull JSONObject getRouteContentJSONObject(
-        final int routeId
-    ) throws SQLException {
-        return new
-            JSONObject(Objects.requireNonNull(getRouteContent(routeId)));
     }
 
     /**
@@ -255,11 +204,13 @@ public final class RouteController {
      * Add a route image to an existing route.
      * @param routeId route identifier
      * @param imageFileName route image file name
+     * @return true if image was added, false otherwise
      * @throws SQLException database issues
      */
-    public static void addImageToRoute(
+    public static boolean addImageToRoute(
         final int routeId, final String imageFileName
     ) throws SQLException {
+        boolean updated;
         try (
             Connection connection = getDataSource().getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -270,8 +221,12 @@ public final class RouteController {
         ) {
             pst.setString(1, imageFileName);
             pst.setInt(2, routeId);
-            pst.executeUpdate();
+
+            // the number of rows affected by the update query
+            int rowsAffected = pst.executeUpdate();
+            updated = rowsAffected > 0;
         }
+        return updated;
     }
 
     /**

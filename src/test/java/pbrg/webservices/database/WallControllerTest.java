@@ -5,15 +5,14 @@ import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
 import static pbrg.webservices.database.WallController.getWallIdFromRouteId;
-import java.sql.SQLException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class WallControllerTest {
+final class WallControllerTest {
 
     @BeforeAll
-    static void startResources() throws IllegalStateException, SQLException {
+    static void startResources() throws IllegalStateException {
         startTestDatabaseInThread();
 
         // use the test database

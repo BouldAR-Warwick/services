@@ -1,6 +1,6 @@
 package pbrg.webservices.database;
 
-import static pbrg.webservices.database.DatabaseUtils.dataSourceIsValid;
+import static pbrg.webservices.utils.DatabaseUtils.dataSourceIsValid;
 import static pbrg.webservices.utils.TestUtils.dockerDaemonRunning;
 import static pbrg.webservices.utils.ProcessUtils.runProcessBuilder;
 import java.util.List;
