@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.sql.SQLException;
 import static pbrg.webservices.database.RouteController.addImageToRoute;
-import static pbrg.webservices.database.RouteController.createRoute;
+import static pbrg.webservices.database.RouteController.addRoute;
 import static pbrg.webservices.database.WallController.addWall;
 import static pbrg.webservices.database.WallController.getWallIdFromGymId;
 import static pbrg.webservices.database.WallController.gymHasWall;
@@ -66,7 +66,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         try {
             arguments = new JSONObject(getBody(request));
         } catch (JSONException e) {
-            System.out.println("Issue parsing body as JSON");
+            // Issue parsing body as JSON
             response.sendError(
                 HttpServletResponse.SC_BAD_REQUEST,
                 "Issue parsing body as JSON."
@@ -77,7 +77,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         // ensure request has all credentials
         String difficultyKey = "difficulty";
         if (!arguments.has(difficultyKey)) {
-            System.out.println("Missing difficulty");
+            // Missing difficulty
             response.sendError(
                 HttpServletResponse.SC_BAD_REQUEST,
                 "Body missing difficulty."
@@ -100,7 +100,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         }
 
         if (!gymHasWall(gymId)) {
-            System.out.println("Gym does not have a wall");
+            // Gym does not have a wall
             response.sendError(
                 HttpServletResponse.SC_EXPECTATION_FAILED,
                 "Gym does not have a wall"
@@ -116,7 +116,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
                 throw new RuntimeException();
             }
         } catch (RuntimeException e) {
-            System.out.println("Route generation failed");
+            // Route generation failed
             e.printStackTrace();
             response.sendError(
                 HttpServletResponse.SC_EXPECTATION_FAILED,
@@ -130,7 +130,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         try {
             wallID = getWallIdFromGymId(gymId);
         } catch (SQLException | NullPointerException e) {
-            System.out.println("Failed to get wall ID from gym ID.");
+            // Failed to get wall ID from gym ID
             e.printStackTrace();
             response.sendError(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -142,11 +142,11 @@ public class GenerateRouteServlet extends MyHttpServlet {
         // store the route as a new route in the database
         int routeId;
         try {
-            routeId = createRoute(
+            routeId = addRoute(
                 route.toString(), grade, userId, wallID
             );
         } catch (SQLException | NullPointerException e) {
-            System.out.println("Failed to create route.");
+            // Failed to create route
             e.printStackTrace();
             response.sendError(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -160,7 +160,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         try {
             routeImageFileName = createRouteImagePython(routeId);
         } catch (SQLException e) {
-            System.out.println("Failed to create route image.");
+            // Failed to create route image
             e.printStackTrace();
             response.sendError(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -173,7 +173,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         try {
             addImageToRoute(routeId, routeImageFileName);
         } catch (SQLException e) {
-            System.out.println("Failed to add image to route.");
+            // Failed to add image to route
             e.printStackTrace();
             response.sendError(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -182,7 +182,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
             return;
         }
 
-        System.out.println("Route generated successfully.");
+        // Route generated successfully
 
         // return the route id and route
         JSONObject responseJSON = new JSONObject();

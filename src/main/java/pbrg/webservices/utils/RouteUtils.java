@@ -2,12 +2,10 @@ package pbrg.webservices.utils;
 
 import static pbrg.webservices.database.RouteController.getRouteContentJSONArray;
 import static pbrg.webservices.database.WallController.getWallImageFileNameFromRouteId;
-import static pbrg.webservices.utils.ProcessUtils.collectOutput;
 import static pbrg.webservices.utils.ProcessUtils.runProcessEnsureSuccess;
-
+import static pbrg.webservices.utils.ProcessUtils.runProcessGetOutputEnsureSuccess;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.sql.SQLException;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -52,7 +50,8 @@ public final class RouteUtils {
      * @param grade grade
      * @return route as a JSON object of holds
      */
-    public static JSONArray generateRouteMoonBoard(final int grade) {
+    public static JSONArray generateRouteMoonBoard(final int grade)
+        throws IOException {
         // path is working dir + python-scripts/plot-holds.py
         File pythonFile = new File(
             pythonScriptsDir,
@@ -73,15 +72,8 @@ public final class RouteUtils {
         );
 
         // run py script, collect results
-        Process process = runProcessEnsureSuccess(pb);
-        StringBuilder output;
-        try {
-            output = collectOutput(process);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
         // comma separated list of coordinates (hold positions to be used)
+        StringBuilder output = runProcessGetOutputEnsureSuccess(pb);
         String result = output.toString();
 
         // return route - parse result as a json object
@@ -100,18 +92,17 @@ public final class RouteUtils {
     ) throws SQLException {
         // Load the image file
         String wallImageFileName = getWallImageFileNameFromRouteId(routeId);
+        if (wallImageFileName == null) {
+            throw new RuntimeException(
+                "Route " + routeId + " has no wall image"
+            );
+        }
 
         // Parse the JSON string into a JSON array
         JSONArray holdArray = getRouteContentJSONArray(routeId);
         if (holdArray.isEmpty()) {
             throw new RuntimeException(
                 "Route " + routeId + " has no holds"
-            );
-        }
-
-        if (wallImageFileName == null) {
-            throw new RuntimeException(
-                "Route " + routeId + " has no wall image"
             );
         }
 

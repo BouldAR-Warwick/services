@@ -79,6 +79,19 @@ public final class ProcessUtils {
     }
 
     /**
+     * Run a process, ensure success, and return output as a StringBuilder.
+     * @param pb process builder
+     * @return output as a string builder, each line is a new line
+     */
+    static StringBuilder runProcessGetOutputEnsureSuccess(
+        @NotNull final ProcessBuilder pb
+    ) throws IOException {
+        Process process = runProcessEnsureSuccess(pb);
+        StringBuilder output = collectOutput(process);
+        return output;
+    }
+
+    /**
      * Collect output from a process.
      * @param process process
      * @return output as a string builder, each line is a new line
@@ -102,20 +115,33 @@ public final class ProcessUtils {
     public static @NotNull List<String> collectOutputAsList(
         final @NotNull Process process
     ) throws IOException {
-        List<String> output = new ArrayList<>();
+        List<String> output;
 
-        String line;
         try (
             BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream())
             )
         ) {
-            while ((line = reader.readLine()) != null) {
-                output.add(line);
-            }
+            output = readLines(reader);
         }
-
         return output;
+    }
+
+    /**
+     * Read lines from a buffered reader.
+     * @param reader buffered reader
+     * @return list of lines
+     * @throws IOException if an I/O error occurs
+     */
+    static @NotNull List<String> readLines(
+        final @NotNull BufferedReader reader
+    ) throws IOException {
+        List<String> lines = new ArrayList<>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            lines.add(line);
+        }
+        return lines;
     }
 
     /**

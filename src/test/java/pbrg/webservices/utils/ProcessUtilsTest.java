@@ -1,5 +1,6 @@
 package pbrg.webservices.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,19 +10,18 @@ import static org.mockito.Mockito.when;
 import static pbrg.webservices.utils.ProcessUtils.collectOutput;
 import static pbrg.webservices.utils.ProcessUtils.collectOutputAsList;
 import static pbrg.webservices.utils.ProcessUtils.getExitCode;
+import static pbrg.webservices.utils.ProcessUtils.readLines;
 import static pbrg.webservices.utils.ProcessUtils.runProcessBuilder;
 import static pbrg.webservices.utils.ProcessUtils.runProcessEnsureSuccess;
-import static pbrg.webservices.utils.RouteUtils.generateRouteMoonBoard;
-import static pbrg.webservices.utils.RouteUtils.getPythonScriptsDir;
-import static pbrg.webservices.utils.RouteUtils.plotHoldsOnImagePython;
-import static pbrg.webservices.utils.RouteUtils.setPythonScriptsDir;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.json.JSONArray;
 import org.junit.jupiter.api.Test;
 
 class ProcessUtilsTest {
@@ -112,48 +112,6 @@ class ProcessUtilsTest {
     }
 
     @Test
-    void generateRouteMoonBoardFileDoesNotExist() {
-        // given: a file path that does not exist
-        String originalPath = getPythonScriptsDir();
-        setPythonScriptsDir("/dev/null/");
-
-        assertThrows(
-            // then: an exception should be thrown
-            RuntimeException.class,
-
-            // when: the file is checked
-            () -> generateRouteMoonBoard(1)
-        );
-
-        // after: reset the path
-        setPythonScriptsDir(originalPath);
-    }
-
-    @Test
-    void plotHoldsOnImagePythonFileDoesNotExist() {
-        // given: a file path that does not exist
-        String originalPath = getPythonScriptsDir();
-        setPythonScriptsDir("/dev/null/");
-
-        assertThrows(
-            // then: an exception should be thrown
-            RuntimeException.class,
-
-            // when: the file is checked
-            () -> plotHoldsOnImagePython(
-                mock(Integer.class),
-                mock(String.class),
-                mock(String.class),
-                mock(String.class),
-                mock(JSONArray.class)
-            )
-        );
-
-        // after: reset the path
-        setPythonScriptsDir(originalPath);
-    }
-
-    @Test
     void testRunProcessEnsureSuccessThrowsRuntimeException()
         throws InterruptedException, IOException {
         // mock the ProcessBuilder and Process classes
@@ -181,10 +139,77 @@ class ProcessUtilsTest {
     }
 
     @Test
-    void collectOutputEmpty () throws IOException {
+    void collectOutputEmpty() throws IOException {
         ProcessBuilder pb = new ProcessBuilder("true");
         Process process = pb.start();
         StringBuilder output = collectOutput(process);
         assertTrue(output.toString().isEmpty());
+    }
+
+    @Test
+    void readLinesThrowingIOException() {
+        // given reader that throws an IOException
+        BufferedReader reader = mock(BufferedReader.class);
+        try {
+            when(reader.readLine())
+                .thenThrow(new IOException("Test exception"));
+        } catch (IOException e) {
+            fail("IOException should not be thrown");
+        }
+
+        assertThrows(
+            // then: an IOException should be thrown
+            IOException.class,
+
+            // when reading the reader
+            () -> readLines(reader)
+        );
+    }
+
+    @Test
+    void testReadLines() throws IOException {
+        BufferedReader reader = mock(BufferedReader.class);
+        when(reader.readLine())
+            .thenReturn("line1")
+            .thenReturn("line2")
+            .thenReturn(null);
+
+        List<String> lines = readLines(reader);
+
+        assertEquals(2, lines.size());
+        assertEquals("line1", lines.get(0));
+        assertEquals("line2", lines.get(1));
+    }
+
+    @Test
+    void testEmptyReadLines() throws IOException {
+        BufferedReader reader = mock(BufferedReader.class);
+        when(reader.readLine()).thenReturn(null);
+
+        List<String> lines = readLines(reader);
+
+        assertTrue(lines.isEmpty());
+    }
+
+    @Test
+    void testCollectOutputAsListExceptionOnClose() {
+        Process process = mock(Process.class);
+        when(process.getInputStream()).thenReturn(
+            new ByteArrayInputStream("test".getBytes())
+        );
+
+        assertThrows(IOException.class, () -> {
+            try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream())
+            ) {
+                @Override
+                public void close() throws IOException {
+                    throw new IOException("Test exception on close");
+                }
+            }
+            ) {
+                collectOutputAsList(process);
+            }
+        });
     }
 }

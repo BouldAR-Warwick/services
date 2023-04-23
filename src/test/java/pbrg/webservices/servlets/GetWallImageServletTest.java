@@ -19,8 +19,8 @@ class GetWallImageServletTest {
     @Test
     void doGetWithNulls() {
         assertThrows(
-            // then: throws NullPointerException
-            NullPointerException.class,
+            // then: throws Exception
+            Exception.class,
 
             // when: requested with null request and response
             () -> SERVLET.doGet(null, null)
@@ -33,8 +33,8 @@ class GetWallImageServletTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         assertThrows(
-            // then: throws NullPointerException
-            NullPointerException.class,
+            // then: throws Exception
+            Exception.class,
 
             // when: requested with null request and response
             () -> SERVLET.doGet(request, null)

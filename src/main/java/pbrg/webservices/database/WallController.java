@@ -96,12 +96,11 @@ public final class WallController {
     /**
      * Get a wall ID from a route ID.
      * @param routeId route identifier
-     * @return wall identifier
-     * @throws SQLException database issues
+     * @return wall identifier, null if an SQL exception occurs
      */
     public static @Nullable Integer getWallIdFromRouteId(
         final int routeId
-    ) throws SQLException {
+    ) {
         Integer wallId = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -118,6 +117,8 @@ public final class WallController {
             if (rs.next()) {
                 wallId = Integer.parseInt(rs.getString("WID"));
             }
+        } catch (SQLException e) {
+            return null;
         }
 
         return wallId;

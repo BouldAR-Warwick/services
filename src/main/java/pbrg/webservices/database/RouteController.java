@@ -212,7 +212,7 @@ public final class RouteController {
      * @return route identifier
      * @throws SQLException database issues
      */
-    public static Integer createRoute(
+    public static Integer addRoute(
         final String routeContent, final int difficulty,
         final int creatorUserId, final int wallId
     ) throws SQLException {
@@ -293,6 +293,30 @@ public final class RouteController {
         ) {
             pst.setInt(1, creatorUserId);
             pst.setInt(2, wallId);
+            removed = pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
+        return removed;
+    }
+
+    /**
+     * Delete a route from the database.
+     * @param routeId route identifier
+     * @return true if route was deleted, false otherwise
+     */
+    public static boolean deleteRoute(
+        final int routeId
+    ) {
+        boolean removed;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "DELETE FROM routes "
+                    + "WHERE rid = ?"
+            )
+        ) {
+            pst.setInt(1, routeId);
             removed = pst.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;

@@ -36,7 +36,6 @@ public class LogoutServlet extends MyHttpServlet {
         for (Cookie cookie : cookies) {
             String field =
                 URLDecoder.decode(cookie.getName(), StandardCharsets.UTF_8);
-            System.out.println(field);
             if (field.equals("username")) {
                 cookie.setMaxAge(0);
                 response.addCookie(cookie);

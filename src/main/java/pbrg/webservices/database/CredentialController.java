@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import org.jetbrains.annotations.Nullable;
 import pbrg.webservices.models.User;
 
@@ -35,7 +36,6 @@ public final class CredentialController {
         ) {
             pst.setString(1, username);
             pst.setString(2, password);
-
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 user = new User(rs.getInt("uid"), rs.getString("username"));
@@ -57,11 +57,11 @@ public final class CredentialController {
     public static boolean signUp(
         final String username, final String email, final String password
     ) throws SQLException {
-        boolean added = insertUser(username, email, password);
+        Integer userId = addUser(username, email, password);
+        boolean added = userId != null;
         if (!added) {
             return false;
         }
-
         // check for successful creation
         return usernameExists(username);
     }
@@ -71,21 +71,23 @@ public final class CredentialController {
      * @param username username
      * @param email email
      * @param password password
-     * @return true if user was added, false otherwise
+     * @return user id if user was added, null otherwise
      * @throws SQLException if SQL error occurs
      */
-    private static boolean insertUser(
+    public static Integer addUser(
         final String username, final String email, final String password
     ) throws SQLException {
         // ensure username, email are unique
         if (usernameExists(username) || emailExists(email)) {
-            return false;
+            return null;
         }
 
+        Integer userId = null;
         try (
             Connection connection = getDataSource().getConnection();
             PreparedStatement pst = connection.prepareStatement(
-                "INSERT INTO users (Username, Email, Password) VALUES (?,?,?)"
+                "INSERT INTO users (Username, Email, Password) VALUES (?,?,?)",
+                Statement.RETURN_GENERATED_KEYS
             )
         ) {
             String[] values = {username, email, password};
@@ -93,8 +95,12 @@ public final class CredentialController {
                 pst.setString(i, values[i - 1]);
             }
             pst.executeUpdate();
+            ResultSet rs = pst.getGeneratedKeys();
+            if (rs.next()) {
+                userId = rs.getInt(1);
+            }
         }
-        return true;
+        return userId;
     }
 
     /**
@@ -160,7 +166,6 @@ public final class CredentialController {
             )
         ) {
             pst.setString(1, email);
-
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 exists = rs.getBoolean(1);
@@ -187,7 +192,6 @@ public final class CredentialController {
             )
         ) {
             pst.setString(1, username);
-
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 uid = rs.getInt("uid");
@@ -212,7 +216,6 @@ public final class CredentialController {
             )
         ) {
             pst.setString(1, email);
-
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 uid = rs.getInt("uid");

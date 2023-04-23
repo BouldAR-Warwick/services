@@ -2,6 +2,7 @@ package pbrg.webservices.servlets;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import java.io.PrintWriter;
@@ -12,7 +13,7 @@ import static org.mockito.Mockito.when;
 final class HelloServletTest {
 
     @Test
-    void testDoGet() throws Exception {
+    void testDoGet() throws IOException {
         HelloServlet servlet = new HelloServlet();
         servlet.init();
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
@@ -25,7 +26,6 @@ final class HelloServletTest {
 
         // then: Hello World! is a substring of result
         String result = stringWriter.toString();
-        System.out.println(result);
         assertTrue(result.contains("Hello World!"));
     }
 }

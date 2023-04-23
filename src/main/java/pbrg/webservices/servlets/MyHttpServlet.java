@@ -14,8 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class MyHttpServlet extends HttpServlet {
 
-    // add @NotNull to doGet params
-
     /**
      * Override doGet method to support non-null params.
      * @param request an {@link HttpServletRequest} object that contains

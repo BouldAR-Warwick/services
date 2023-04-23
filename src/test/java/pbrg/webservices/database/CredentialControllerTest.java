@@ -10,9 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static pbrg.webservices.database.CredentialController.addUser;
 import static pbrg.webservices.database.CredentialController.emailExists;
 import static pbrg.webservices.database.CredentialController
     .getUserIDFromUsername;
@@ -29,7 +31,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import javax.sql.DataSource;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -88,6 +92,31 @@ public final class CredentialControllerTest {
         Integer uid = getUserIDFromUsername(TEST_USERNAME);
         assertNotNull(uid);
         return uid;
+    }
+
+    /**
+     * Creates a mock DataSource that throws an SQLException when
+     * getConnection() is called.
+     * @return the mock DataSource
+     * @throws SQLException if an error occurs while creating the mock
+     */
+    static @NotNull DataSource mockEmptyResultSet() throws SQLException {
+        DataSource dataSource = mock(DataSource.class);
+        Connection connection = mock(Connection.class);
+        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+        ResultSet resultSet = mock(ResultSet.class);
+
+        when(dataSource.getConnection()).thenReturn(connection);
+        when(connection.prepareStatement(anyString()))
+            .thenReturn(preparedStatement);
+        when(connection.prepareStatement(
+            anyString(), eq(Statement.RETURN_GENERATED_KEYS))
+        ).thenReturn(preparedStatement);
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(false);
+
+        return dataSource;
     }
 
     @BeforeAll
@@ -463,21 +492,6 @@ public final class CredentialControllerTest {
         assertFalse(usernameExists(TEST_USERNAME));
     }
 
-    static DataSource mockEmptyResultSet() throws SQLException {
-        DataSource dataSource = mock(DataSource.class);
-        Connection connection = mock(Connection.class);
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        ResultSet resultSet = mock(ResultSet.class);
-
-        when(dataSource.getConnection()).thenReturn(connection);
-        when(connection.prepareStatement(anyString()))
-            .thenReturn(preparedStatement);
-        when(preparedStatement.executeQuery()).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(false);
-
-        return dataSource;
-    }
-
     @Test
     void usernameExistsNoResults() throws SQLException {
         // given: a data source such that the result set is empty
@@ -568,10 +582,29 @@ public final class CredentialControllerTest {
     }
 
     @Test
+    void addUserNoResults() throws SQLException {
+        // given: a data source such that the result set is empty
+        DataSource dataSource = mockEmptyResultSet();
+
+        // use the mocked data source, storing the original
+        DataSource originalDataSource = DatabaseController.getDataSource();
+        DatabaseController.setDataSource(dataSource);
+
+        // when: checking if the email exists
+        // then: should not exist
+        Integer userId = addUser(TEST_USERNAME, TEST_EMAIL, "password");
+        assertNull(userId);
+
+        // after: reset data source
+        DatabaseController.setDataSource(originalDataSource);
+    }
+
+    @Test
     void deleteUserThatDoesNotExist() throws SQLException {
         // given: a non-existing user (uid = -1)
-        // when: deleting the user
-        // then: the user is not deleted
-        assertFalse(CredentialController.deleteUser(-1));
+        int userId = -1;
+
+        // when: deleting the user, then: the user is not deleted
+        assertFalse(CredentialController.deleteUser(userId));
     }
 }
