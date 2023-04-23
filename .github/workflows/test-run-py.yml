@@ -1,4 +1,4 @@
-name: test py
+name: Test RouteGen Python Script
 
 on:
   push:
