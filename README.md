@@ -4,7 +4,8 @@
 
 | __Build Status__  | [![Java CI with Maven](https://github.com/tmcowley/pbrg-services/actions/workflows/maven.yml/badge.svg)](https://github.com/tmcowley/pbrg-services/actions/workflows/maven.yml) |
 |:------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| __Code Quality__  | [![GitHub Super-Linter](https://github.com/tmcowley/pbrg-services/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)                 |
+| __Code Quality__  | [![GitHub Super-Linter](https://github.com/tmcowley/pbrg-services/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter) |
+| __Security Assessment__ | [![CodeQL](https://github.com/BouldAR-Warwick/services/workflows/SAST:%20CodeQL/badge.svg)](https://codeql.github.com/) |
 | __Test Coverage__ | ![Coverage](.github/badges/jacoco.svg)                                                                                                                                          |
 
 ## Technologies
