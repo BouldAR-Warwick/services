@@ -29,26 +29,30 @@ public class GetRouteImageServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
+        // ensure session exists
         HttpSession session = getSession(request);
-
-        // return unauthorized error message if session is not exist
         if (session == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Session does not exist"
+            );
             return;
         }
 
         // ensure session has the route id
-        boolean sessionWithoutRouteId = session.getAttribute("rid") == null;
+        String routeIdKey = "rid";
+        boolean sessionWithoutRouteId =
+            session.getAttribute(routeIdKey) == null;
         if (sessionWithoutRouteId) {
             // no route id in session
             response.sendError(
-                HttpServletResponse.SC_EXPECTATION_FAILED,
+                HttpServletResponse.SC_BAD_REQUEST,
                 "Session has no route id"
             );
             return;
         }
 
-        int routeId = (int) session.getAttribute("rid");
+        int routeId = (int) session.getAttribute(routeIdKey);
 
         // ensure the route exists
         if (!routeExists(routeId)) {
@@ -61,11 +65,19 @@ public class GetRouteImageServlet extends MyHttpServlet {
 
         // get the route image file name
         String routeImageFileName = getRouteImageFileNameByRouteId(routeId);
-        assert routeImageFileName != null;
+
+        // ensure the route image has been generated
+        if (routeImageFileName == null) {
+            response.sendError(
+                HttpServletResponse.SC_EXPECTATION_FAILED,
+                "Route image has not been generated"
+            );
+            return;
+        }
 
         // ensure the file exists
         File wallImageFile = new File(
-            ServletUtils.getRouteImagePath() + routeImageFileName
+            ServletUtils.getRouteImagePath(), routeImageFileName
         );
         if (!wallImageFile.exists()) {
             response.sendError(
@@ -83,5 +95,8 @@ public class GetRouteImageServlet extends MyHttpServlet {
                 "Error reading image file"
             );
         }
+
+        // send ok response
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

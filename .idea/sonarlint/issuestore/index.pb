@@ -22,10 +22,6 @@ l
 `
 0src/main/java/pbrg/webservices/package-info.java,b/b/bba614a12dc9c7ebe4eb13649002d818e6155acd
 i
-9src/main/java/pbrg/webservices/servlets/LoginServlet.java,f/c/fc564c739e2db5f0663a8c46215bab1d1336fa0f
-l
-<src/main/java/pbrg/webservices/servlets/RegisterServlet.java,3/6/36c2fa8a2bcd6143395962f9cdb47a50cf625e41
-i
 9src/main/java/pbrg/webservices/servlets/HelloServlet.java,2/0/2093b16c8d626e3ddcb8a996e63120c9b83c5f13
 n
 >src/main/java/pbrg/webservices/servlets/StoreRouteServlet.java,b/f/bf0c220b17bdbc9ec78909ce7d2d9b0e7fb4171c
@@ -35,8 +31,6 @@ j
 :src/main/java/pbrg/webservices/servlets/LogoutServlet.java,4/c/4c421f48c10077cae54cf796de33f574132b6b9c
 i
 9src/main/java/pbrg/webservices/database/TestDatabase.java,6/5/6541f9632df6108451bb5e53e032d7fd6a0b0103
-q
-Asrc/main/java/pbrg/webservices/database/CredentialController.java,a/1/a1d7b2aff8ae11daec4c9546956900412da1ec1a
 j
 :src/test/java/pbrg/webservices/utils/ProcessUtilsTest.java,2/5/25a2480bfcab695cd046490df4b3c2b25e6ce6d5
 i
@@ -61,8 +55,6 @@ n
 >src/test/java/pbrg/webservices/servlets/MyHttpServletTest.java,8/0/80e1b494358e28e44c3786e0f8c7f3a8b3f94718
 o
 ?src/test/java/pbrg/webservices/database/WallControllerTest.java,5/4/54968d4d2b15c29da8f195cd911d5e0a9ab8f38c
-u
-Esrc/test/java/pbrg/webservices/database/CredentialControllerTest.java,c/d/cdd1c30fbd0efe6c07cc50464b5a12e2d7683ef7
 j
 :src/main/java/pbrg/webservices/servlets/GetGymServlet.java,4/1/41b9dc1e8268ba90389aee9c9cdce9bcb5e8a679
 p

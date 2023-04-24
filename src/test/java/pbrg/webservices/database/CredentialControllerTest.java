@@ -136,7 +136,7 @@ public final class CredentialControllerTest {
     }
 
     @AfterEach
-    void ensureTestUserIsRemoved() throws SQLException {
+    void ensureTestUserIsRemoved() {
         assertFalse(usernameExists(TEST_USERNAME));
         assertFalse(emailExists(TEST_EMAIL));
     }
@@ -235,7 +235,7 @@ public final class CredentialControllerTest {
         }
 
         @Test
-        void signInInvalidUser() throws SQLException {
+        void signInInvalidUser() {
             // given: a user that does not exist in the system
             assertFalse(usernameExists(TEST_USERNAME));
             assertFalse(emailExists(TEST_EMAIL));
@@ -283,13 +283,11 @@ public final class CredentialControllerTest {
             DataSource originalDataSource = DatabaseController.getDataSource();
             DatabaseController.setDataSource(mockedDataSource);
 
-            assertThrows(
-                // then: an exception is thrown
-                SQLException.class,
+            // when: signing in and experience SQLException
+            User user = CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
-                // when: signing in
-                () -> CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD)
-            );
+            // then: should not retrieve user
+            assertNull(user);
 
             // after: reset data source
             DatabaseController.setDataSource(originalDataSource);
@@ -328,13 +326,11 @@ public final class CredentialControllerTest {
             DataSource originalDataSource = DatabaseController.getDataSource();
             DatabaseController.setDataSource(mockedDataSource);
 
-            assertThrows(
-                // then: an exception is thrown
-                SQLException.class,
+            // when: signing in
+            User user = CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
-                // when: signing in
-                () -> CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD)
-            );
+            // then: should not retrieve user
+            assertNull(user);
 
             // after: reset data source
             DatabaseController.setDataSource(originalDataSource);
@@ -354,13 +350,11 @@ public final class CredentialControllerTest {
             DataSource originalDataSource = DatabaseController.getDataSource();
             DatabaseController.setDataSource(mockedDataSource);
 
-            assertThrows(
-                // then: an exception is thrown
-                SQLException.class,
+            // when: signing in
+            User user = CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
-                // when: signing in
-                () -> CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD)
-            );
+            // then: should not retrieve user
+            assertNull(user);
 
             // after: reset data source
             DatabaseController.setDataSource(originalDataSource);
@@ -403,13 +397,11 @@ public final class CredentialControllerTest {
             DataSource originalDataSource = DatabaseController.getDataSource();
             DatabaseController.setDataSource(mockedDataSource);
 
-            assertThrows(
-                // then: an exception is thrown
-                SQLException.class,
+            // when: signing in
+            User user = CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
-                // when: signing in
-                () -> CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD)
-            );
+            // then: should not retrieve user
+            assertNull(user);
 
             // after: reset data source
             DatabaseController.setDataSource(originalDataSource);
@@ -485,7 +477,7 @@ public final class CredentialControllerTest {
     }
 
     @Test
-    void usernameExistsUserDoesNotExist() throws SQLException {
+    void usernameExistsUserDoesNotExist() {
         // given: a non-existing username
         // when: checking if the username exists
         // then: the username does not exist

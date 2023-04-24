@@ -23,10 +23,9 @@ public final class CredentialController {
      * @param username username
      * @param password password
      * @return user object
-     * @throws SQLException if the SQL query fails
      */
     public static @Nullable User signIn(
-        final String username, final String password) throws SQLException {
+        final String username, final String password) {
         User user = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -40,8 +39,9 @@ public final class CredentialController {
             if (rs.next()) {
                 user = new User(rs.getInt("uid"), rs.getString("username"));
             }
+        } catch (SQLException e) {
+            return null;
         }
-
         return user;
     }
 
@@ -52,11 +52,10 @@ public final class CredentialController {
      * @param email    email
      * @param password password
      * @return true if user was added, false otherwise
-     * @throws SQLException if SQL error occurs
      */
     public static boolean signUp(
         final String username, final String email, final String password
-    ) throws SQLException {
+    ) {
         Integer userId = addUser(username, email, password);
         boolean added = userId != null;
         if (!added) {
@@ -72,11 +71,10 @@ public final class CredentialController {
      * @param email email
      * @param password password
      * @return user id if user was added, null otherwise
-     * @throws SQLException if SQL error occurs
      */
-    public static Integer addUser(
+    public static @Nullable Integer addUser(
         final String username, final String email, final String password
-    ) throws SQLException {
+    ) {
         // ensure username, email are unique
         if (usernameExists(username) || emailExists(email)) {
             return null;
@@ -99,6 +97,9 @@ public final class CredentialController {
             if (rs.next()) {
                 userId = rs.getInt(1);
             }
+        } catch (SQLException e) {
+            return usernameExists(username)
+                ? getUserIDFromUsername(username) : null;
         }
         return userId;
     }
@@ -107,9 +108,8 @@ public final class CredentialController {
      * Check if a user exists by id.
      * @param uid user id
      * @return true if user exists, false otherwise
-     * @throws SQLException if SQL error occurs
      */
-    public static boolean userExists(final int uid) throws SQLException {
+    public static boolean userExists(final int uid) {
         boolean exists = false;
         try (
             Connection connection = getDataSource().getConnection();
@@ -122,8 +122,9 @@ public final class CredentialController {
             if (rs.next()) {
                 exists = rs.getBoolean(1);
             }
+        } catch (SQLException e) {
+            return false;
         }
-
         return exists;
     }
 
@@ -133,7 +134,7 @@ public final class CredentialController {
      * @return true if username exists, false otherwise
      * @throws SQLException if SQL error occurs
      */
-    static boolean usernameExists(final String username) throws SQLException {
+    static boolean usernameExists(final String username) {
         boolean exists = false;
         try (
             Connection connection = getDataSource().getConnection();
@@ -146,8 +147,9 @@ public final class CredentialController {
             if (rs.next()) {
                 exists = rs.getBoolean(1);
             }
+        } catch (SQLException e) {
+            return false;
         }
-
         return exists;
     }
 
@@ -155,9 +157,8 @@ public final class CredentialController {
      * Check if an email exists.
      * @param email email
      * @return true if email exists, false otherwise
-     * @throws SQLException if SQL error occurs
      */
-    static boolean emailExists(final String email) throws SQLException {
+    static boolean emailExists(final String email) {
         boolean exists = false;
         try (
             Connection connection = getDataSource().getConnection();
@@ -170,8 +171,9 @@ public final class CredentialController {
             if (rs.next()) {
                 exists = rs.getBoolean(1);
             }
+        } catch (SQLException e) {
+            return false;
         }
-
         return exists;
     }
 
@@ -183,7 +185,7 @@ public final class CredentialController {
      */
     static @Nullable Integer getUserIDFromUsername(
         final String username
-    ) throws SQLException {
+    ) {
         Integer uid = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -196,8 +198,9 @@ public final class CredentialController {
             if (rs.next()) {
                 uid = rs.getInt("uid");
             }
+        } catch (SQLException e) {
+            return null;
         }
-
         return uid;
     }
 

@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Arrays;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +33,6 @@ public class LoginServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-
         // convert request body to json object
         JSONObject credentials;
         try {
@@ -58,17 +56,10 @@ public class LoginServlet extends MyHttpServlet {
         boolean stayLoggedIn = credentials.getBoolean("stayLoggedIn");
 
         // select user
-        User user;
-        try {
-            user = signIn(username, password);
-        } catch (SQLException e) {
-            response.getWriter().println(e.getMessage());
-            return;
-        }
+        User user = signIn(username, password);
 
         // case one -> the user has not been authenticated (wrong credentials)
-        boolean userLoggedIn = (user != null);
-        if (!userLoggedIn) {
+        if (user == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

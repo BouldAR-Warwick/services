@@ -94,7 +94,7 @@ public class GetWallImageServlet extends MyHttpServlet {
 
         // ensure the file exists
         File wallImageFile = new File(
-            ServletUtils.getWallImagePath() + wallImageFileName
+            ServletUtils.getWallImagePath(), wallImageFileName
         );
         if (!wallImageFile.exists()) {
             response.sendError(
