@@ -133,7 +133,8 @@ public final class ServletUtils {
      * @throws IOException file errors
      */
     static void returnImageAsBitmap(
-        final HttpServletResponse response, final String filePath
+        @NotNull final HttpServletResponse response,
+        @NotNull final String filePath
     ) throws IOException {
         // get the file extension, lookup & set content type
         String ext = getExtension(filePath);

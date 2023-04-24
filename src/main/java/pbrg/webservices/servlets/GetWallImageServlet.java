@@ -56,10 +56,8 @@ public class GetWallImageServlet extends MyHttpServlet {
             return;
         }
 
-        // get the gym id from the session
-        int gymId = (int) session.getAttribute(gymIdKey);
-
         // ensure the gym has a wall
+        int gymId = (int) session.getAttribute(gymIdKey);
         if (!gymHasWall(gymId)) {
             // return unauthorized error message
             response.sendError(
@@ -74,12 +72,26 @@ public class GetWallImageServlet extends MyHttpServlet {
         try {
             int wallId = getWallIdFromGymId(gymId);
             wallImageFileName = getWallImageFileNameFromWallId(wallId);
-        } catch (SQLException e) {
-            response.getWriter().println(e.getMessage());
+            if (wallImageFileName == null) {
+                throw new AssertionError(
+                    "wallImageFileName is null for a gym with a wall"
+                );
+            }
+        } catch (SQLException | AssertionError e) {
+            response.sendError(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                e.getMessage()
+            );
             return;
         }
-        assert wallImageFileName != null;
 
-        returnWallImageAsBitmap(response, wallImageFileName);
+        try {
+            returnWallImageAsBitmap(response, wallImageFileName);
+        } catch (IOException e) {
+            response.sendError(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Error reading image file"
+            );
+        }
     }
 }
