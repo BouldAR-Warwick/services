@@ -4,12 +4,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.File;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.sql.SQLException;
+import pbrg.webservices.utils.ServletUtils;
+
 import static pbrg.webservices.database.RouteController.addImageToRoute;
 import static pbrg.webservices.database.RouteController.addRoute;
 import static pbrg.webservices.database.WallController.addWall;
@@ -52,12 +55,22 @@ public class GenerateRouteServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // get session
         HttpSession session = getSession(request);
 
-        // return unauthorized error message if session is not exist
+        // ensure session is valid
         if (session == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        // ensure session has attributes
+        boolean sessionHasAttributes = session.getAttribute("uid") != null
+            && session.getAttribute("gid") != null;
+        if (!sessionHasAttributes) {
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Session does not have attributes user, gym ids."
+            );
             return;
         }
 
@@ -66,7 +79,6 @@ public class GenerateRouteServlet extends MyHttpServlet {
         try {
             arguments = new JSONObject(getBody(request));
         } catch (JSONException e) {
-            // Issue parsing body as JSON
             response.sendError(
                 HttpServletResponse.SC_BAD_REQUEST,
                 "Issue parsing body as JSON."
@@ -77,10 +89,9 @@ public class GenerateRouteServlet extends MyHttpServlet {
         // ensure request has all credentials
         String difficultyKey = "difficulty";
         if (!arguments.has(difficultyKey)) {
-            // Missing difficulty
             response.sendError(
                 HttpServletResponse.SC_BAD_REQUEST,
-                "Body missing difficulty."
+                "Body missing route grade."
             );
             return;
         }
@@ -99,8 +110,8 @@ public class GenerateRouteServlet extends MyHttpServlet {
             assert wallId != null;
         }
 
+        // ensure the gym has a wall (mocked above)
         if (!gymHasWall(gymId)) {
-            // Gym does not have a wall
             response.sendError(
                 HttpServletResponse.SC_EXPECTATION_FAILED,
                 "Gym does not have a wall"
@@ -108,14 +119,18 @@ public class GenerateRouteServlet extends MyHttpServlet {
             return;
         }
 
+        // get the wall ID
+        Integer wallID = getWallIdFromGymId(gymId);
+        assert wallID != null;
+
         // generate the route
         JSONArray route;
         try {
             route = generateRouteMoonBoard(grade);
             if (route.isEmpty()) {
-                throw new RuntimeException();
+                throw new IllegalStateException("Route generation failed");
             }
-        } catch (RuntimeException e) {
+        } catch (IllegalStateException | IOException e) {
             // Route generation failed
             e.printStackTrace();
             response.sendError(
@@ -125,29 +140,12 @@ public class GenerateRouteServlet extends MyHttpServlet {
             return;
         }
 
-        // get the wall ID
-        int wallID;
-        try {
-            wallID = getWallIdFromGymId(gymId);
-        } catch (SQLException | NullPointerException e) {
-            // Failed to get wall ID from gym ID
-            e.printStackTrace();
-            response.sendError(
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Failed to get wall ID from gym ID."
-            );
-            return;
-        }
-
         // store the route as a new route in the database
-        int routeId;
-        try {
-            routeId = addRoute(
-                route.toString(), grade, userId, wallID
-            );
-        } catch (SQLException | NullPointerException e) {
+        Integer routeId = addRoute(
+            route.toString(), grade, userId, wallID
+        );
+        if (routeId == null) {
             // Failed to create route
-            e.printStackTrace();
             response.sendError(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Failed to create route."
@@ -156,15 +154,24 @@ public class GenerateRouteServlet extends MyHttpServlet {
         }
 
         // generate route image, store filename
-        String routeImageFileName;
-        try {
-            routeImageFileName = createRouteImagePython(routeId);
-        } catch (SQLException e) {
+        String routeImageFileName = createRouteImagePython(routeId);
+        if (routeImageFileName == null) {
             // Failed to create route image
-            e.printStackTrace();
             response.sendError(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Failed to create route image."
+                "Failed to create route image, IOException thrown."
+            );
+            return;
+        }
+
+        // ensure routeImageFileName exists
+        File routeImage =
+            new File(ServletUtils.getRouteImagePath() + routeImageFileName);
+        if (!routeImage.exists()) {
+            // Failed to create route image
+            response.sendError(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Failed to create route image, file not found."
             );
             return;
         }

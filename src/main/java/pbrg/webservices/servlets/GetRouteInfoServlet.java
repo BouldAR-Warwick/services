@@ -1,12 +1,12 @@
 package pbrg.webservices.servlets;
 
+import static pbrg.webservices.database.RouteController.routeExists;
 import static pbrg.webservices.utils.RouteUtils.getRouteContentJSONArray;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.SQLException;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -27,7 +27,6 @@ public class GetRouteInfoServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-
         HttpSession session = getSession(request);
 
         // return unauthorized error message if session is not exist
@@ -37,21 +36,28 @@ public class GetRouteInfoServlet extends MyHttpServlet {
         }
 
         // ensure route is stored in session
-        if (session.getAttribute("rid") == null) {
+        String routeIdKey = "rid";
+        boolean sessionWithoutRouteId =
+            session.getAttribute(routeIdKey) == null;
+        if (sessionWithoutRouteId) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         // collect gym id, user id from cookies
-        int routeId = (int) session.getAttribute("rid");
+        int routeId = (int) session.getAttribute(routeIdKey);
 
-        JSONArray listOfHolds;
-        try {
-            listOfHolds = getRouteContentJSONArray(routeId);
-        } catch (SQLException e) {
-            response.getWriter().println(e.getMessage());
+        // ensure the route exists
+        if (!routeExists(routeId)) {
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "Route does not exist"
+            );
             return;
         }
+
+        JSONArray listOfHolds = getRouteContentJSONArray(routeId);
+        assert listOfHolds != null;
 
         // return: nest the hold array in a JSON object under key info
         JSONObject info = new JSONObject();

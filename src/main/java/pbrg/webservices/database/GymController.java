@@ -86,9 +86,8 @@ public final class GymController {
      * Check if a gym exists (by gym name).
      * @param gymId gym identifier
      * @return true if gym exists, false otherwise
-     * @throws SQLException if SQL error occurs
      */
-    public static boolean gymExists(final int gymId) throws SQLException {
+    public static boolean gymExists(final int gymId) {
         boolean exists = false;
         try (
             Connection connection = getDataSource().getConnection();
@@ -102,6 +101,8 @@ public final class GymController {
             if (rs.next()) {
                 exists = rs.getBoolean(1);
             }
+        } catch (SQLException e) {
+            return false;
         }
         return exists;
     }

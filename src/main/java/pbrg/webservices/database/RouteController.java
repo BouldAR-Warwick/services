@@ -10,6 +10,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pbrg.webservices.models.Route;
 import pbrg.webservices.models.RouteFull;
 
@@ -61,11 +62,10 @@ public final class RouteController {
      * Get a route by its ID.
      * @param routeId route ID
      * @return route
-     * @throws SQLException if SQL error occurs
      */
     public static RouteFull getRouteByRouteId(
         final int routeId
-    ) throws SQLException {
+    ) {
         RouteFull route = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -88,6 +88,8 @@ public final class RouteController {
                     rs.getString("image_file_name")
                 );
             }
+        } catch (SQLException e) {
+            return null;
         }
         return route;
     }
@@ -124,14 +126,42 @@ public final class RouteController {
     }
 
     /**
+     * Check if a route, by ID, exists.
+     * @param routeId route ID
+     * @return route exists
+     */
+    public static boolean routeExists(
+        final int routeId
+    ) {
+        boolean exists = false;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT EXISTS("
+                    + "SELECT 1 FROM routes "
+                    + "WHERE routes.RID=?"
+                    + ")"
+            )
+        ) {
+            pst.setInt(1, routeId);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                exists = rs.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+        return exists;
+    }
+
+    /**
      * Get a route's contents (list of holds) as a String.
      * @param routeId route identifier
      * @return list of holds in JSON
-     * @throws SQLException database issues
      */
-    public static String getRouteContent(
+    public static @Nullable String getRouteContent(
         final int routeId
-    ) throws SQLException {
+    ) {
         String holds = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -148,6 +178,8 @@ public final class RouteController {
             if (rs.next()) {
                 holds = rs.getString("route_content");
             }
+        } catch (SQLException e) {
+            return null;
         }
         return holds;
     }
@@ -159,12 +191,11 @@ public final class RouteController {
      * @param creatorUserId creator user identifier
      * @param wallId wall identifier
      * @return route identifier
-     * @throws SQLException database issues
      */
     public static Integer addRoute(
         final String routeContent, final int difficulty,
         final int creatorUserId, final int wallId
-    ) throws SQLException {
+    ) {
         Integer routeId = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -196,6 +227,8 @@ public final class RouteController {
                 // the route ID
                 routeId = rs.getInt(1);
             }
+        } catch (SQLException e) {
+            return null;
         }
         return routeId;
     }

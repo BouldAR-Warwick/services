@@ -2,6 +2,7 @@ package pbrg.webservices.utils;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -126,8 +127,8 @@ final class RouteUtilsTest {
         setPythonScriptsDir("/dev/null/");
 
         assertThrows(
-            // then: an UncheckedIOException should be thrown
-            UncheckedIOException.class,
+            // then: an IOException should be thrown
+            IOException.class,
 
             // when: the file is checked
             () -> generateRouteMoonBoard(1)
@@ -151,8 +152,8 @@ final class RouteUtilsTest {
         assertFalse(pythonFile.exists());
 
         assertThrows(
-            // then: an UncheckedIOException should be thrown
-            UncheckedIOException.class,
+            // then: an IOException should be thrown
+            IOException.class,
 
             // when: the file is checked
             () -> plotHoldsOnImagePython(
@@ -170,13 +171,11 @@ final class RouteUtilsTest {
         // given: a route that has no wall image
         int routeId = -1;
 
-        assertThrows(
-            // then: an exception should be thrown
-            RuntimeException.class,
+        // when: trying to createRouteImagePython
+        String routeImageFileName = createRouteImagePython(routeId);
 
-            // when: trying to createRouteImagePython
-            () -> createRouteImagePython(routeId)
-        );
+        // then: routeImageFileName should be null
+        assertNull(routeImageFileName);
     }
 
     @Test
@@ -195,13 +194,11 @@ final class RouteUtilsTest {
         );
         assertNotNull(routeId);
 
-        assertThrows(
-            // then: an exception should be thrown
-            RuntimeException.class,
+        // when: trying to createRouteImagePython
+        String routeImage = createRouteImagePython(routeId);
 
-            // when: trying to createRouteImagePython
-            () -> createRouteImagePython(routeId)
-        );
+        // then: routeImage should be generated
+        assertNotNull(routeImage);
 
         // after: delete models
         assertTrue(deleteRoute(routeId));
@@ -212,26 +209,23 @@ final class RouteUtilsTest {
 
     @Test
     void getRouteContentJSONArrayWithInvalidRoute() {
-        assertThrows(
-            // then: an IllegalArgumentException should be thrown
-            IllegalArgumentException.class,
+        // given: a route ID that does not exist
+        // when: trying to getRouteContentJSONArray
+        JSONArray routeContent = getRouteContentJSONArray(INVALID_ROUTE_ID);
 
-            // given: a route ID that does not exist
-            // when: trying to getRouteContentJSONArray
-            () -> getRouteContentJSONArray(INVALID_ROUTE_ID)
-        );
+        // then: routeContent should be null
+        assertNull(routeContent);
     }
 
     @Test
     void getRouteImageFileNameByRouteIdWithInvalidRoute() {
-        assertThrows(
-            // then: an IllegalArgumentException should be thrown
-            IllegalArgumentException.class,
+        // given: a route ID that does not exist
+        // when: trying to getRouteImageFileNamesByRouteId
+        String routeImageFileName =
+            getRouteImageFileNameByRouteId(INVALID_ROUTE_ID);
 
-            // given: a route ID that does not exist
-            // when: trying to getRouteImageFileNamesByRouteId
-            () -> getRouteImageFileNameByRouteId(INVALID_ROUTE_ID)
-        );
+        // then: routeImageFileName should be null
+        assertNull(routeImageFileName);
     }
 
     @Test
@@ -251,6 +245,7 @@ final class RouteUtilsTest {
 
         // generate the route image, add to route
         String routeImage = createRouteImagePython(routeId);
+        assertNotNull(routeImage);
         assertTrue(addImageToRoute(routeId, routeImage));
 
         // when: getting the route image file name

@@ -18,17 +18,7 @@ import org.jetbrains.annotations.NotNull;
 public final class ServletUtils {
 
     static {
-        if (production()) {
-            wallImagePath = System.getProperty("user.home")
-                + "/Projects/services/src/main/resources/";
-            routeImagePath = System.getProperty("user.home")
-                + "/Projects/services/src/main/resources/";
-        } else {
-            wallImagePath = System.getProperty("user.dir")
-                + "/src/main/resources/";
-            routeImagePath = System.getProperty("user.dir")
-                + "/src/main/resources/";
-        }
+        setPaths(production());
     }
 
     /** The path to the wall images directory. */
@@ -43,6 +33,27 @@ public final class ServletUtils {
      */
     public static String getWallImagePath() {
         return wallImagePath;
+    }
+
+    /**
+     * Set the image paths.
+     * @param inProduction true if in production, false otherwise
+     */
+    public static void setPaths(final boolean inProduction) {
+        // if in production
+        if (inProduction) {
+            wallImagePath = System.getProperty("user.home")
+                + "/Projects/services/src/main/resources/";
+            routeImagePath = System.getProperty("user.home")
+                + "/Projects/services/src/main/resources/";
+            return;
+        }
+
+        // otherwise in test
+        wallImagePath = System.getProperty("user.dir")
+            + "/src/main/resources/";
+        routeImagePath = System.getProperty("user.dir")
+            + "/src/main/resources/";
     }
 
     /**

@@ -6,10 +6,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import org.jetbrains.annotations.NotNull;
 import pbrg.webservices.utils.ServletUtils;
 
+import static pbrg.webservices.database.GymController.gymExists;
 import static pbrg.webservices.database.WallController
     .getWallIdFromGymId;
 import static pbrg.webservices.database.WallController
@@ -58,8 +58,19 @@ public class GetWallImageServlet extends MyHttpServlet {
             return;
         }
 
-        // ensure the gym has a wall
         int gymId = (int) session.getAttribute(gymIdKey);
+
+        // ensure the gym exists
+        if (!gymExists(gymId)) {
+            // return unauthorized error message
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Gym does not exist"
+            );
+            return;
+        }
+
+        // ensure the gym has a wall
         if (!gymHasWall(gymId)) {
             // return unauthorized error message
             response.sendError(
@@ -69,20 +80,14 @@ public class GetWallImageServlet extends MyHttpServlet {
             return;
         }
 
-        // get wall image file name from gym id
-        String wallImageFileName;
-        try {
-            int wallId = getWallIdFromGymId(gymId);
-            wallImageFileName = getWallImageFileNameFromWallId(wallId);
-            if (wallImageFileName == null) {
-                throw new AssertionError(
-                    "wallImageFileName is null for a gym with a wall"
-                );
-            }
-        } catch (SQLException | AssertionError e) {
+        // ensure the wall has an image
+        Integer wallId = getWallIdFromGymId(gymId);
+        assert wallId != null;
+        String wallImageFileName = getWallImageFileNameFromWallId(wallId);
+        if (wallImageFileName == null) {
             response.sendError(
                 HttpServletResponse.SC_EXPECTATION_FAILED,
-                e.getMessage()
+                "Image file name is null, but wall exists in gym"
             );
             return;
         }

@@ -67,11 +67,10 @@ public final class WallController {
      * Get a wall image file name by wall id.
      * @param wallId the wall id
      * @return the wall image file name
-     * @throws SQLException If the query fails
      */
-    public static String getWallImageFileNameFromWallId(
+    public static @Nullable String getWallImageFileNameFromWallId(
         final int wallId
-    ) throws SQLException {
+    ) {
         String fileName = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -88,8 +87,9 @@ public final class WallController {
             if (rs.next()) {
                 fileName = rs.getString("image_file_name");
             }
+        } catch (SQLException e) {
+            return null;
         }
-
         return fileName;
     }
 
@@ -128,11 +128,10 @@ public final class WallController {
      * Returns the wall image file name based on the route ID.
      * @param routeId the route ID
      * @return the wall image file name if found, null otherwise
-     * @throws SQLException if there is an error accessing the database
      */
     public static @Nullable String getWallImageFileNameFromRouteId(
         final int routeId
-    ) throws SQLException {
+    ) {
         Integer wallId = getWallIdFromRouteId(routeId);
         if (wallId == null) {
             return null;
@@ -143,12 +142,11 @@ public final class WallController {
     /**
      * Get a gym ID from a gym ID.
      * @param gymId gym identifier
-     * @return wall identifier
-     * @throws SQLException database issues
+     * @return wall identifier, or null if none found
      */
     public static Integer getWallIdFromGymId(
         final int gymId
-    ) throws SQLException {
+    ) {
         Integer wallId = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -165,6 +163,8 @@ public final class WallController {
             if (rs.next()) {
                 wallId = Integer.parseInt(rs.getString("WID"));
             }
+        } catch (SQLException e) {
+            return null;
         }
         return wallId;
     }
@@ -185,6 +185,34 @@ public final class WallController {
             )
         ) {
             pst.setInt(1, gymId);
+            ResultSet rs = pst.executeQuery();
+
+            // get JSON list of holds
+            if (rs.next()) {
+                has = rs.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+        return has;
+    }
+
+    /**
+     * Check if a route has a wall.
+     * @param routeId the route id
+     * @return true if the route has a wall, false otherwise
+     */
+    public static boolean routeHasWall(final int routeId) {
+        boolean has = false;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT EXISTS (SELECT routes.WID "
+                    + "FROM routes "
+                    + "WHERE RID = ?)"
+            )
+        ) {
+            pst.setInt(1, routeId);
             ResultSet rs = pst.executeQuery();
 
             // get JSON list of holds

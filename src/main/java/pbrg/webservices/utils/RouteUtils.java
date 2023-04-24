@@ -1,36 +1,53 @@
 package pbrg.webservices.utils;
 
-import static pbrg.webservices.database.WallController.getWallImageFileNameFromRouteId;
+import static pbrg.webservices.database.ProductionDatabase.production;
+import static pbrg.webservices.database.RouteController.routeExists;
+import static pbrg.webservices.database.WallController
+    .getWallImageFileNameFromRouteId;
+import static pbrg.webservices.database.WallController.routeHasWall;
 import static pbrg.webservices.utils.ProcessUtils.runProcessEnsureSuccess;
-import static pbrg.webservices.utils.ProcessUtils.runProcessGetOutputEnsureSuccess;
+import static pbrg.webservices.utils.ProcessUtils
+    .runProcessGetOutputEnsureSuccess;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.sql.SQLException;
 import java.util.Objects;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import pbrg.webservices.database.RouteController;
 import pbrg.webservices.models.RouteFull;
 
 public final class RouteUtils {
 
-    /** The current working directory. */
-    private static final File WORKING_DIR =
-        new File(System.getProperty("user.dir"));
-
-    /** The default path to the python scripts directory. */
-    private static final String DEFAULT_PYTHON_SCRIPTS_DIR =
-        WORKING_DIR + "/scripts/python/";
+    static {
+        // set the python scripts directory
+        setPythonScriptsDir(production());
+    }
 
     /** The path to the python scripts directory. */
-    private static String pythonScriptsDir =
-        DEFAULT_PYTHON_SCRIPTS_DIR;
+    private static String pythonScriptsDir;
 
     /** Util class, no instances. */
     private RouteUtils() {
         throw new IllegalStateException("Utility class");
+    }
+
+    /**
+     * Set the python scripts directory based on the environment.
+     * @param inProduction true if in production, false otherwise
+     */
+    public static void setPythonScriptsDir(final boolean inProduction) {
+        // if in production
+        if (inProduction) {
+            pythonScriptsDir = System.getProperty("user.home")
+                + "/Projects/services/scripts/python/";
+            return;
+        }
+
+        // otherwise in test
+        pythonScriptsDir = System.getProperty("user.dir") + "/scripts/python/";
     }
 
     /**
@@ -54,19 +71,20 @@ public final class RouteUtils {
      * @param grade grade
      * @return route as a JSON object of holds
      */
-    public static JSONArray generateRouteMoonBoard(final int grade)
+    @Contract("_ -> new")
+    public static @NotNull JSONArray generateRouteMoonBoard(final int grade)
         throws IOException {
         // path is working dir + python-scripts/plot-holds.py
         File pythonFile = new File(
-            pythonScriptsDir,
+            RouteUtils.getPythonScriptsDir(),
             "route-gen-moon-board.py"
         );
 
         // ensure file exists
         if (!pythonFile.exists()) {
-            throw new UncheckedIOException(new IOException(
+            throw new IOException(
                 "Python script " + pythonFile + " does not exist"
-            ));
+            );
         }
 
         ProcessBuilder pb = new ProcessBuilder(
@@ -89,33 +107,44 @@ public final class RouteUtils {
      * with a Python script.
      * @param routeId route ID
      * @return file name of the route image
-     * @throws SQLException database errors
      */
-    public static String createRouteImagePython(
+    public static @Nullable String createRouteImagePython(
         final int routeId
-    ) throws SQLException {
-        // Load the image file
-        String wallImageFileName = getWallImageFileNameFromRouteId(routeId);
-        if (wallImageFileName == null) {
-            throw new RuntimeException(
-                "Route " + routeId + " has no wall image"
-            );
+    ) {
+        // ensure the route exists
+        if (!routeExists(routeId)) {
+            return null;
         }
+
+        // ensure the route has a wall
+        if (!routeHasWall(routeId)) {
+            return null;
+        }
+
+        // load the wall image file
+        String wallImageFileName = getWallImageFileNameFromRouteId(routeId);
+        assert wallImageFileName != null;
 
         // Parse the JSON string into a JSON array
         JSONArray holdArray = getRouteContentJSONArray(routeId);
-        if (holdArray.isEmpty()) {
-            throw new RuntimeException(
-                "Route " + routeId + " has no holds"
-            );
+        if (holdArray == null) {
+            // route has no holds
+            return null;
         }
 
         // plot holds on image by calling python script
-        return plotHoldsOnImagePython(
-            routeId, wallImageFileName,
-            ServletUtils.getWallImagePath(), ServletUtils.getRouteImagePath(),
-            holdArray
-        );
+        String routeFileName;
+        try {
+            routeFileName = plotHoldsOnImagePython(
+                routeId, wallImageFileName,
+                ServletUtils.getWallImagePath(),
+                ServletUtils.getRouteImagePath(),
+                holdArray
+            );
+        } catch (IOException e) {
+            return null;
+        }
+        return routeFileName;
     }
 
     /**
@@ -127,13 +156,13 @@ public final class RouteUtils {
      * @param holdArray json array of holds
      * @return new file name
      */
-    public static String plotHoldsOnImagePython(
+    public static @NotNull String plotHoldsOnImagePython(
         final int routeId,
         @NotNull final String wallImageFileName,
         @NotNull final String wallImageFilePath,
         @NotNull final String routeImageFilePath,
         @NotNull final JSONArray holdArray
-    ) {
+    ) throws IOException {
         // path is working dir + python-scripts/plot-holds.py
         File pythonFile = new File(
             pythonScriptsDir,
@@ -142,9 +171,9 @@ public final class RouteUtils {
 
         // ensure file exists
         if (!pythonFile.exists()) {
-            throw new UncheckedIOException(new IOException(
+            throw new IOException(
                 "Python script " + pythonFile + " does not exist"
-            ));
+            );
         }
 
         // python script with arguments: wallImageFileName, routeID, holdArray
@@ -169,18 +198,17 @@ public final class RouteUtils {
      * Get a route's contents (list of holds) as a JSON array.
      * @param routeId route identifier
      * @return list of holds in JSON
-     * @throws SQLException database issues
      */
     @Contract("_ -> new")
-    public static @NotNull JSONArray getRouteContentJSONArray(
+    public static @Nullable JSONArray getRouteContentJSONArray(
         final int routeId
-    ) throws SQLException {
-        String routeContent = RouteController.getRouteContent(routeId);
-        if (routeContent == null) {
-            throw new IllegalArgumentException(
-                "Route " + routeId + " has no content"
-            );
+    ) {
+        // ensure the route exists
+        if (!routeExists(routeId)) {
+            return null;
         }
+        String routeContent = RouteController.getRouteContent(routeId);
+        assert routeContent != null;
         return new JSONArray(Objects.requireNonNull(routeContent));
     }
 
@@ -189,17 +217,16 @@ public final class RouteUtils {
      *
      * @param routeId the route id of the route
      * @return the route image file name
-     * @throws SQLException if there is an error with the database
      */
-    public static @NotNull String getRouteImageFileNameByRouteId(
-        final int routeId) throws SQLException {
-        RouteFull route = RouteController.getRouteByRouteId(routeId);
-        if (route == null) {
-            throw new IllegalArgumentException(
-                "Route " + routeId + " has no image"
-            );
+    public static @Nullable String getRouteImageFileNameByRouteId(
+        final int routeId
+    ) {
+        // ensure the route exists
+        if (!routeExists(routeId)) {
+            return null;
         }
-
+        RouteFull route = RouteController.getRouteByRouteId(routeId);
+        assert route != null;
         return route.getImageFileName();
     }
 }
