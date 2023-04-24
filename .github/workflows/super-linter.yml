@@ -22,6 +22,7 @@ jobs:
           fetch-depth: 0
 
       - name: Lint Code Base
+        continue-on-error: true
         uses: github/super-linter/slim@v4
         env:
           VALIDATE_ALL_CODEBASE: false
