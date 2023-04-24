@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Map;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * For servlet utils: file path utils, API utils (bitmap returns).
@@ -159,7 +160,8 @@ public final class ServletUtils {
      * @throws IOException file errors
      */
     public static void returnWallImageAsBitmap(
-        final HttpServletResponse response, final String fileName
+        @NotNull final HttpServletResponse response,
+        @NotNull final String fileName
     ) throws IOException {
         returnImageAsBitmap(
             response,

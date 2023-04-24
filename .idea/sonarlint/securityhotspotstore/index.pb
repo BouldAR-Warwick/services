@@ -35,9 +35,6 @@ i
 9src/main/java/pbrg/webservices/servlets/HelloServlet.java,2/0/2093b16c8d626e3ddcb8a996e63120c9b83c5f13
 f
 6src/main/java/pbrg/webservices/utils/ServletUtils.java,d/f/df390aa1bce9317d9d30f414d03e49463d3db234
-:
-
-.gitignore,a/5/a5cc2925ca8258af241be7e5b0381edf30266302
 o
 ?src/main/java/pbrg/webservices/database/DatabaseController.java,e/e/ee6bc3f42feac2ecc3d1067825ae115cdccc07ec
 m
@@ -78,8 +75,6 @@ m
 =src/test/java/pbrg/webservices/database/TestDatabaseTest.java,e/a/eac26a77d265d7d2da38ef9a73793fa357f275d2
 f
 6src/main/java/pbrg/webservices/utils/ProcessUtils.java,d/9/d9eb6915256e2a25daf37c0c3f0e095a0eb8b7ed
-t
-Dsrc/test/java/pbrg/webservices/servlets/GetWallImageServletTest.java,7/2/723dff0668a38ff077cd01a98a215df109d24854
 l
 <src/main/java/pbrg/webservices/database/RouteController.java,3/9/3962409221228a8c742f6f70b98b19ece49c384a
 `
@@ -108,3 +103,9 @@ p
 @src/test/java/pbrg/webservices/servlets/GetGymServerletTest.java,6/2/623d7094afe857004f5a11c6205fa99eed84e203
 K
 scripts/database/schema.sql,9/7/970907d4dbe8202b1b02348fb9f0f2afb308f21a
+P
+ .github/workflows/maven-test.yml,2/3/2331da35d5266620291a24a751509cb307d3a19d
+S
+#.github/workflows/maven-package.yml,1/d/1d20c9bcfe2ac44f4a11b3294acb80dd42167ceb
+9
+	README.md,8/e/8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d

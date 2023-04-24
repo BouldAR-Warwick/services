@@ -8,6 +8,7 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/sonarlint/
 *.iws
 *.iml
 *.ipr
@@ -41,3 +42,5 @@ build/
 /htmlReport/
 .idea/sonarlint/
 .idea/sonarlint/*
+.idea/sonarlint/issuestore/index.pb
+.idea/sonarlint/securityhotspotstore/index.pb

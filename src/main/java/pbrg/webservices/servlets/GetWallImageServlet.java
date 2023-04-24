@@ -6,14 +6,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 import static pbrg.webservices.database.WallController
     .getWallIdFromGymId;
 import static pbrg.webservices.database.WallController
     .getWallImageFileNameFromWallId;
+import static pbrg.webservices.database.WallController.gymHasWall;
 import static pbrg.webservices.utils.ServletUtils.returnWallImageAsBitmap;
 
 @WebServlet(name = "GetWallImageServlet", urlPatterns = "/GetWallImage")
@@ -33,75 +32,54 @@ public class GetWallImageServlet extends MyHttpServlet {
         final @NotNull HttpServletResponse response
     ) throws IOException {
         // validate request, session, session requires gid
-        if (!validatePreconditions(request, response)) {
-            return;
-        }
-
+        String gymIdKey = "gid";
         HttpSession session = getSession(request);
-        assert session != null;
-        int gymId = (int) session.getAttribute("gid");
 
-        // get wall image file name from gym id
-        String wallImageFileName;
-        try {
-            Integer wallId = getWallIdFromGymId(gymId);
-            wallImageFileName = getWallImageFileNameFromWallId(wallId);
-        } catch (SQLException e) {
-            response.getWriter().println(e.getMessage());
+        // error if request is unauthorized
+        if (session == null) {
+            // return unauthorized error message
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Session is null"
+            );
             return;
         }
 
-        // wall query failed or no wall against gym
-        if (wallImageFileName == null) {
+        // ensure session has attributes
+        boolean sessionHasGid = session.getAttribute(gymIdKey) != null;
+        if (!sessionHasGid) {
+            // return unauthorized error message
             response.sendError(
-                HttpServletResponse.SC_EXPECTATION_FAILED,
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Session has no gid"
+            );
+            return;
+        }
+
+        // get the gym id from the session
+        int gymId = (int) session.getAttribute(gymIdKey);
+
+        // ensure the gym has a wall
+        if (!gymHasWall(gymId)) {
+            // return unauthorized error message
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
                 "Gym has no wall"
             );
             return;
         }
 
+        // get wall image file name from gym id
+        String wallImageFileName;
+        try {
+            int wallId = getWallIdFromGymId(gymId);
+            wallImageFileName = getWallImageFileNameFromWallId(wallId);
+        } catch (SQLException e) {
+            response.getWriter().println(e.getMessage());
+            return;
+        }
+        assert wallImageFileName != null;
+
         returnWallImageAsBitmap(response, wallImageFileName);
-    }
-
-    private boolean validatePreconditions(
-        final HttpServletRequest request, final HttpServletResponse response
-    ) {
-        String[] requiredAttributes = {"gid"};
-
-        // validate the session
-        HttpSession session = getSession(request);
-        return validateSession(session, requiredAttributes, response);
-    }
-
-    private boolean validateSession(
-        final HttpSession session, final String[] requiredAttributes,
-        final HttpServletResponse response
-    ) {
-        // error if request is unauthorized
-        if (session == null) {
-            // return unauthorized error message
-            try {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return false;
-        }
-
-        // ensure session has attributes
-        List<String> attributes =
-            Collections.list(session.getAttributeNames());
-        for (String attribute: requiredAttributes) {
-            if (!attributes.contains(attribute)) {
-                try {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return false;
-            }
-        }
-
-        return true;
     }
 }

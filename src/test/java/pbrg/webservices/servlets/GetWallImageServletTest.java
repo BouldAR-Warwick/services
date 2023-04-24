@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -57,6 +59,9 @@ class GetWallImageServletTest {
         SERVLET.doPost(request, response);
 
         // check response has HttpServletResponse.SC_UNAUTHORIZED
-        verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).sendError(
+            eq(HttpServletResponse.SC_UNAUTHORIZED),
+            anyString()
+        );
     }
 }
