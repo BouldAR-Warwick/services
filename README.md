@@ -1,12 +1,12 @@
-<p style="text-align: center"><a href="https://github.com/BouldAR-Warwick"><img alt="BouldAR Logo" src="https://github.com/BouldAR-Warwick/bouldar-assets/raw/main/logo_purple.png" width="512"/></a></p>
+<a href="https://github.com/BouldAR-Warwick"><img alt="BouldAR Logo" src="https://github.com/BouldAR-Warwick/bouldar-assets/raw/main/logo_purple.png" width="512"/></a>
 
 # Services
 
-| __Build Status__  | [![Java CI with Maven](https://github.com/tmcowley/pbrg-services/actions/workflows/maven.yml/badge.svg)](https://github.com/tmcowley/pbrg-services/actions/workflows/maven.yml) |
-|:------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| __Code Quality__  | [![GitHub Super-Linter](https://github.com/tmcowley/pbrg-services/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter) |
-| __Security Assessment__ | [![CodeQL](https://github.com/BouldAR-Warwick/services/workflows/SAST:%20CodeQL/badge.svg)](https://codeql.github.com/) |
-| __Test Coverage__ | ![Coverage](.github/badges/jacoco.svg)                                                                                                                                          |
+| __Build Status__      | [![Maven Package](https://github.com/tmcowley/pbrg-services/actions/workflows/maven-package.yml/badge.svg)](https://github.com/tmcowley/pbrg-services/actions/workflows/maven-package.yml) <br /> [![Maven Test](https://github.com/tmcowley/pbrg-services/actions/workflows/maven-test.yml/badge.svg)](https://github.com/tmcowley/pbrg-services/actions/workflows/maven-test.yml) |
+|:----------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| __Code Quality__      | [![GitHub Super-Linter](https://github.com/tmcowley/pbrg-services/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)                                                                                                                                                                                                                     |
+| __Security Scanning__ | [![CodeQL](https://github.com/BouldAR-Warwick/services/workflows/SAST:%20CodeQL/badge.svg)](https://codeql.github.com/)                                                                                                                                                                                                                                                             |
+| __Test Coverage__     | ![Coverage](.github/badges/jacoco.svg)                                                                                                                                                                                                                                                                                                                                              |
 
 ## Technologies
 - Apache Tomcat v10.0.27
