@@ -190,7 +190,9 @@ final class RouteUtilsTest {
         assertNotNull(gymId);
         Integer wallId = addWall(gymId, "Test Wall", "MoonBoard2016.jpg");
         assertNotNull(wallId);
-        Integer routeId = addRoute(routeContent, AVERAGE_GRADE, userId, wallId);
+        Integer routeId = addRoute(
+            routeContent, AVERAGE_GRADE, userId, wallId
+        );
         assertNotNull(routeId);
 
         assertThrows(
@@ -251,7 +253,9 @@ final class RouteUtilsTest {
         assertNotNull(gymId);
         Integer wallId = addWall(gymId, "Test Wall", "wall1.jpg");
         assertNotNull(wallId);
-        Integer routeId = addRoute(routeContent, AVERAGE_GRADE, userId, wallId);
+        Integer routeId = addRoute(
+            routeContent, AVERAGE_GRADE, userId, wallId
+        );
         assertNotNull(routeId);
 
         // generate the route image, add to route
