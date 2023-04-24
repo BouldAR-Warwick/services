@@ -4,9 +4,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import org.jetbrains.annotations.NotNull;
+import pbrg.webservices.utils.ServletUtils;
 
 import static pbrg.webservices.database.WallController
     .getWallIdFromGymId;
@@ -79,8 +81,20 @@ public class GetWallImageServlet extends MyHttpServlet {
             }
         } catch (SQLException | AssertionError e) {
             response.sendError(
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                HttpServletResponse.SC_EXPECTATION_FAILED,
                 e.getMessage()
+            );
+            return;
+        }
+
+        // ensure the file exists
+        File wallImageFile = new File(
+            ServletUtils.getWallImagePath() + wallImageFileName
+        );
+        if (!wallImageFile.exists()) {
+            response.sendError(
+                HttpServletResponse.SC_EXPECTATION_FAILED,
+                "Image file does not exist"
             );
             return;
         }

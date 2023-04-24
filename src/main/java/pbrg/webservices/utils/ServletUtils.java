@@ -1,6 +1,8 @@
 package pbrg.webservices.utils;
 
 import static org.apache.commons.io.FilenameUtils.getExtension;
+import static pbrg.webservices.database.ProductionDatabase.production;
+
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.OutputStream;
@@ -15,20 +17,32 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class ServletUtils {
 
+    static {
+        if (production()) {
+            wallImagePath = System.getProperty("user.home")
+                + "/Projects/services/src/main/resources/";
+            routeImagePath = System.getProperty("user.home")
+                + "/Projects/services/src/main/resources/";
+        } else {
+            wallImagePath = System.getProperty("user.dir")
+                + "/src/main/resources/";
+            routeImagePath = System.getProperty("user.dir")
+                + "/src/main/resources/";
+        }
+    }
+
     /** The path to the wall images directory. */
-    private static final String WALL_IMAGE_PATH =
-        System.getProperty("user.dir") + "/src/main/resources/";
+    private static String wallImagePath;
 
     /** The path to the route images directory. */
-    private static final String ROUTE_IMAGE_PATH =
-        System.getProperty("user.dir") + "/src/main/resources/";
+    private static String routeImagePath;
 
     /**
      * Get the path to the wall images directory.
      * @return the path to the wall images directory
      */
     public static String getWallImagePath() {
-        return WALL_IMAGE_PATH;
+        return wallImagePath;
     }
 
     /**
@@ -36,7 +50,7 @@ public final class ServletUtils {
      * @return the path to the route images directory
      */
     public static String getRouteImagePath() {
-        return ROUTE_IMAGE_PATH;
+        return routeImagePath;
     }
 
     /**
@@ -166,7 +180,7 @@ public final class ServletUtils {
     ) throws IOException {
         returnImageAsBitmap(
             response,
-            ServletUtils.WALL_IMAGE_PATH + fileName
+            ServletUtils.wallImagePath + fileName
         );
     }
 
@@ -181,7 +195,7 @@ public final class ServletUtils {
     ) throws IOException {
         returnImageAsBitmap(
             response,
-            ServletUtils.ROUTE_IMAGE_PATH + fileName
+            ServletUtils.routeImagePath + fileName
         );
     }
 }
