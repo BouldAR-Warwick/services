@@ -84,8 +84,6 @@ l
 <src/main/java/pbrg/webservices/database/RouteController.java,3/9/3962409221228a8c742f6f70b98b19ece49c384a
 t
 Dsrc/test/java/pbrg/webservices/servlets/GetWallImageServletTest.java,7/2/723dff0668a38ff077cd01a98a215df109d24854
-k
-;src/main/java/pbrg/webservices/database/WallController.java,4/d/4dbcd0fdfb2ebbb8623695698f27f10936f4c893
 p
 @src/test/java/pbrg/webservices/database/DatabaseTestMethods.java,6/1/614056bb478f33230436bccc13f03fb5f53d8566
 p
@@ -108,7 +106,5 @@ q
 Asrc/main/java/pbrg/webservices/servlets/GenerateRouteServlet.java,e/8/e82d01380351c42da493751d32f9c60c789a1d45
 p
 @src/test/java/pbrg/webservices/servlets/GetGymServerletTest.java,6/2/623d7094afe857004f5a11c6205fa99eed84e203
-h
-8src/test/java/pbrg/webservices/utils/RouteUtilsTest.java,4/3/43186213b91528fe0eb2dd0ba8bbab5e84fc2aec
 K
 scripts/database/schema.sql,9/7/970907d4dbe8202b1b02348fb9f0f2afb308f21a

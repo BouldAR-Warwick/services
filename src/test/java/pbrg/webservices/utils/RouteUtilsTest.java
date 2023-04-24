@@ -106,7 +106,7 @@ final class RouteUtilsTest {
         assertNotNull(holds);
         assertFalse(holds.toString().isBlank());
         String wallImageFilePath = "MoonBoard2016.jpg";
-        String workingDirectory = System.getProperty("user.dir");
+        String workingDirectory = ServletUtils.getWallImagePath();
 
         // when: plotting holds on image
         String newFile = plotHoldsOnImagePython(
@@ -235,8 +235,7 @@ final class RouteUtilsTest {
     @Test
     void getRouteImageFileNameByRouteIdValid() throws SQLException {
         // given: a route that empty hold array
-        String routeContent = "[{x: 0, y: 0}]";
-        routeContent = "[{x: 0.570, y: 0.655},"
+        String routeContent = "[{x: 0.570, y: 0.655},"
             + " {x: 0.433, y: 0.694},"
             + " {x: 0.529, y: 0.600},"
             + " {x: 0.346, y: 0.542},"
