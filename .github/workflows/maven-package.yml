@@ -6,7 +6,8 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Maven Package (no test)
+# Maven Package (no test)
+name: Maven Package
 
 on:
   push:
