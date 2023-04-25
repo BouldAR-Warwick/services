@@ -10,7 +10,7 @@ import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 import pbrg.webservices.utils.RouteUtils;
 
-@WebServlet(name = "DeleteRouteServlet", urlPatterns = "/deleteRoute")
+@WebServlet(name = "DeleteRouteServlet", urlPatterns = "/DeleteRoute")
 public class DeleteRouteServlet extends MyHttpServlet {
 
     @Override
