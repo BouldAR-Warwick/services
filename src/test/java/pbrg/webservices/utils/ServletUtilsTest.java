@@ -11,10 +11,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.utils.ServletUtils.getContentType;
+import static pbrg.webservices.utils.ServletUtils.getRouteImagePath;
+import static pbrg.webservices.utils.ServletUtils.getWallImagePath;
 import static pbrg.webservices.utils.ServletUtils.returnImageAsBitmap;
 import static pbrg.webservices.utils.ServletUtils.returnRouteImageAsBitmap;
 import static pbrg.webservices.utils.ServletUtils.returnWallImageAsBitmap;
 import static pbrg.webservices.utils.ServletUtils.sessionHasAttributes;
+import static pbrg.webservices.utils.ServletUtils.setPaths;
+
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -93,7 +97,8 @@ class ServletUtilsTest {
         ServletOutputStream outputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(outputStream);
 
-        String filePath = ServletUtils.getWallImagePath() + "MoonBoard2016.jpg";
+        String filePath =
+            ServletUtils.getWallImagePath() + "MoonBoard2016.jpg";
 
         // When
         returnImageAsBitmap(response, filePath);
@@ -165,7 +170,9 @@ class ServletUtilsTest {
             IOException.class,
 
             // when: returnImageAsBitmap is called
-            () -> returnImageAsBitmap(mock(HttpServletResponse.class), fileName)
+            () -> returnImageAsBitmap(
+                mock(HttpServletResponse.class), fileName
+            )
         );
     }
 
@@ -184,4 +191,27 @@ class ServletUtilsTest {
         );
     }
 
+    @Test
+    void testSetPathsInProduction() {
+        // given: in production
+        boolean inProduction = true;
+
+        // when setting paths
+        setPaths(inProduction);
+
+        // then verify paths are set
+        assertEquals(
+            System.getProperty("user.home")
+                + "/Projects/services/src/main/resources/",
+            getRouteImagePath()
+        );
+        assertEquals(
+            System.getProperty("user.home")
+                + "/Projects/services/src/main/resources/",
+            getWallImagePath()
+        );
+
+        // after: reset paths
+        setPaths();
+    }
 }

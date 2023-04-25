@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import static pbrg.webservices.servlets.MyHttpServlet.getBody;
 import static pbrg.webservices.servlets.MyHttpServlet.getSession;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

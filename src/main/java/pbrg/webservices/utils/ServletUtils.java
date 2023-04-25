@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 public final class ServletUtils {
 
     static {
-        setPaths(production());
+        setPaths();
     }
 
     /** The path to the wall images directory. */
@@ -33,6 +33,11 @@ public final class ServletUtils {
      */
     public static String getWallImagePath() {
         return wallImagePath;
+    }
+
+    /** Set the image paths according to the environment. */
+    public static void setPaths() {
+        setPaths(production());
     }
 
     /**

@@ -26,9 +26,8 @@ public class DeleteRouteServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
+        // ensure session exists
         HttpSession session = getSession(request);
-
-        // return unauthorized error message if session is not exist
         if (session == null) {
             response.sendError(
                 HttpServletResponse.SC_UNAUTHORIZED,
@@ -60,14 +59,7 @@ public class DeleteRouteServlet extends MyHttpServlet {
         }
 
         // delete the route (removes route image if generated)
-        boolean removed = RouteUtils.deleteRoute(routeId);
-        if (!removed) {
-            response.sendError(
-                HttpServletResponse.SC_EXPECTATION_FAILED,
-                "Failed to remove route"
-            );
-            return;
-        }
+        RouteUtils.deleteRoute(routeId);
 
         // report success
         response.setStatus(HttpServletResponse.SC_OK);

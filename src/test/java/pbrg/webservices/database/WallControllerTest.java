@@ -36,7 +36,7 @@ public final class WallControllerTest {
      * @param gymId the gym id
      * @return the wall id
      */
-    public static int createTestWall(int gymId) {
+    public static int createTestWall(final int gymId) {
         return addWall(gymId, TEST_WALL_CONTENT, TEST_WALL_IMAGE_FILE_NAME);
     }
 

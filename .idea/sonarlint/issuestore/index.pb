@@ -67,12 +67,8 @@ p
 @src/main/java/pbrg/webservices/servlets/GetWallImageServlet.java,6/0/60d676bfe014caa9e339518679b213137a4de99e
 h
 8src/test/java/pbrg/webservices/utils/RouteUtilsTest.java,4/3/43186213b91528fe0eb2dd0ba8bbab5e84fc2aec
-j
-:src/test/java/pbrg/webservices/utils/ServletUtilsTest.java,1/1/113347d0bbf7715306728dbd2635cb307a44bf86
 g
 7src/test/java/pbrg/webservices/utils/TestUtilsTest.java,d/8/d8f2a63e28d0bf6a1ace9f7af4869d0cc9b71031
-f
-6src/main/java/pbrg/webservices/utils/ServletUtils.java,d/f/df390aa1bce9317d9d30f414d03e49463d3db234
 i
 9src/main/java/pbrg/webservices/servlets/LoginServlet.java,f/c/fc564c739e2db5f0663a8c46215bab1d1336fa0f
 l

@@ -266,54 +266,42 @@ public final class RouteUtils {
     /**
      * Delete a route by its id (including its image file).
      * @param routeId route id
-     * @return true if deleted, false otherwise
      */
-    public static boolean deleteRoute(final int routeId) {
+    public static void deleteRoute(final int routeId) {
         // ensure route exists
         if (!routeExists(routeId)) {
-            return false;
+            return;
         }
 
         String routeImageFileName = getRouteImageFileName(routeId);
         boolean routeImageGenerated = routeImageFileName != null;
 
-        // remove from database
-        boolean deletedFromDatabase = RouteController.deleteRoute(routeId);
-        if (!deletedFromDatabase) {
-            return false;
-        }
-
-        // remove route image if it exists
+        // remove route image if it exists, do nothing if it doesn't exist
         if (routeImageGenerated) {
-            return deleteRouteImage(routeImageFileName);
+            deleteRouteImage(routeImageFileName);
+            assert !new File(ServletUtils.getRouteImagePath(),
+                routeImageFileName).exists();
         }
 
-        return true;
+        // remove from database
+        RouteController.deleteRoute(routeId);
     }
 
     /**
-     * Delete a route image file.
+     * Delete a route image file. Does nothing if the file does not exist.
      * @param routeImageFileName route image file name
-     * @return true if deleted, false otherwise
      */
-    private static boolean deleteRouteImage(final String routeImageFileName) {
+    private static void deleteRouteImage(final String routeImageFileName) {
         // create the file system path
-        String routeImageFilePath = ServletUtils.getRouteImagePath()
-            + routeImageFileName;
+        File routeImageFile = new File(
+            ServletUtils.getRouteImagePath(), routeImageFileName
+        );
 
-        // ensure exists
-        File routeImageFile = new File(routeImageFilePath);
-        if (!routeImageFile.exists()) {
-            return false;
-        }
-
-        // delete the file
         try {
+            // delete the file
             Files.delete(routeImageFile.toPath());
-        } catch (SecurityException | IOException e) {
-            return false;
+        } catch (IOException e) {
+            // IOException -> file does not exist
         }
-
-        return true;
     }
 }
