@@ -11,6 +11,7 @@ import static pbrg.webservices.utils.ProcessUtils
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Objects;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -228,5 +229,31 @@ public final class RouteUtils {
         RouteFull route = RouteController.getRouteByRouteId(routeId);
         assert route != null;
         return route.getImageFileName();
+    }
+
+    /**
+     * Delete a route image file.
+     * @param routeImageFileName route image file name
+     * @return true if deleted, false otherwise
+     */
+    public static boolean deleteRouteImage(final String routeImageFileName) {
+        // create the file system path
+        String routeImageFilePath = ServletUtils.getRouteImagePath()
+            + routeImageFileName;
+
+        // ensure exists
+        File routeImageFile = new File(routeImageFilePath);
+        if (!routeImageFile.exists()) {
+            return false;
+        }
+
+        // delete the file
+        try {
+            Files.delete(routeImageFile.toPath());
+        } catch (SecurityException | IOException e) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -289,7 +289,8 @@ public final class RouteController {
     }
 
     /**
-     * Delete a route from the database.
+     * Delete a route from the database only.
+     * Note does NOT delete the route image.
      * @param routeId route identifier
      * @return true if route was deleted, false otherwise
      */

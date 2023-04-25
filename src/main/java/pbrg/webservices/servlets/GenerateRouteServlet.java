@@ -166,7 +166,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
 
         // ensure routeImageFileName exists
         File routeImage =
-            new File(ServletUtils.getRouteImagePath() + routeImageFileName);
+            new File(ServletUtils.getRouteImagePath(), routeImageFileName);
         if (!routeImage.exists()) {
             // Failed to create route image
             response.sendError(

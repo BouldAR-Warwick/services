@@ -1,20 +1,19 @@
 package pbrg.webservices.servlets;
 
+import static pbrg.webservices.database.RouteController.deleteRoute;
 import static pbrg.webservices.database.RouteController.routeExists;
+import static pbrg.webservices.utils.RouteUtils.deleteRouteImage;
 import static pbrg.webservices.utils.RouteUtils.getRouteImageFileNameByRouteId;
-import static pbrg.webservices.utils.ServletUtils.returnRouteImageAsBitmap;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.File;
 import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
-import pbrg.webservices.utils.ServletUtils;
 
-@WebServlet(name = "GetRouteImageServlet", urlPatterns = "/GetRouteImage")
-public class GetRouteImageServlet extends MyHttpServlet {
+@WebServlet(name = "DeleteRouteServlet", urlPatterns = "/DeleteRouteServlet")
+public class DeleteRouteServlet extends MyHttpServlet {
 
     @Override
     protected final void doGet(
@@ -29,26 +28,20 @@ public class GetRouteImageServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // ensure session exists
         HttpSession session = getSession(request);
+
+        // return unauthorized error message if session is not exist
         if (session == null) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not exist"
-            );
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        // ensure session has the route id
+        // ensure route is stored in session
         String routeIdKey = "rid";
         boolean sessionWithoutRouteId =
             session.getAttribute(routeIdKey) == null;
         if (sessionWithoutRouteId) {
-            // no route id in session
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Session has no route id"
-            );
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
@@ -64,37 +57,31 @@ public class GetRouteImageServlet extends MyHttpServlet {
 
         // ensure the route image has been generated
         String routeImageFileName = getRouteImageFileNameByRouteId(routeId);
-        boolean routeImageNotGenerated = routeImageFileName == null;
-        if (routeImageNotGenerated) {
+        boolean routeImageGenerated = routeImageFileName != null;
+
+        // remove from database
+        boolean removedFromDatabase = deleteRoute(routeId);
+        if (!removedFromDatabase) {
             response.sendError(
                 HttpServletResponse.SC_EXPECTATION_FAILED,
-                "Route image has not been generated"
+                "Failed to remove route from database"
             );
             return;
         }
 
-        // ensure the file exists
-        File wallImageFile = new File(
-            ServletUtils.getRouteImagePath(), routeImageFileName
-        );
-        if (!wallImageFile.exists()) {
-            response.sendError(
-                HttpServletResponse.SC_EXPECTATION_FAILED,
-                "Image file does not exist"
-            );
-            return;
+        // remove route image if it exists
+        if (routeImageGenerated) {
+            boolean removedRouteImage = deleteRouteImage(routeImageFileName);
+            if (!removedRouteImage) {
+                response.sendError(
+                    HttpServletResponse.SC_EXPECTATION_FAILED,
+                    "Failed to remove route image"
+                );
+                return;
+            }
         }
 
-        try {
-            returnRouteImageAsBitmap(response, routeImageFileName);
-        } catch (IOException e) {
-            response.sendError(
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error reading image file"
-            );
-        }
-
-        // send ok response
+        // report success
         response.setStatus(HttpServletResponse.SC_OK);
     }
 }
