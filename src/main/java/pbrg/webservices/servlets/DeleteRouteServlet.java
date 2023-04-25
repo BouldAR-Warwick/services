@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 
-@WebServlet(name = "DeleteRouteServlet", urlPatterns = "/DeleteRouteServlet")
+@WebServlet(name = "DeleteRouteServlet", urlPatterns = "/delete-route")
 public class DeleteRouteServlet extends MyHttpServlet {
 
     @Override
