@@ -18,13 +18,27 @@ import static pbrg.webservices.database.WallController.gymHasWall;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-final class WallControllerTest {
+public final class WallControllerTest {
+
+    /** The test wall content. */
+    private static final String TEST_WALL_CONTENT = "[{x: 0.5, y: 0.5}]";
+
+    /** The test wall image file name. */
+    private static final String TEST_WALL_IMAGE_FILE_NAME = "MoonBoard2016.jpg";
+
+    /**
+     * Creates a test wall in the database.
+     * @param gymId the gym id
+     * @return the wall id
+     */
+    public static int createTestWall(int gymId) {
+        return addWall(gymId, TEST_WALL_CONTENT, TEST_WALL_IMAGE_FILE_NAME);
+    }
 
     @BeforeAll
     static void startResources() throws IllegalStateException {
@@ -64,7 +78,7 @@ final class WallControllerTest {
     }
 
     @Test
-    void addWallEmptyResults() throws SQLException {
+    void addWallEmptyResults() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockEmptyResultSet();
@@ -82,7 +96,7 @@ final class WallControllerTest {
     }
 
     @Test
-    void getWallImageFileNameFromWallIdEmptyResults() throws SQLException {
+    void getWallImageFileNameFromWallIdEmptyResults() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockEmptyResultSet();
@@ -111,7 +125,7 @@ final class WallControllerTest {
     }
 
     @Test
-    void getWallIdFromGymIdEmptyResults() throws SQLException {
+    void getWallIdFromGymIdEmptyResults() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockEmptyResultSet();
@@ -128,7 +142,7 @@ final class WallControllerTest {
     }
 
     @Test
-    void gymHasWallEmptyResults() throws SQLException {
+    void gymHasWallEmptyResults() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockEmptyResultSet();
@@ -145,7 +159,7 @@ final class WallControllerTest {
     }
 
     @Test
-    void deleteWallEmptyResults() throws SQLException {
+    void deleteWallEmptyResults() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockEmptyResultSet();
@@ -162,7 +176,7 @@ final class WallControllerTest {
     }
 
     @Test
-    void addWallThrowsException() throws SQLException {
+    void addWallThrowsException() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DatabaseController.setDataSource(mockConnectionThrowsException());
@@ -179,7 +193,7 @@ final class WallControllerTest {
     }
 
     @Test
-    void getWallIdFromRouteIdThrowsException() throws SQLException {
+    void getWallIdFromRouteIdThrowsException() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DatabaseController.setDataSource(mockConnectionThrowsException());
@@ -195,7 +209,7 @@ final class WallControllerTest {
     }
 
     @Test
-    void gymHasWallThrowsException() throws SQLException {
+    void gymHasWallThrowsException() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DatabaseController.setDataSource(mockConnectionThrowsException());
@@ -211,7 +225,7 @@ final class WallControllerTest {
     }
 
     @Test
-    void deleteWallThrowsException() throws SQLException {
+    void deleteWallThrowsException() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DatabaseController.setDataSource(mockConnectionThrowsException());

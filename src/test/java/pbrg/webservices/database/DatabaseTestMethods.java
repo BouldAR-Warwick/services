@@ -1,5 +1,6 @@
 package pbrg.webservices.database;
 
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -25,25 +26,40 @@ public final class DatabaseTestMethods {
      * @return the mocked data source
      * @throws SQLException if the data source cannot be mocked
      */
-    public static @NotNull DataSource mockEmptyResultSet()
-        throws SQLException {
+    public static @NotNull DataSource mockEmptyResultSet() {
         // mock the result set
         ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.next()).thenReturn(false);
+        try {
+            when(resultSet.next()).thenReturn(false);
+        } catch (SQLException e) {
+            fail("SQLException should not be thrown");
+        }
 
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
-        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        try {
+            when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
+            when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        } catch (SQLException e) {
+            fail("SQLException should not be thrown");
+        }
 
         Connection connection = mock(Connection.class);
-        when(connection.prepareStatement(
-            anyString(), eq(Statement.RETURN_GENERATED_KEYS)
-        )).thenReturn(preparedStatement);
-        when(connection.prepareStatement(anyString()))
-            .thenReturn(preparedStatement);
+        try {
+            when(connection.prepareStatement(
+                anyString(), eq(Statement.RETURN_GENERATED_KEYS)
+            )).thenReturn(preparedStatement);
+            when(connection.prepareStatement(anyString()))
+                .thenReturn(preparedStatement);
+        } catch (SQLException e) {
+            fail("SQLException should not be thrown");
+        }
 
         DataSource dataSource = mock(DataSource.class);
-        when(dataSource.getConnection()).thenReturn(connection);
+        try {
+            when(dataSource.getConnection()).thenReturn(connection);
+        } catch (SQLException e) {
+            fail("SQLException should not be thrown");
+        }
 
         return dataSource;
     }
@@ -53,13 +69,21 @@ public final class DatabaseTestMethods {
      * @return the mocked data source
      * @throws SQLException if the data source cannot be mocked
      */
-    public static @NotNull DataSource mockNoAffectedRows()
-        throws SQLException {
+    public static @NotNull DataSource mockNoAffectedRows() {
         DataSource mockDataSource = mockEmptyResultSet();
-        PreparedStatement mockPreparedStatement =
-            mockDataSource.getConnection().prepareStatement("");
-        when(mockPreparedStatement.executeUpdate())
-            .thenReturn(0);
+        PreparedStatement mockPreparedStatement = null;
+        try {
+            mockPreparedStatement =
+                mockDataSource.getConnection().prepareStatement("");
+        } catch (SQLException e) {
+            fail("SQLException should not be thrown");
+        }
+        try {
+            when(mockPreparedStatement.executeUpdate())
+                .thenReturn(0);
+        } catch (SQLException e) {
+            fail("SQLException should not be thrown");
+        }
         return mockDataSource;
     }
 
@@ -69,10 +93,13 @@ public final class DatabaseTestMethods {
      * @return the mocked data source
      * @throws SQLException if the data source cannot be mocked
      */
-    public static @NotNull DataSource mockConnectionThrowsException()
-        throws SQLException {
+    public static @NotNull DataSource mockConnectionThrowsException() {
         DataSource mockDataSource = mock(DataSource.class);
-        when(mockDataSource.getConnection()).thenThrow(SQLException.class);
+        try {
+            when(mockDataSource.getConnection()).thenThrow(SQLException.class);
+        } catch (SQLException e) {
+            fail("SQLException should not be thrown");
+        }
         return mockDataSource;
     }
 }

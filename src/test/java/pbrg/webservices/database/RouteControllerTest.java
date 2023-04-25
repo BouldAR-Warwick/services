@@ -1,5 +1,6 @@
 package pbrg.webservices.database;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,14 +10,17 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static pbrg.webservices.database.CredentialController.userExists;
 import static pbrg.webservices.database.DatabaseTestMethods.mockConnectionThrowsException;
 import static pbrg.webservices.database.DatabaseTestMethods.mockEmptyResultSet;
 import static pbrg.webservices.database.DatabaseTestMethods.mockNoAffectedRows;
 import static pbrg.webservices.database.RouteController.addRoute;
 import static pbrg.webservices.database.RouteController.getRoutesInGymMadeByUser;
+import static pbrg.webservices.database.RouteController.routeExists;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
+import static pbrg.webservices.database.WallController.wallExists;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -31,19 +35,50 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import pbrg.webservices.models.Route;
 
-final class RouteControllerTest {
+public final class RouteControllerTest {
+
+    /** The test route difficulty. */
+    private static final int TEST_ROUTE_DIFFICULTY = 6;
+
+    /** The test route content. */
+    private static final String TEST_ROUTE_CONTENT = "[{x: 0.5, y: 0.5}]";
 
     /** The first route id in the test database. */
-    private static final int FIRST_ROUTE_ID = 10;
+    private static final int FIRST_ROUTE_CREATOR_ID = 10;
 
     /** The first route difficulty in the test database. */
     private static final int FIRST_ROUTE_DIFFICULTY = 3;
 
     /** The second route id in the test database. */
-    private static final int SECOND_ROUTE_ID = 20;
+    private static final int SECOND_ROUTE_CREATOR_ID = 20;
 
     /** The second route difficulty in the test database. */
     private static final int SECOND_ROUTE_DIFFICULTY = 4;
+
+    /**
+     * Create the test route.
+     * @param userId the creator user id
+     * @param wallId the wall id
+     * @return the route id
+     */
+    public static int createTestRoute(final int userId, final int wallId) {
+        // ensure user exists
+        assertTrue(userExists(userId));
+
+        // ensure wall exists
+        assertTrue(wallExists(wallId));
+
+        // create the route
+        Integer routeId = addRoute(
+            TEST_ROUTE_CONTENT, TEST_ROUTE_DIFFICULTY,
+            userId, wallId
+        );
+
+        // ensure route was created
+        assertNotNull(routeId);
+        assertTrue(routeExists(routeId));
+        return routeId;
+    }
 
 
     @BeforeAll
@@ -101,7 +136,7 @@ final class RouteControllerTest {
     }
 
     @Test
-    void addRouteEmptyResults() throws SQLException {
+    void addRouteEmptyResults() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockEmptyResultSet();
@@ -118,7 +153,7 @@ final class RouteControllerTest {
     }
 
     @Test
-    void addImageToRouteNoAffectedRows() throws SQLException {
+    void addImageToRouteNoAffectedRows() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockNoAffectedRows();
@@ -135,7 +170,7 @@ final class RouteControllerTest {
     }
 
     @Test
-    void deleteRouteByCreatorAndWallNoAffectedRows() throws SQLException {
+    void deleteRouteByCreatorAndWallNoAffectedRows() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockNoAffectedRows();
@@ -152,7 +187,7 @@ final class RouteControllerTest {
     }
 
     @Test
-    void deleteRouteNoAffectedRows() throws SQLException {
+    void deleteRouteNoAffectedRows() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockNoAffectedRows();
@@ -169,8 +204,7 @@ final class RouteControllerTest {
     }
 
     @Test
-    void deleteRouteByCreatorAndWallConnectionThrowsException()
-        throws SQLException {
+    void deleteRouteByCreatorAndWallConnectionThrowsException() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockConnectionThrowsException();
@@ -187,7 +221,7 @@ final class RouteControllerTest {
     }
 
     @Test
-    void deleteRouteConnectionThrowsException() throws SQLException {
+    void deleteRouteConnectionThrowsException() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockConnectionThrowsException();
@@ -245,8 +279,10 @@ final class RouteControllerTest {
         when(rs.next())
             .thenReturn(true).thenReturn(true).thenReturn(false);
         when(rs.getInt("RID"))
-            .thenReturn(FIRST_ROUTE_ID).thenReturn(FIRST_ROUTE_ID)
-            .thenReturn(SECOND_ROUTE_ID).thenReturn(SECOND_ROUTE_ID);
+            .thenReturn(FIRST_ROUTE_CREATOR_ID)
+            .thenReturn(FIRST_ROUTE_CREATOR_ID)
+            .thenReturn(SECOND_ROUTE_CREATOR_ID)
+            .thenReturn(SECOND_ROUTE_CREATOR_ID);
         when(rs.getInt("Difficulty"))
             .thenReturn(FIRST_ROUTE_DIFFICULTY)
             .thenReturn(SECOND_ROUTE_DIFFICULTY);
@@ -262,23 +298,25 @@ final class RouteControllerTest {
 
         // check first route
         Route route1 = routes.get(0);
-        assertEquals(FIRST_ROUTE_ID, route1.getRouteId());
+        assertEquals(FIRST_ROUTE_CREATOR_ID, route1.getRouteId());
         assertEquals(FIRST_ROUTE_DIFFICULTY, route1.getDifficulty());
-        assertEquals("Route #" + FIRST_ROUTE_ID, route1.getRouteName());
+        assertEquals("Route #" + FIRST_ROUTE_CREATOR_ID, route1.getRouteName());
 
         // check second route
         Route route2 = routes.get(1);
-        assertEquals(SECOND_ROUTE_ID, route2.getRouteId());
+        assertEquals(SECOND_ROUTE_CREATOR_ID, route2.getRouteId());
         assertEquals(SECOND_ROUTE_DIFFICULTY, route2.getDifficulty());
-        assertEquals("Route #" + SECOND_ROUTE_ID, route2.getRouteName());
+        assertEquals(
+            "Route #" + SECOND_ROUTE_CREATOR_ID,
+            route2.getRouteName()
+        );
 
         // after: restore original data source
         DatabaseController.setDataSource(originalDataSource);
     }
 
     @Test
-    void getRoutesInGymMadeByUserThrowsSQLExceptionWhenConnectionFails()
-        throws SQLException {
+    void getRoutesInGymMadeByUserThrowsSQLExceptionWhenConnectionFails() {
         // Arrange
         int gymId = 1;
         int userId = 2;

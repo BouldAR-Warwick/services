@@ -23,15 +23,13 @@ import static pbrg.webservices.utils.RouteUtils.createRouteImagePython;
 import static pbrg.webservices.utils.RouteUtils.generateRouteMoonBoard;
 import static pbrg.webservices.utils.RouteUtils.getPythonScriptsDir;
 import static pbrg.webservices.utils.RouteUtils.getRouteContentJSONArray;
-import static pbrg.webservices.utils.RouteUtils.getRouteImageFileNameByRouteId;
+import static pbrg.webservices.utils.RouteUtils.getRouteImageFileName;
 import static pbrg.webservices.utils.RouteUtils.plotHoldsOnImagePython;
 import static pbrg.webservices.utils.RouteUtils.setPythonScriptsDir;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import org.json.JSONArray;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -180,7 +178,7 @@ final class RouteUtilsTest {
 
     @Test
     void createRouteImagePythonEmptyHoldArray()
-        throws SQLException, NullPointerException {
+        throws NullPointerException {
         // given: a route that empty hold array
         String routeContent = "[]";
         Integer userId = addUser("test", "test", "test");
@@ -222,14 +220,14 @@ final class RouteUtilsTest {
         // given: a route ID that does not exist
         // when: trying to getRouteImageFileNamesByRouteId
         String routeImageFileName =
-            getRouteImageFileNameByRouteId(INVALID_ROUTE_ID);
+            getRouteImageFileName(INVALID_ROUTE_ID);
 
         // then: routeImageFileName should be null
         assertNull(routeImageFileName);
     }
 
     @Test
-    void getRouteImageFileNameByRouteIdValid() throws SQLException {
+    void getRouteImageFileNameByRouteIdValid() {
         // given: a route with a single hold
         String routeContent = "[{x: 0.570, y: 0.655}]";
         Integer userId = addUser("test", "test", "test");
@@ -249,7 +247,7 @@ final class RouteUtilsTest {
         assertTrue(addImageToRoute(routeId, routeImage));
 
         // when: getting the route image file name
-        String routeImageFileName = getRouteImageFileNameByRouteId(routeId);
+        String routeImageFileName = getRouteImageFileName(routeId);
 
         // then: the file name is not null
         assertNotNull(routeImageFileName);

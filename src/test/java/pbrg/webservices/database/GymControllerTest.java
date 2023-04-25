@@ -48,9 +48,8 @@ public final class GymControllerTest {
     /**
      * Create a test gym using the test gym credentials.
      * @return the gym ID
-     * @throws SQLException if SQL error occurs
      */
-    public static int createTestGym() throws SQLException {
+    public static int createTestGym() {
         // ensure the test gym does not exist
         if (gymExists(TEST_GYM_NAME)) {
             // get the gym id, delete
@@ -87,7 +86,7 @@ public final class GymControllerTest {
     }
 
     @BeforeAll
-    static void startResources() throws IllegalStateException, SQLException {
+    static void startResources() throws IllegalStateException {
         startTestDatabaseInThread();
 
         // use the test database
@@ -104,7 +103,7 @@ public final class GymControllerTest {
     }
 
     @BeforeEach
-    void dbSanityCheck() throws SQLException {
+    void dbSanityCheck() {
         // ensure the test gym does not exist
         assertFalse(gymExists(TEST_GYM_NAME));
     }
@@ -158,7 +157,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void addNewGymInvalidName() throws SQLException {
+    void addNewGymInvalidName() {
         // given: a name that exceeds the length cap
         String gymName = "a".repeat(GymController.GYM_NAME_LENGTH_CAP + 1);
 
@@ -171,7 +170,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void addNewGymInvalidLocation() throws SQLException {
+    void addNewGymInvalidLocation() {
         // given: a location that exceeds the length cap
         String gymLocation =
             "a".repeat(GymController.GYM_LOCATION_LENGTH_CAP + 1);
@@ -185,7 +184,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void addNewGymNameExists() throws SQLException {
+    void addNewGymNameExists() {
         // given: a conflicting name
 
         // add the test gym
@@ -206,7 +205,7 @@ public final class GymControllerTest {
 
     @Test
     void insertGymConflictingName()
-        throws SQLException, IllegalAccessException {
+        throws IllegalAccessException {
         // given: a conflicting name
 
         // add the test gym
@@ -239,7 +238,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void insertGymEmptyResultSet() throws SQLException,
+    void insertGymEmptyResultSet() throws
         IllegalAccessException, InvocationTargetException {
 
         // inject the mock data source
@@ -269,7 +268,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void gymExistsEmptyResultSet() throws SQLException {
+    void gymExistsEmptyResultSet() {
         // add the test gym
         Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
         assertNotNull(gymId);
@@ -293,7 +292,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void gymExistsByNameEmptyResultSet() throws SQLException {
+    void gymExistsByNameEmptyResultSet() {
         // add the test gym
         Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
         assertNotNull(gymId);
@@ -317,7 +316,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void deleteNonExistentGym() throws SQLException {
+    void deleteNonExistentGym() {
         // given: a non-existent gym id
         int gymId = -1;
         assertFalse(gymExists(gymId));
@@ -330,7 +329,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void getGymByGymNameNonExistentGym() throws SQLException {
+    void getGymByGymNameNonExistentGym() {
         // given: a non-existent gym name
         assertFalse(gymExists(TEST_GYM_NAME));
 
@@ -342,7 +341,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void getGymByGymNameExistingGym() throws SQLException {
+    void getGymByGymNameExistingGym() {
         // given: an existing gym
         Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
         assertNotNull(gymId);
@@ -402,7 +401,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void addGymToUserInvalidGym() throws SQLException {
+    void addGymToUserInvalidGym() {
         // given: a valid user and an invalid gym
         int uid = createTestUser();
         int gid = -1;
@@ -421,7 +420,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void addGymToUserInvalidUser() throws SQLException {
+    void addGymToUserInvalidUser() {
         // given: an invalid user and a valid gym
         int uid = -1;
         int gid = createTestGym();
@@ -478,7 +477,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void getGymIdByGymNameNoGym() throws SQLException {
+    void getGymIdByGymNameNoGym() {
         // given: a non-existent gym name
         assertFalse(gymExists(TEST_GYM_NAME));
 
@@ -490,7 +489,7 @@ public final class GymControllerTest {
     }
 
     @Test
-    void getGymIdByGymNameValid() throws SQLException {
+    void getGymIdByGymNameValid() {
         // given: an existing gym
         Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
         assertNotNull(gymId);

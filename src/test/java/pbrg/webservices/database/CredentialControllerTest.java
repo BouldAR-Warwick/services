@@ -15,7 +15,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.CredentialController.addUser;
+import static pbrg.webservices.database.CredentialController.deleteUser;
 import static pbrg.webservices.database.CredentialController.emailExists;
+import static pbrg.webservices.database.CredentialController.getUserIDFromEmail;
 import static pbrg.webservices.database.CredentialController
     .getUserIDFromUsername;
 import static pbrg.webservices.database.CredentialController.signUp;
@@ -52,20 +54,20 @@ public final class CredentialControllerTest {
     /** The test password. */
     private static final String TEST_PASSWORD = "password";
 
-    static void clearTestUser() throws SQLException {
+    static void clearTestUser() {
         // remove the test user credentials if they exist
         if (usernameExists(TEST_USERNAME)) {
             Integer uid =
                 getUserIDFromUsername(TEST_USERNAME);
             assert uid != null;
-            boolean deleted = CredentialController.deleteUser(uid);
+            boolean deleted = deleteUser(uid);
             assert deleted;
             assertFalse(usernameExists(TEST_USERNAME));
         }
         if (emailExists(TEST_EMAIL)) {
-            Integer uid = CredentialController.getUserIDFromEmail(TEST_EMAIL);
+            Integer uid = getUserIDFromEmail(TEST_EMAIL);
             assert uid != null;
-            boolean deleted = CredentialController.deleteUser(uid);
+            boolean deleted = deleteUser(uid);
             assert deleted;
             assertFalse(emailExists(TEST_EMAIL));
         }
@@ -74,9 +76,8 @@ public final class CredentialControllerTest {
     /**
      * Creates a test user in the database.
      * @return the test user's uid
-     * @throws SQLException if an error occurs while creating the test user
      */
-    public static int createTestUser() throws SQLException {
+    public static int createTestUser() {
         // remove the test user credentials if they exist
         clearTestUser();
 
@@ -120,7 +121,7 @@ public final class CredentialControllerTest {
     }
 
     @BeforeAll
-    static void startResources() throws SQLException {
+    static void startResources() {
         startTestDatabaseInThread();
 
         // use the test database
@@ -170,7 +171,7 @@ public final class CredentialControllerTest {
     class SignIn {
 
         @Test
-        void signInValidUser() throws SQLException {
+        void signInValidUser() {
             // given: a user that exists in the system
             assertDoesNotThrow(() -> {
                 // when: signing up
@@ -196,7 +197,7 @@ public final class CredentialControllerTest {
             assertEquals(testUser.getUid(), testUid);
 
             // after: remove the test user
-            assertTrue(CredentialController.deleteUser(testUid));
+            assertTrue(deleteUser(testUid));
         }
 
         @Test
@@ -284,7 +285,8 @@ public final class CredentialControllerTest {
             DatabaseController.setDataSource(mockedDataSource);
 
             // when: signing in and experience SQLException
-            User user = CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
+            User user =
+                CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);
@@ -327,7 +329,8 @@ public final class CredentialControllerTest {
             DatabaseController.setDataSource(mockedDataSource);
 
             // when: signing in
-            User user = CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
+            User user =
+                CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);
@@ -351,7 +354,8 @@ public final class CredentialControllerTest {
             DatabaseController.setDataSource(mockedDataSource);
 
             // when: signing in
-            User user = CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
+            User user =
+                CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);
@@ -398,7 +402,8 @@ public final class CredentialControllerTest {
             DatabaseController.setDataSource(mockedDataSource);
 
             // when: signing in
-            User user = CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
+            User user =
+                CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);
@@ -410,7 +415,7 @@ public final class CredentialControllerTest {
     }
 
     @Test
-    void signUpNewUser() throws SQLException {
+    void signUpNewUser() {
         // given: a new user with unique credentials
 
         // then: no exception is thrown
@@ -427,11 +432,11 @@ public final class CredentialControllerTest {
         // after: remove the test user
         Integer uid = getUserIDFromUsername(TEST_USERNAME);
         assertNotNull(uid);
-        assertTrue(CredentialController.deleteUser(uid));
+        assertTrue(deleteUser(uid));
     }
 
     @Test
-    void signUpConflictingCredentials() throws SQLException {
+    void signUpConflictingCredentials() {
         // given: an existing user
         String username = "username_existing";
         String email = "email_existing";
@@ -473,7 +478,7 @@ public final class CredentialControllerTest {
 
         Integer uid = getUserIDFromUsername(username);
         assert uid != null;
-        CredentialController.deleteUser(uid);
+        deleteUser(uid);
     }
 
     @Test
@@ -539,17 +544,17 @@ public final class CredentialControllerTest {
     class GetUserIDFromEmail {
 
         @Test
-        void nonExistentEmail() throws SQLException {
+        void nonExistentEmail() {
             // given: a non-existing email
             assertFalse(emailExists(TEST_EMAIL));
 
             // when: getting the user ID from the email
             // then: the user ID is null
-            assertNull(CredentialController.getUserIDFromEmail(TEST_EMAIL));
+            assertNull(getUserIDFromEmail(TEST_EMAIL));
         }
 
         @Test
-        void validEmail() throws SQLException {
+        void validEmail() {
             // given: an existing email
 
             // add the test user
@@ -561,7 +566,7 @@ public final class CredentialControllerTest {
 
             // when: getting the user ID from the email
             // then: the user ID is not null
-            Integer uid = CredentialController.getUserIDFromEmail(TEST_EMAIL);
+            Integer uid = getUserIDFromEmail(TEST_EMAIL);
             assertNotNull(uid);
             assertEquals(
                 uid,
@@ -569,7 +574,7 @@ public final class CredentialControllerTest {
             );
 
             // after: remove the test user
-            assertTrue(CredentialController.deleteUser(uid));
+            assertTrue(deleteUser(uid));
         }
     }
 
@@ -592,11 +597,11 @@ public final class CredentialControllerTest {
     }
 
     @Test
-    void deleteUserThatDoesNotExist() throws SQLException {
+    void deleteUserThatDoesNotExist() {
         // given: a non-existing user (uid = -1)
         int userId = -1;
 
         // when: deleting the user, then: the user is not deleted
-        assertFalse(CredentialController.deleteUser(userId));
+        assertFalse(deleteUser(userId));
     }
 }

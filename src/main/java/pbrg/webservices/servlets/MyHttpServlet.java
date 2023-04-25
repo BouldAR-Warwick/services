@@ -1,6 +1,5 @@
 package pbrg.webservices.servlets;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,14 +22,13 @@ public class MyHttpServlet extends HttpServlet {
      *                 the response the servlet sends to the client
      *
      * @throws IOException if an input or output error is detected when
-     * @throws ServletException if the request for the GET could not be handled
      * @throws IllegalArgumentException if either argument is null
      */
     @Override
     protected void doGet(
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
-    ) throws IOException, ServletException, IllegalArgumentException {
+    ) throws IOException, IllegalArgumentException {
         // Override doPost method to support non-null params
     }
 
@@ -43,14 +41,13 @@ public class MyHttpServlet extends HttpServlet {
      *                 the response the servlet sends to the client
      *
      * @throws IOException if an input or output error is detected when
-     * @throws ServletException if the request for the GET could not be handled
      * @throws IllegalArgumentException if either argument is null
      */
     @Override
     protected void doPost(
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
-    ) throws IOException, ServletException, IllegalArgumentException {
+    ) throws IOException, IllegalArgumentException {
         // Override doPost method to support non-null params
     }
 

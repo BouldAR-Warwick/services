@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pbrg.webservices.models.Gym;
 
@@ -30,11 +31,11 @@ public final class GymController {
      * @param gymName gym name
      * @param gymLocation gym location
      * @return the gym id if successful, null otherwise
-     * @throws SQLException if SQL error occurs
      */
-    public static Integer addGym(
-        final String gymName, final String gymLocation
-    ) throws SQLException {
+    public static @Nullable Integer addGym(
+        final @NotNull String gymName,
+        final @NotNull String gymLocation
+    ) {
         if (gymName.length() > GYM_NAME_LENGTH_CAP) {
             return null;
         }
@@ -55,11 +56,10 @@ public final class GymController {
      * @param gymName gym name
      * @param gymLocation gym location
      * @return the gym id if successful, null otherwise
-     * @throws SQLException if SQL error occurs
      */
-    private static Integer insertGym(
+    private static @Nullable Integer insertGym(
         final String gymName, final String gymLocation
-    ) throws SQLException {
+    ) {
         Integer gymId = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -78,6 +78,8 @@ public final class GymController {
             if (rs.next()) {
                 gymId = rs.getInt(1);
             }
+        } catch (SQLException e) {
+            return null;
         }
         return gymId;
     }
@@ -111,9 +113,8 @@ public final class GymController {
      * Check if a gym exists (by gym name).
      * @param gymName gym name
      * @return true if gym exists, false otherwise
-     * @throws SQLException if SQL error occurs
      */
-    public static boolean gymExists(final String gymName) throws SQLException {
+    public static boolean gymExists(final String gymName) {
         boolean exists = false;
         try (
             Connection connection = getDataSource().getConnection();
@@ -127,6 +128,8 @@ public final class GymController {
             if (rs.next()) {
                 exists = rs.getBoolean(1);
             }
+        } catch (SQLException e) {
+            return false;
         }
         return exists;
     }
@@ -135,11 +138,10 @@ public final class GymController {
      * Delete a gym (by gym ID).
      * @param gymID gym ID
      * @return true if gym was deleted, false otherwise
-     * @throws SQLException if SQL error occurs
      */
     public static boolean deleteGym(
         final int gymID
-    ) throws SQLException {
+    ) {
         boolean deleted;
         try (
             Connection connection = getDataSource().getConnection();
@@ -149,6 +151,8 @@ public final class GymController {
         ) {
             pst.setInt(1, gymID);
             deleted = pst.executeUpdate() == 1;
+        } catch (SQLException e) {
+            return false;
         }
         return deleted;
     }
@@ -187,7 +191,6 @@ public final class GymController {
      *
      * @param gymName The name of the gym.
      * @return The gym.
-     * @throws SQLException If SQL query fails.
      */
     public static @Nullable Gym getGymByGymName(
         final String gymName
@@ -293,11 +296,10 @@ public final class GymController {
      * Get a gym id from the gym name.
      * @param gymName gym name
      * @return gym id
-     * @throws SQLException if SQL error occurs
      */
     public static Integer getGymIdByGymName(
         final String gymName
-    ) throws SQLException {
+    ) {
         Integer gymId = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -311,6 +313,8 @@ public final class GymController {
             if (rs.next()) {
                 gymId = rs.getInt("GID");
             }
+        } catch (SQLException e) {
+            return null;
         }
         return gymId;
     }

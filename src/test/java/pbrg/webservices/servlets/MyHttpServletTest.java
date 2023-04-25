@@ -178,7 +178,7 @@ class MyHttpServletTest {
     }
 
     @Test
-    void hitPost() throws ServletException, IOException {
+    void hitPost() {
         assertDoesNotThrow(() ->
             new MyHttpServlet().doPost(
                 mock(HttpServletRequest.class),
@@ -188,7 +188,7 @@ class MyHttpServletTest {
     }
 
     @Test
-    void hitGet() throws ServletException, IOException {
+    void hitGet() {
         assertDoesNotThrow(() ->
             new MyHttpServlet().doGet(
                 mock(HttpServletRequest.class),

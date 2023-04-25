@@ -132,7 +132,6 @@ public final class CredentialController {
      * Check if a username exists.
      * @param username username
      * @return true if username exists, false otherwise
-     * @throws SQLException if SQL error occurs
      */
     static boolean usernameExists(final String username) {
         boolean exists = false;
@@ -181,7 +180,6 @@ public final class CredentialController {
      * Get a user's ID from their username.
      * @param username username
      * @return user ID
-     * @throws SQLException if SQL error occurs
      */
     static @Nullable Integer getUserIDFromUsername(
         final String username
@@ -208,9 +206,8 @@ public final class CredentialController {
      * Get a user's ID from their email.
      * @param email email
      * @return user ID
-     * @throws SQLException if SQL error occurs
      */
-    static Integer getUserIDFromEmail(final String email) throws SQLException {
+    static Integer getUserIDFromEmail(final String email) {
         Integer uid = null;
         try (
             Connection connection = getDataSource().getConnection();
@@ -223,8 +220,9 @@ public final class CredentialController {
             if (rs.next()) {
                 uid = rs.getInt("uid");
             }
+        } catch (SQLException e) {
+            return null;
         }
-
         return uid;
     }
 
@@ -232,9 +230,8 @@ public final class CredentialController {
      * Delete a user (by user ID).
      * @param uid user ID
      * @return true if user was deleted, false otherwise
-     * @throws SQLException if SQL error occurs
      */
-    public static boolean deleteUser(final int uid) throws SQLException {
+    public static boolean deleteUser(final int uid) {
         boolean deleted;
         try (
             Connection connection = getDataSource().getConnection();
@@ -244,6 +241,8 @@ public final class CredentialController {
         ) {
             pst.setInt(1, uid);
             deleted = pst.executeUpdate() == 1;
+        } catch (SQLException e) {
+            return false;
         }
         return deleted;
     }

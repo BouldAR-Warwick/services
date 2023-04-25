@@ -226,6 +226,34 @@ public final class WallController {
     }
 
     /**
+     * Check if a wall exists by id.
+     * @param wallId the wall id
+     * @return true if the wall exists, false otherwise
+     */
+    public static boolean wallExists(final int wallId) {
+        boolean exists = false;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT EXISTS (SELECT 1 "
+                    + "FROM walls "
+                    + "WHERE WID = ?)"
+            )
+        ) {
+            pst.setInt(1, wallId);
+            ResultSet rs = pst.executeQuery();
+
+            // get JSON list of holds
+            if (rs.next()) {
+                exists = rs.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+        return exists;
+    }
+
+    /**
      * Delete a wall by wall ID.
      * @param wallId the wall id
      * @return true if the wall was deleted, false otherwise

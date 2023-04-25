@@ -238,11 +238,10 @@ public final class RouteController {
      * @param routeId route identifier
      * @param imageFileName route image file name
      * @return true if image was added, false otherwise
-     * @throws SQLException database issues
      */
     public static boolean addImageToRoute(
         final int routeId, final String imageFileName
-    ) throws SQLException {
+    ) {
         boolean updated;
         try (
             Connection connection = getDataSource().getConnection();
@@ -258,6 +257,8 @@ public final class RouteController {
             // the number of rows affected by the update query
             int rowsAffected = pst.executeUpdate();
             updated = rowsAffected > 0;
+        } catch (SQLException e) {
+            return false;
         }
         return updated;
     }

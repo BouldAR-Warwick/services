@@ -1,7 +1,7 @@
 package pbrg.webservices.servlets;
 
 import static pbrg.webservices.database.RouteController.routeExists;
-import static pbrg.webservices.utils.RouteUtils.getRouteImageFileNameByRouteId;
+import static pbrg.webservices.utils.RouteUtils.getRouteImageFileName;
 import static pbrg.webservices.utils.ServletUtils.returnRouteImageAsBitmap;
 
 import jakarta.servlet.annotation.WebServlet;
@@ -63,7 +63,7 @@ public class GetRouteImageServlet extends MyHttpServlet {
         }
 
         // ensure the route image has been generated
-        String routeImageFileName = getRouteImageFileNameByRouteId(routeId);
+        String routeImageFileName = getRouteImageFileName(routeId);
         boolean routeImageNotGenerated = routeImageFileName == null;
         if (routeImageNotGenerated) {
             response.sendError(

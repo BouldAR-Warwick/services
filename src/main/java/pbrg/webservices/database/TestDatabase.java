@@ -61,7 +61,7 @@ public final class TestDatabase {
     private static final Runnable CLOSE_CONTAINER = () -> {
         // stop a Docker container by ID
         ProcessBuilder closeContainerCommand = new ProcessBuilder(
-            "/bin/bash", "-c", "docker rm -f " + containerId
+            "/bin/bash", "-c", "docker stop " + containerId
         );
         runProcessBuilder(closeContainerCommand);
     };

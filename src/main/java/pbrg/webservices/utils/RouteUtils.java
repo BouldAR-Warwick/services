@@ -1,13 +1,12 @@
 package pbrg.webservices.utils;
 
 import static pbrg.webservices.database.ProductionDatabase.production;
+import static pbrg.webservices.database.RouteController.addImageToRoute;
 import static pbrg.webservices.database.RouteController.routeExists;
-import static pbrg.webservices.database.WallController
-    .getWallImageFileNameFromRouteId;
+import static pbrg.webservices.database.WallController.getWallImageFileNameFromRouteId;
 import static pbrg.webservices.database.WallController.routeHasWall;
 import static pbrg.webservices.utils.ProcessUtils.runProcessEnsureSuccess;
-import static pbrg.webservices.utils.ProcessUtils
-    .runProcessGetOutputEnsureSuccess;
+import static pbrg.webservices.utils.ProcessUtils.runProcessGetOutputEnsureSuccess;
 
 import java.io.File;
 import java.io.IOException;
@@ -149,6 +148,39 @@ public final class RouteUtils {
     }
 
     /**
+     * Create and store a route image for a route by id.
+     * @param routeId route id
+     * @return true if successful, false otherwise
+     */
+    public static boolean createAndStoreRouteImage(final int routeId) {
+        // ensure the route exists
+        if (!routeExists(routeId)) {
+            return false;
+        }
+
+        // ensure the route has a wall
+        if (!routeHasWall(routeId)) {
+            return false;
+        }
+
+        // create the route image
+        String routeImageFileName = createRouteImagePython(routeId);
+        if (routeImageFileName == null) {
+            return false;
+        }
+
+        // ensure routeImageFileName exists
+        File routeImage =
+            new File(ServletUtils.getRouteImagePath(), routeImageFileName);
+        if (!routeImage.exists()) {
+            return false;
+        }
+
+        // store the route image
+        return addImageToRoute(routeId, routeImageFileName);
+    }
+
+    /**
      * Plot holds on an image using python script plot-holds.py.
      * @param routeId route id
      * @param wallImageFileName wall image file name
@@ -219,7 +251,7 @@ public final class RouteUtils {
      * @param routeId the route id of the route
      * @return the route image file name
      */
-    public static @Nullable String getRouteImageFileNameByRouteId(
+    public static @Nullable String getRouteImageFileName(
         final int routeId
     ) {
         // ensure the route exists
@@ -232,11 +264,39 @@ public final class RouteUtils {
     }
 
     /**
+     * Delete a route by its id (including its image file).
+     * @param routeId route id
+     * @return true if deleted, false otherwise
+     */
+    public static boolean deleteRoute(final int routeId) {
+        // ensure route exists
+        if (!routeExists(routeId)) {
+            return false;
+        }
+
+        String routeImageFileName = getRouteImageFileName(routeId);
+        boolean routeImageGenerated = routeImageFileName != null;
+
+        // remove from database
+        boolean deletedFromDatabase = RouteController.deleteRoute(routeId);
+        if (!deletedFromDatabase) {
+            return false;
+        }
+
+        // remove route image if it exists
+        if (routeImageGenerated) {
+            return deleteRouteImage(routeImageFileName);
+        }
+
+        return true;
+    }
+
+    /**
      * Delete a route image file.
      * @param routeImageFileName route image file name
      * @return true if deleted, false otherwise
      */
-    public static boolean deleteRouteImage(final String routeImageFileName) {
+    private static boolean deleteRouteImage(final String routeImageFileName) {
         // create the file system path
         String routeImageFilePath = ServletUtils.getRouteImagePath()
             + routeImageFileName;

@@ -1,4 +1,5 @@
 target/
+.trunk/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -42,5 +43,3 @@ build/
 /htmlReport/
 .idea/sonarlint/
 .idea/sonarlint/*
-.idea/sonarlint/issuestore/index.pb
-.idea/sonarlint/securityhotspotstore/index.pb

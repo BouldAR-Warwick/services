@@ -1,25 +1,21 @@
 package pbrg.webservices.servlets;
 
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import java.io.File;
-import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.io.IOException;
-import java.sql.SQLException;
-import pbrg.webservices.utils.ServletUtils;
-
-import static pbrg.webservices.database.RouteController.addImageToRoute;
 import static pbrg.webservices.database.RouteController.addRoute;
 import static pbrg.webservices.database.WallController.addWall;
 import static pbrg.webservices.database.WallController.getWallIdFromGymId;
 import static pbrg.webservices.database.WallController.gymHasWall;
-import static pbrg.webservices.utils.RouteUtils.createRouteImagePython;
+import static pbrg.webservices.utils.RouteUtils.createAndStoreRouteImage;
 import static pbrg.webservices.utils.RouteUtils.generateRouteMoonBoard;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * prototyping only for the MoonBoard wall.
@@ -35,7 +31,7 @@ import static pbrg.webservices.utils.RouteUtils.generateRouteMoonBoard;
  */
 @WebServlet(
     name = "GenerateRouteServlet",
-    urlPatterns = "/GenerateRouteServlet"
+    urlPatterns = "/GenerateRoute"
 )
 public class GenerateRouteServlet extends MyHttpServlet {
 
@@ -131,8 +127,6 @@ public class GenerateRouteServlet extends MyHttpServlet {
                 throw new IllegalStateException("Route generation failed");
             }
         } catch (IllegalStateException | IOException e) {
-            // Route generation failed
-            e.printStackTrace();
             response.sendError(
                 HttpServletResponse.SC_EXPECTATION_FAILED,
                 "Route generation failed"
@@ -145,7 +139,6 @@ public class GenerateRouteServlet extends MyHttpServlet {
             route.toString(), grade, userId, wallID
         );
         if (routeId == null) {
-            // Failed to create route
             response.sendError(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Failed to create route."
@@ -153,38 +146,12 @@ public class GenerateRouteServlet extends MyHttpServlet {
             return;
         }
 
-        // generate route image, store filename
-        String routeImageFileName = createRouteImagePython(routeId);
-        if (routeImageFileName == null) {
-            // Failed to create route image
+        // generate the route image (thumbnail)
+        boolean routeImageGenerated = createAndStoreRouteImage(routeId);
+        if (!routeImageGenerated) {
             response.sendError(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Failed to create route image, IOException thrown."
-            );
-            return;
-        }
-
-        // ensure routeImageFileName exists
-        File routeImage =
-            new File(ServletUtils.getRouteImagePath(), routeImageFileName);
-        if (!routeImage.exists()) {
-            // Failed to create route image
-            response.sendError(
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Failed to create route image, file not found."
-            );
-            return;
-        }
-
-        // store route image in database
-        try {
-            addImageToRoute(routeId, routeImageFileName);
-        } catch (SQLException e) {
-            // Failed to add image to route
-            e.printStackTrace();
-            response.sendError(
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Failed to add image to route."
+                "Failed to create route image."
             );
             return;
         }
