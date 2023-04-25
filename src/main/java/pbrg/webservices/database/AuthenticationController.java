@@ -10,10 +10,10 @@ import java.sql.Statement;
 import org.jetbrains.annotations.Nullable;
 import pbrg.webservices.models.User;
 
-public final class CredentialController {
+public final class AuthenticationController {
 
     /** Static class, no need to instantiate. */
-    private CredentialController() {
+    private AuthenticationController() {
         throw new IllegalStateException("Utility class");
     }
 

@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MyHttpServlet extends HttpServlet {
 
@@ -57,10 +59,9 @@ public class MyHttpServlet extends HttpServlet {
      * @param request the http servlet request
      * @return request body as a json object
      */
-    public static @NotNull String getBody(
+    static @Nullable String getBody(
         final @NotNull HttpServletRequest request
     ) {
-
         // for constructing the body
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -76,11 +77,30 @@ public class MyHttpServlet extends HttpServlet {
                 stringBuilder.append(charBuffer, 0, bytesRead);
             }
         } catch (IOException e) {
-            return "";
+            return null;
         }
 
         // return the body
         return stringBuilder.toString();
+    }
+
+    /**
+     * Get the request body as a json object.
+     * @param request the http servlet request
+     * @return request body as a json object; null if un-parsable
+     */
+    public static @Nullable JSONObject getBodyAsJson(
+        final @NotNull HttpServletRequest request
+    ) {
+        String body = getBody(request);
+        if (body == null) {
+            return null;
+        }
+        try {
+            return new JSONObject(body);
+        } catch (JSONException e) {
+            return null;
+        }
     }
 
     /**

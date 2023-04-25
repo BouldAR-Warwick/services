@@ -68,7 +68,7 @@ public final class WallController {
      * @param wallId the wall id
      * @return the wall image file name
      */
-    public static @Nullable String getWallImageFileNameFromWallId(
+    public static @Nullable String getWallImageFileName(
         final int wallId
     ) {
         String fileName = null;
@@ -136,7 +136,7 @@ public final class WallController {
         if (wallId == null) {
             return null;
         }
-        return getWallImageFileNameFromWallId(wallId);
+        return getWallImageFileName(wallId);
     }
 
     /**

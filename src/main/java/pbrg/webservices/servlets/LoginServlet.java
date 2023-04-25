@@ -1,6 +1,6 @@
 package pbrg.webservices.servlets;
 
-import static pbrg.webservices.database.CredentialController.signIn;
+import static pbrg.webservices.database.AuthenticationController.signIn;
 
 import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,9 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONException;
 import org.json.JSONObject;
 import pbrg.webservices.models.User;
 import pbrg.webservices.utils.ServletUtils;
@@ -33,33 +31,39 @@ public class LoginServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // convert request body to json object
-        JSONObject credentials;
-        try {
-            credentials = new JSONObject(getBody(request));
-        } catch (JSONException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        // parse request body to json object
+        JSONObject arguments = getBodyAsJson(request);
+        if (arguments == null) {
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "Request body is not a valid JSON object"
+            );
             return;
         }
 
         // ensure request has all credentials
-        String[] requiredCredentials =
-            {"username", "password", "stayLoggedIn"};
-        if (!Arrays.stream(requiredCredentials).allMatch(credentials::has)) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+        String usernameKey = "username";
+        String passwordKey = "password";
+        String persistKey = "stayLoggedIn";
+        String[] credentials = {usernameKey, passwordKey, persistKey};
+        for (String credential : credentials) {
+            if (!arguments.has(credential)) {
+                response.sendError(
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    "Request body is missing " + credential
+                );
+                return;
+            }
         }
 
         // collect credentials
-        String username = credentials.getString("username");
-        String password = credentials.getString("password");
-        boolean stayLoggedIn = credentials.getBoolean("stayLoggedIn");
+        String username = arguments.getString(usernameKey);
+        String password = arguments.getString(passwordKey);
+        boolean stayLoggedIn = arguments.getBoolean(persistKey);
 
-        // select user
         User user = signIn(username, password);
-
-        // case one -> the user has not been authenticated (wrong credentials)
         if (user == null) {
+            // first case -> user not been authenticated (wrong credentials)
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
@@ -68,11 +72,9 @@ public class LoginServlet extends MyHttpServlet {
         HttpSession session = request.getSession();
         session.setAttribute("uid", user.getUid());
 
-        // TODO store primary gym id in session?
-
         if (stayLoggedIn) {
             // create cookie and store logged-in user info in cookie
-            Cookie cookie1 = new Cookie("username", user.getUsername());
+            Cookie cookie1 = new Cookie(usernameKey, user.getUsername());
             Cookie cookie2 = new Cookie("uid", String.valueOf(user.getUid()));
 
             // set expired time to 7 days
@@ -86,9 +88,13 @@ public class LoginServlet extends MyHttpServlet {
             response.addCookie(cookie2);
         }
 
-        String json = new Gson().toJson(user);
+        // returning user as json
+        String userAsJson = new Gson().toJson(user);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(json);
+        response.getWriter().write(userAsJson);
+
+        // report success
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

@@ -27,27 +27,29 @@ public class GetRouteInfoServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
+        // ensure session exists
         HttpSession session = getSession(request);
-
-        // return unauthorized error message if session is not exist
         if (session == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Session does not exist"
+            );
             return;
         }
 
         // ensure route is stored in session
         String routeIdKey = "rid";
-        boolean sessionWithoutRouteId =
-            session.getAttribute(routeIdKey) == null;
-        if (sessionWithoutRouteId) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        boolean sessionHasRouteId = session.getAttribute(routeIdKey) != null;
+        if (!sessionHasRouteId) {
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "Session does not have a route id"
+            );
             return;
         }
 
-        // collect gym id, user id from cookies
-        int routeId = (int) session.getAttribute(routeIdKey);
-
         // ensure the route exists
+        int routeId = (int) session.getAttribute(routeIdKey);
         if (!routeExists(routeId)) {
             response.sendError(
                 HttpServletResponse.SC_BAD_REQUEST,
@@ -59,9 +61,14 @@ public class GetRouteInfoServlet extends MyHttpServlet {
         JSONArray listOfHolds = getRouteContentJSONArray(routeId);
         assert listOfHolds != null;
 
-        // return: nest the hold array in a JSON object under key info
-        JSONObject info = new JSONObject();
-        info.put("info", listOfHolds);
-        response.getWriter().println(info);
+        // nest the list of holds in the response body
+        JSONObject responseBody = new JSONObject();
+        responseBody.put("info", listOfHolds);
+
+        // return the list of holds
+        response.getWriter().println(responseBody);
+
+        // report success
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

@@ -14,15 +14,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static pbrg.webservices.database.CredentialController.addUser;
-import static pbrg.webservices.database.CredentialController.deleteUser;
-import static pbrg.webservices.database.CredentialController.emailExists;
-import static pbrg.webservices.database.CredentialController.getUserIDFromEmail;
-import static pbrg.webservices.database.CredentialController
+import static pbrg.webservices.database.AuthenticationController.addUser;
+import static pbrg.webservices.database.AuthenticationController.deleteUser;
+import static pbrg.webservices.database.AuthenticationController.emailExists;
+import static pbrg.webservices.database.AuthenticationController.getUserIDFromEmail;
+import static pbrg.webservices.database.AuthenticationController
     .getUserIDFromUsername;
-import static pbrg.webservices.database.CredentialController.signUp;
-import static pbrg.webservices.database.CredentialController.userExists;
-import static pbrg.webservices.database.CredentialController.usernameExists;
+import static pbrg.webservices.database.AuthenticationController.signUp;
+import static pbrg.webservices.database.AuthenticationController.userExists;
+import static pbrg.webservices.database.AuthenticationController.usernameExists;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import pbrg.webservices.models.User;
 
-public final class CredentialControllerTest {
+public final class AuthenticationControllerTest {
 
     /** The test username. */
     private static final String TEST_USERNAME = "username_test";
@@ -145,9 +145,9 @@ public final class CredentialControllerTest {
     @Test
     void testPrivateConstructor() {
         // get constructor
-        Constructor<CredentialController> constructor;
+        Constructor<AuthenticationController> constructor;
         try {
-            constructor = CredentialController.class.getDeclaredConstructor();
+            constructor = AuthenticationController.class.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {
             fail("DatabaseUtils should have a private constructor");
             throw new RuntimeException(e);
@@ -187,7 +187,7 @@ public final class CredentialControllerTest {
 
             // when: signing in
             User testUser =
-                CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
+                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should retrieve user
             assertNotNull(testUser);
@@ -228,7 +228,7 @@ public final class CredentialControllerTest {
                 NullPointerException.class,
 
                 // when: signing in
-                () -> CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD)
+                () -> AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD)
             );
 
             // after: reset data source
@@ -243,7 +243,7 @@ public final class CredentialControllerTest {
 
             // when: signing in
             User testUser =
-                CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
+                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(testUser);
@@ -286,7 +286,7 @@ public final class CredentialControllerTest {
 
             // when: signing in and experience SQLException
             User user =
-                CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
+                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);
@@ -330,7 +330,7 @@ public final class CredentialControllerTest {
 
             // when: signing in
             User user =
-                CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
+                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);
@@ -355,7 +355,7 @@ public final class CredentialControllerTest {
 
             // when: signing in
             User user =
-                CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
+                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);
@@ -403,7 +403,7 @@ public final class CredentialControllerTest {
 
             // when: signing in
             User user =
-                CredentialController.signIn(TEST_USERNAME, TEST_PASSWORD);
+                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);

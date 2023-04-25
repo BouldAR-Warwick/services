@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,16 +20,32 @@ class GetWallImageServletTest {
         new GetWallImageServlet();
 
     @Test
-    void doGetWithNulls() {
+    void testDoGetCallsDoPost() throws IOException {
+        // given a request and response
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        GetWallImageServlet servlet = spy(new GetWallImageServlet());
+
+        // when calling do get
+        servlet.doGet(request, response);
+
+        // then do post is called
+        verify(servlet).doPost(request, response);
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    @Test
+    void doPostWithNulls() {
         assertThrows(
             // then: throws Exception
             Exception.class,
 
             // when: requested with null request and response
-            () -> SERVLET.doGet(null, null)
+            () -> SERVLET.doPost(null, null)
         );
     }
 
+    @SuppressWarnings("DataFlowIssue")
     @Test
     void emptyResponse() {
         // given: valid request, null response
@@ -39,7 +56,7 @@ class GetWallImageServletTest {
             Exception.class,
 
             // when: requested with null request and response
-            () -> SERVLET.doGet(request, null)
+            () -> SERVLET.doPost(request, null)
         );
 
         // then: ensure the session is never called

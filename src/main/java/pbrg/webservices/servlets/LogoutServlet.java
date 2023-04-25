@@ -24,29 +24,29 @@ public class LogoutServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) {
-        // set cookie to 0 second valid (a.k.a. deleted)
+        // ensure request has cookies
         Cookie[] cookies = request.getCookies();
 
-        if (cookies == null) {
-            // invalidate session
-            request.getSession().invalidate();
-            return;
-        }
-
-        for (Cookie cookie : cookies) {
-            String field =
-                URLDecoder.decode(cookie.getName(), StandardCharsets.UTF_8);
-            if (field.equals("username")) {
-                cookie.setMaxAge(0);
-                response.addCookie(cookie);
-            }
-            if (field.equals("uid")) {
-                cookie.setMaxAge(0);
-                response.addCookie(cookie);
+        // invalidate cookies, if they exist
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                String field =
+                    URLDecoder.decode(cookie.getName(), StandardCharsets.UTF_8);
+                if (field.equals("username")) {
+                    cookie.setMaxAge(0);
+                    response.addCookie(cookie);
+                }
+                if (field.equals("uid")) {
+                    cookie.setMaxAge(0);
+                    response.addCookie(cookie);
+                }
             }
         }
 
         // invalidate session
-        request.getSession().invalidate();
+        request.getSession(false).invalidate();
+
+        // report success
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

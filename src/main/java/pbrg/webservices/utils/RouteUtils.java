@@ -232,7 +232,6 @@ public final class RouteUtils {
      * @param routeId route identifier
      * @return list of holds in JSON
      */
-    @Contract("_ -> new")
     public static @Nullable JSONArray getRouteContentJSONArray(
         final int routeId
     ) {

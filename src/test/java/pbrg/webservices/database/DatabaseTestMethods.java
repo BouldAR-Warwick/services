@@ -24,7 +24,6 @@ public final class DatabaseTestMethods {
     /**
      * Mocks a data source that returns an empty result set.
      * @return the mocked data source
-     * @throws SQLException if the data source cannot be mocked
      */
     public static @NotNull DataSource mockEmptyResultSet() {
         // mock the result set
@@ -67,7 +66,6 @@ public final class DatabaseTestMethods {
     /**
      * Mocks a data source that affects no rows.
      * @return the mocked data source
-     * @throws SQLException if the data source cannot be mocked
      */
     public static @NotNull DataSource mockNoAffectedRows() {
         DataSource mockDataSource = mockEmptyResultSet();
@@ -91,7 +89,6 @@ public final class DatabaseTestMethods {
      * Mocks a data source that throws an exception when getConnection() is
      * called.
      * @return the mocked data source
-     * @throws SQLException if the data source cannot be mocked
      */
     public static @NotNull DataSource mockConnectionThrowsException() {
         DataSource mockDataSource = mock(DataSource.class);

@@ -2,14 +2,12 @@ package pbrg.webservices.servlets;
 
 import static pbrg.webservices.database.RouteController
     .getRoutesInGymMadeByUser;
-import static pbrg.webservices.utils.ServletUtils.sessionHasAttributes;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -31,43 +29,46 @@ public class GetRoutesServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-
+        // ensure session exists
         HttpSession session = getSession(request);
-
-        // return unauthorized error message if session is not exist
         if (session == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        // ensure session has required attributes: gym id, user id
-        String[] requiredSessionAttributes = {"gid", "uid"};
-        if (!sessionHasAttributes(session, requiredSessionAttributes)) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+        // ensure session has gym id, user id
+        String userIdKey = "uid";
+        String gymIdKey = "gid";
+        String[] requiredAttributes = {userIdKey, gymIdKey};
+        for (String attribute : requiredAttributes) {
+            boolean inSession = session.getAttribute(attribute) != null;
+            if (!inSession) {
+                response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Session does not have " + attribute
+                );
+                return;
+            }
         }
 
-        // collect gym id, user id from cookies
-        int gymId = (int) session.getAttribute("gid");
+        // collect user id, gym id from cookies
         int userId = (int) session.getAttribute("uid");
+        int gymId = (int) session.getAttribute("gid");
 
-        List<Route> routes;
-        try {
-            routes = getRoutesInGymMadeByUser(gymId, userId);
-        } catch (SQLException e) {
-            response.getWriter().println(e.getMessage());
-            return;
-        }
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        JSONObject jsonObject = new JSONObject();
-
+        // get routes in gym made by user
+        List<Route> routes = getRoutesInGymMadeByUser(gymId, userId);
         Route[] arrayOfRoutes = routes.toArray(new Route[0]);
 
-        jsonObject.put("routes", arrayOfRoutes);
+        // place list of routes in response body
+        JSONObject responseBody = new JSONObject();
+        responseBody.put("routes", arrayOfRoutes);
 
-        response.getWriter().write(jsonObject.toString());
+        // send response
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(responseBody.toString());
+
+        // report success
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.Duration;
 import org.jetbrains.annotations.NotNull;
 import pbrg.webservices.database.GymController;
@@ -29,24 +28,32 @@ public class StoreGymServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
+        // ensure session exists
         HttpSession session = getSession(request);
-
-        // return unauthorized error message if session is not exist
         if (session == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Session does not exist"
+            );
             return;
         }
 
-        int userId = (int) session.getAttribute("uid");
-
-        Gym gym = null;
-        try {
-            gym = GymController.getGymByUserId(userId);
-        } catch (SQLException exception) {
-            response.getWriter().println(exception.getMessage());
+        // ensure session has a user id
+        String userIdKey = "uid";
+        boolean sessionHasUserId = session.getAttribute(userIdKey) != null;
+        if (!sessionHasUserId) {
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Session does not have a user id"
+            );
+            return;
         }
 
+        // get user id from session
+        int userId = (int) session.getAttribute("uid");
+
         // when no gyms are matched
+        Gym gym = GymController.getPrimaryGymOfUser(userId);
         if (gym == null) {
             return;
         }
@@ -54,14 +61,16 @@ public class StoreGymServlet extends MyHttpServlet {
         // store gym ID in session cookie
 
         // create cookie and store logged-in user info in cookie
-        Cookie gymIdCookie = new Cookie("gid", String.valueOf(gym.getGid()));
-
         // set expired time to 7 days
+        Cookie gymIdCookie = new Cookie("gid", String.valueOf(gym.getGid()));
         int sevenDaysInSeconds =
             (int) Duration.ofDays(ServletUtils.SEVEN_DAYS).getSeconds();
         gymIdCookie.setMaxAge(sevenDaysInSeconds);
 
         // send cookie back to client for authentication next time
         response.addCookie(gymIdCookie);
+
+        // report success
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

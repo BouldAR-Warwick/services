@@ -12,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -51,6 +52,20 @@ class GetGymServletTest {
             // act: getting gym servlet
             () -> servlet.doGet(request, response)
         );
+    }
+
+    @Test
+    void testDoGetCallsDoPost() throws IOException {
+        // given a request and response
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        GetGymServlet servlet = spy(new GetGymServlet());
+
+        // when calling do get
+        servlet.doGet(request, response);
+
+        // then do post is called
+        verify(servlet).doPost(request, response);
     }
 
     @Test

@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -51,33 +50,37 @@ public class GenerateRouteServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
+        // ensure session exists
         HttpSession session = getSession(request);
-
-        // ensure session is valid
         if (session == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
-        // ensure session has attributes
-        boolean sessionHasAttributes = session.getAttribute("uid") != null
-            && session.getAttribute("gid") != null;
-        if (!sessionHasAttributes) {
             response.sendError(
                 HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not have attributes user, gym ids."
+                "Session does not exist"
             );
             return;
         }
 
+        // ensure session has uid, guid
+        String userIdKey = "uid";
+        String gymIdKey = "gid";
+        String[] requiredAttributes = {userIdKey, gymIdKey};
+        for (String attribute : requiredAttributes) {
+            boolean inSession = session.getAttribute(attribute) != null;
+            if (!inSession) {
+                response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Session does not have attribute " + attribute
+                );
+                return;
+            }
+        }
+
         // parse arguments
-        JSONObject arguments;
-        try {
-            arguments = new JSONObject(getBody(request));
-        } catch (JSONException e) {
+        JSONObject arguments = getBodyAsJson(request);
+        if (arguments == null) {
             response.sendError(
                 HttpServletResponse.SC_BAD_REQUEST,
-                "Issue parsing body as JSON."
+                "Body is not valid JSON"
             );
             return;
         }
@@ -92,6 +95,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
             return;
         }
 
+        // get arguments
         int userId = (int) session.getAttribute("uid");
         int gymId = (int) session.getAttribute("gid");
         int grade = arguments.getInt(difficultyKey);
@@ -163,5 +167,8 @@ public class GenerateRouteServlet extends MyHttpServlet {
         responseJSON.put("routeId", routeId);
         response.setContentType("application/json");
         response.getWriter().write(responseJSON.toString());
+
+        // report success
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

@@ -159,13 +159,12 @@ public final class GymController {
 
     /**
      * Get all gyms matching a query word in its location or name.
-     *
      * @param queryWord query word
      * @return list of gyms
-     * @throws SQLException if database error
      */
-    public static List<String> getGymsByQueryWord(
-            final String queryWord) throws SQLException {
+    public static @NotNull List<String> getGymsByQueryWord(
+        final @NotNull String queryWord
+    ) {
         List<String> gyms = new ArrayList<>();
         try (
             Connection connection = getDataSource().getConnection();
@@ -178,22 +177,22 @@ public final class GymController {
             pst.setString(1, "%" + queryWord + "%");
             pst.setString(2, "%" + queryWord + "%");
             ResultSet rs = pst.executeQuery();
-
             while (rs.next()) {
                 gyms.add(rs.getString("GymName"));
             }
+        } catch (SQLException e) {
+            return gyms;
         }
         return gyms;
     }
 
     /**
-     * Get a gym by name.
-     *
+     * Find a gym by its name.
      * @param gymName The name of the gym.
      * @return The gym.
      */
     public static @Nullable Gym getGymByGymName(
-        final String gymName
+        final @NotNull String gymName
     ) {
         Gym gym;
         try (
@@ -209,8 +208,14 @@ public final class GymController {
         return gym;
     }
 
-    private static Gym extractGym(
-        final PreparedStatement pst
+    /**
+     * Extract a Gym from a result set.
+     * @param pst prepared statement
+     * @return gym
+     * @throws SQLException if database error
+     */
+    private static @Nullable Gym extractGym(
+        final @NotNull PreparedStatement pst
     ) throws SQLException {
         ResultSet rs = pst.executeQuery();
         if (rs.next()) {
@@ -227,11 +232,10 @@ public final class GymController {
      * @param userId user ID
      * @param gymId gym ID
      * @return true if added, false otherwise
-     * @throws SQLException if SQL error occurs
      */
-    public static boolean addGymToUser(
+    public static boolean setPrimaryGym(
         final int userId, final int gymId
-    ) throws SQLException {
+    ) {
         boolean added;
         try (
             Connection connection = getDataSource().getConnection();
@@ -242,6 +246,8 @@ public final class GymController {
             pst.setInt(1, userId);
             pst.setInt(2, gymId);
             added = pst.executeUpdate() == 1;
+        } catch (SQLException e) {
+            return false;
         }
         return added;
     }
@@ -250,11 +256,10 @@ public final class GymController {
      * Remove a user's primary gym.
      * @param userId user ID
      * @return true if removed, false otherwise
-     * @throws SQLException if SQL error occurs
      */
     public static boolean removeUserPrimaryGym(
         final int userId
-    ) throws SQLException {
+    ) {
         boolean removed;
         try (
             Connection connection = getDataSource().getConnection();
@@ -264,18 +269,18 @@ public final class GymController {
         ) {
             pst.setInt(1, userId);
             removed = pst.executeUpdate() == 1;
+        } catch (SQLException e) {
+            return false;
         }
         return removed;
     }
 
     /**
-     * Get a gym by a user ID.
-     *
+     * Get a user's primary gym id.
      * @param userId user ID
      * @return a gym
-     * @throws SQLException if SQL error occurs
      */
-    public static Gym getGymByUserId(final int userId) throws SQLException {
+    public static @Nullable Gym getPrimaryGymOfUser(final int userId) {
         Gym gym;
         try (
             Connection connection = getDataSource().getConnection();
@@ -288,6 +293,8 @@ public final class GymController {
         ) {
             pst.setInt(1, userId);
             gym = extractGym(pst);
+        } catch (SQLException e) {
+            return null;
         }
         return gym;
     }
@@ -297,8 +304,8 @@ public final class GymController {
      * @param gymName gym name
      * @return gym id
      */
-    public static Integer getGymIdByGymName(
-        final String gymName
+    public static @Nullable Integer getGymIdByGymName(
+        final @NotNull String gymName
     ) {
         Integer gymId = null;
         try (
@@ -317,5 +324,31 @@ public final class GymController {
             return null;
         }
         return gymId;
+    }
+
+    /**
+     * Check if a user has a primary gym.
+     * @param userId user ID
+     * @return true if user has a primary gym, false otherwise
+     */
+    public static boolean userHasPrimaryGym(
+        final int userId
+    ) {
+        boolean exists = false;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT EXISTS(SELECT 1 FROM user_in_gym WHERE UID = ?)"
+            )
+        ) {
+            pst.setInt(1, userId);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                exists = rs.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+        return exists;
     }
 }

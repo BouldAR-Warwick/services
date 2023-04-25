@@ -9,12 +9,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static pbrg.webservices.database.CredentialController.deleteUser;
-import static pbrg.webservices.database.CredentialControllerTest
+import static pbrg.webservices.database.AuthenticationController.deleteUser;
+import static pbrg.webservices.database.AuthenticationController.userExists;
+import static pbrg.webservices.database.AuthenticationControllerTest
     .createTestUser;
 import static pbrg.webservices.database.DatabaseTestMethods
     .mockConnectionThrowsException;
 import static pbrg.webservices.database.GymController.deleteGym;
+import static pbrg.webservices.database.GymController.gymExists;
 import static pbrg.webservices.database.GymControllerTest.createTestGym;
 import static pbrg.webservices.database.RouteController.deleteRoute;
 import static pbrg.webservices.database.RouteController.routeExists;
@@ -23,6 +25,7 @@ import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
 import static pbrg.webservices.database.WallController.deleteWall;
+import static pbrg.webservices.database.WallController.wallExists;
 import static pbrg.webservices.database.WallControllerTest.createTestWall;
 import static pbrg.webservices.utils.RouteUtils.createAndStoreRouteImage;
 import static pbrg.webservices.utils.RouteUtils.getRouteImageFileName;
@@ -83,9 +86,15 @@ class DeleteRouteServletTest {
         if (routeExists(routeId)) {
             assertTrue(deleteRoute(routeId));
         }
-        assertTrue(deleteWall(wallId));
-        assertTrue(deleteGym(gymId));
-        assertTrue(deleteUser(userId));
+        if (wallExists(wallId)) {
+            assertTrue(deleteWall(wallId));
+        }
+        if (gymExists(gymId)) {
+            assertTrue(deleteGym(gymId));
+        }
+        if (userExists(userId)) {
+            assertTrue(deleteUser(userId));
+        }
     }
 
     @Test

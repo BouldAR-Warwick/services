@@ -1,7 +1,6 @@
 package pbrg.webservices.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,12 +15,10 @@ import static pbrg.webservices.utils.ServletUtils.getWallImagePath;
 import static pbrg.webservices.utils.ServletUtils.returnImageAsBitmap;
 import static pbrg.webservices.utils.ServletUtils.returnRouteImageAsBitmap;
 import static pbrg.webservices.utils.ServletUtils.returnWallImageAsBitmap;
-import static pbrg.webservices.utils.ServletUtils.sessionHasAttributes;
 import static pbrg.webservices.utils.ServletUtils.setPaths;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -72,22 +69,6 @@ class ServletUtilsTest {
         for (String nonKey : nonKeys) {
             assertNull(getContentType(nonKey));
         }
-    }
-
-    @Test
-    void testSessionHasAttributes() {
-        // Given
-        HttpSession session = mock(HttpSession.class);
-        when(session.getAttribute("attr1")).thenReturn("value1");
-        when(session.getAttribute("attr2")).thenReturn("value2");
-
-        // When & Then
-        assertTrue(
-            sessionHasAttributes(session, new String[]{"attr1", "attr2"})
-        );
-        assertFalse(
-            sessionHasAttributes(session, new String[]{"attr1", "attr3"})
-        );
     }
 
     @Test

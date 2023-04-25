@@ -5,11 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static pbrg.webservices.database.CredentialController.deleteUser;
-import static pbrg.webservices.database.CredentialController.userExists;
-import static pbrg.webservices.database.CredentialControllerTest
+import static pbrg.webservices.database.AuthenticationController.deleteUser;
+import static pbrg.webservices.database.AuthenticationController.userExists;
+import static pbrg.webservices.database.AuthenticationControllerTest
     .createTestUser;
 import static pbrg.webservices.database.GymController.deleteGym;
 import static pbrg.webservices.database.GymController.gymExists;
@@ -27,7 +28,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -54,7 +54,21 @@ class GenerateRouteServletTest {
     }
 
     @Test
-    void validRunThrough() throws SQLException, IOException {
+    void testDoGetCallsDoPost() throws IOException {
+        // given a request and response
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        DeleteRouteServlet servlet = spy(new DeleteRouteServlet());
+
+        // when calling do get
+        servlet.doGet(request, response);
+
+        // then do post is called
+        verify(servlet).doPost(request, response);
+    }
+
+    @Test
+    void validRunThrough() throws IOException {
         // given: a user, a gym with a wall, a grade
         int uid = createTestUser();
         int gid = createTestGym();
@@ -92,6 +106,8 @@ class GenerateRouteServletTest {
         assertTrue(content.has("routeId"));
         int routeId = content.getInt("routeId");
         assertTrue(userOwnsRoute(uid, routeId));
+
+        verify(response).setStatus(HttpServletResponse.SC_OK);
 
         // after: remove models
         assertTrue(deleteRoute(uid, wallId));

@@ -4,19 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static pbrg.webservices.database.CredentialController.deleteUser;
-import static pbrg.webservices.database.CredentialControllerTest
+import static pbrg.webservices.database.AuthenticationController.deleteUser;
+import static pbrg.webservices.database.AuthenticationControllerTest
     .createTestUser;
 import static pbrg.webservices.database.DatabaseTestMethods.mockEmptyResultSet;
 import static pbrg.webservices.database.GymController.addGym;
 import static pbrg.webservices.database.GymController.deleteGym;
-import static pbrg.webservices.database.GymController.getGymByUserId;
+import static pbrg.webservices.database.GymController.getPrimaryGymOfUser;
 import static pbrg.webservices.database.GymController.getGymIdByGymName;
 import static pbrg.webservices.database.GymController.gymExists;
 import static pbrg.webservices.database.GymController.removeUserPrimaryGym;
@@ -31,6 +30,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import javax.sql.DataSource;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +70,7 @@ public final class GymControllerTest {
      * @return the mocked data source
      * @throws SQLException if the data source cannot be mocked
      */
-    private static DataSource mockExecuteUpdateReturningZero()
+    private static @NotNull DataSource mockExecuteUpdateReturningZero()
         throws SQLException {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(preparedStatement.executeUpdate()).thenReturn(0);
@@ -138,13 +138,10 @@ public final class GymControllerTest {
     }
 
     @Test
-    void addNewGym() throws SQLException {
+    void addNewGym() {
         // given: a new gym
         // when: adding the gym
-        Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
-
-        // then: the gym is added
-        assertNotNull(gymId);
+        int gymId = createTestGym();
 
         // ensure the gym exists
         assertTrue(gymExists(gymId));
@@ -153,6 +150,7 @@ public final class GymControllerTest {
 
         // after: remove the gym
         assertTrue(deleteGym(gymId));
+        assertFalse(gymExists(gymId));
         assertFalse(gymExists(TEST_GYM_NAME));
     }
 
@@ -188,8 +186,7 @@ public final class GymControllerTest {
         // given: a conflicting name
 
         // add the test gym
-        Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
-        assertNotNull(gymId);
+        int gymId = createTestGym();
         assertTrue(gymExists(gymId));
 
         // when: adding a gym with a conflicting name
@@ -343,8 +340,7 @@ public final class GymControllerTest {
     @Test
     void getGymByGymNameExistingGym() {
         // given: an existing gym
-        Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
-        assertNotNull(gymId);
+        int gymId = createTestGym();
         assertTrue(gymExists(gymId));
 
         // when: getting the gym
@@ -362,14 +358,14 @@ public final class GymControllerTest {
     }
 
     @Test
-    void addGymToUserBothValid() throws SQLException {
+    void addGymToUserBothValid() {
         // given: a valid user and gym without a primary gym relationship
         int uid = createTestUser();
         int gid = createTestGym();
-        assertNull(getGymByUserId(uid));
+        assertNull(getPrimaryGymOfUser(uid));
 
         // when: adding the gym to the user
-        boolean added = GymController.addGymToUser(uid, gid);
+        boolean added = GymController.setPrimaryGym(uid, gid);
 
         // then: the gym is added to the user
         assertTrue(added);
@@ -391,7 +387,7 @@ public final class GymControllerTest {
         DatabaseController.setDataSource(dataSource);
 
         // when: adding gym to user
-        boolean added = GymController.addGymToUser(-1, -1);
+        boolean added = GymController.setPrimaryGym(-1, -1);
 
         // then: the gym is not added to the user
         assertFalse(added);
@@ -407,13 +403,10 @@ public final class GymControllerTest {
         int gid = -1;
 
         // when: adding the gym to the user
-        assertThrows(
-            // then: the gym is not added to the user
-            SQLException.class,
+        boolean added = GymController.setPrimaryGym(uid, gid);
 
-            // then: the gym is not added to the user
-            () -> GymController.addGymToUser(uid, gid)
-        );
+        // then: the gym is not added to the user
+        assertFalse(added);
 
         // after: remove user
         assertTrue(deleteUser(uid));
@@ -426,30 +419,29 @@ public final class GymControllerTest {
         int gid = createTestGym();
 
         // when: adding the gym to the user
-        assertThrows(
-            // then: the gym is not added to the user
-            SQLException.class,
+        boolean added = GymController.setPrimaryGym(uid, gid);
 
-            // then: the gym is not added to the user
-            () -> GymController.addGymToUser(uid, gid)
-        );
+        // then: the gym is not added to the user
+        assertFalse(added);
 
         // after: remove gym
         assertTrue(deleteGym(gid));
     }
 
     @Test
-    void getGymByUserIdTest() throws SQLException {
+    void getGymByUserIdTest() {
         // given: a valid user and gym, gym is user's primary gym
         int uid = createTestUser();
         int gid = createTestGym();
-        assertNull(getGymByUserId(uid));
-        boolean added = GymController.addGymToUser(uid, gid);
+        assertNull(getPrimaryGymOfUser(uid));
+        boolean added = GymController.setPrimaryGym(uid, gid);
         assertTrue(added);
 
         // when: getting the gym by user id
         // then: the gym is found
-        assertEquals(gid, getGymByUserId(uid).getGid());
+        Gym gym = getPrimaryGymOfUser(uid);
+        assertNotNull(gym);
+        assertEquals(gid, gym.getGid());
 
         // after: remove both and connection
         assertTrue(removeUserPrimaryGym(uid));
@@ -491,19 +483,19 @@ public final class GymControllerTest {
     @Test
     void getGymIdByGymNameValid() {
         // given: an existing gym
-        Integer gymId = addGym(TEST_GYM_NAME, TEST_GYM_LOCATION);
-        assertNotNull(gymId);
+        int gymId = createTestGym();
         assertTrue(gymExists(gymId));
 
         // when: getting the gym id
         Integer gymIdByName = getGymIdByGymName(TEST_GYM_NAME);
 
         // then: the gym id is found
-        assertNotNull(gymId);
+        assertNotNull(gymIdByName);
         assertEquals(gymId, gymIdByName);
 
         // after: remove the gym
         assertTrue(deleteGym(gymId));
+        assertFalse(gymExists(gymId));
         assertFalse(gymExists(TEST_GYM_NAME));
     }
 }

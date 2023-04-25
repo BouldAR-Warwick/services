@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.servlets.MyHttpServlet.getBody;
+import static pbrg.webservices.servlets.MyHttpServlet.getBodyAsJson;
 import static pbrg.webservices.servlets.MyHttpServlet.getSession;
 
 import jakarta.servlet.ServletInputStream;
@@ -73,6 +74,7 @@ class MyHttpServletTest {
 
         // Call the getBody method with the mock request
         String body = getBody(request);
+        assertNotNull(body);
 
         // Verify that the body contains the expected JSON string
         assertEquals(bodyJsonString, body);
@@ -96,6 +98,7 @@ class MyHttpServletTest {
 
         // Call the getBody method with the mock request
         String body = getBody(request);
+        assertNotNull(body);
 
         // Verify that the body contains the expected JSON string
         assertEquals(bodyJsonString, body);
@@ -194,5 +197,25 @@ class MyHttpServletTest {
                 mock(HttpServletResponse.class)
             )
         );
+    }
+
+    @Test
+    void testGetBodyException() throws IOException {
+        // given: an IOException is thrown when getInputStream is called
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getInputStream()).thenThrow(new IOException());
+
+        // when: getBody is called, then: null is returned
+        assertNull(getBody(request));
+    }
+
+    @Test
+    void testGetBodyAsJsonNullBody() throws IOException {
+        // given: an IOException is thrown when getInputStream is called
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getInputStream()).thenThrow(new IOException());
+
+        // when: getBody is called, then: null is returned
+        assertNull(getBodyAsJson(request));
     }
 }

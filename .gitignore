@@ -42,4 +42,3 @@ build/
 ### IntelliJ code coverage report ###
 /htmlReport/
 .idea/sonarlint/
-.idea/sonarlint/*

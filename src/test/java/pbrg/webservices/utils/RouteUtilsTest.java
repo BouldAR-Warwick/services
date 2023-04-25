@@ -7,13 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
-import static pbrg.webservices.database.CredentialController.addUser;
-import static pbrg.webservices.database.CredentialController.deleteUser;
+import static pbrg.webservices.database.AuthenticationController.addUser;
+import static pbrg.webservices.database.AuthenticationController.deleteUser;
 import static pbrg.webservices.database.GymController.addGym;
 import static pbrg.webservices.database.GymController.deleteGym;
 import static pbrg.webservices.database.RouteController.addImageToRoute;
 import static pbrg.webservices.database.RouteController.addRoute;
-import static pbrg.webservices.database.RouteController.deleteRoute;
+import static pbrg.webservices.database.RouteController.routeExists;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
@@ -169,7 +169,7 @@ final class RouteUtilsTest {
         // given: a route that has no wall image
         int routeId = -1;
 
-        // when: trying to createRouteImagePython
+        // when: trying to create the route thumbnail
         String routeImageFileName = createRouteImagePython(routeId);
 
         // then: routeImageFileName should be null
@@ -192,14 +192,15 @@ final class RouteUtilsTest {
         );
         assertNotNull(routeId);
 
-        // when: trying to createRouteImagePython
+        // when: trying to create the route thumbnail
         String routeImage = createRouteImagePython(routeId);
 
         // then: routeImage should be generated
         assertNotNull(routeImage);
 
         // after: delete models
-        assertTrue(deleteRoute(routeId));
+        RouteUtils.deleteRoute(routeId);
+        assertFalse(routeExists(routeId));
         assertTrue(deleteWall(wallId));
         assertTrue(deleteGym(gymId));
         assertTrue(deleteUser(userId));
@@ -253,7 +254,8 @@ final class RouteUtilsTest {
         assertNotNull(routeImageFileName);
 
         // after: delete models
-        assertTrue(deleteRoute(routeId));
+        RouteUtils.deleteRoute(routeId);
+        assertFalse(routeExists(routeId));
         assertTrue(deleteWall(wallId));
         assertTrue(deleteGym(gymId));
         assertTrue(deleteUser(userId));

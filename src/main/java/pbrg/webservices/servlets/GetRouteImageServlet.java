@@ -92,9 +92,10 @@ public class GetRouteImageServlet extends MyHttpServlet {
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error reading image file"
             );
+            return;
         }
 
-        // send ok response
+        // report success
         response.setStatus(HttpServletResponse.SC_OK);
     }
 }

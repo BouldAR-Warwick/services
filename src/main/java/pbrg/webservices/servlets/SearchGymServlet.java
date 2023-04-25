@@ -28,39 +28,52 @@ public class SearchGymServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-
+        // ensure session exists
         HttpSession session = getSession(request);
-
-        // return unauthorized error message if session is not exist
         if (session == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Session does not exist"
+            );
             return;
         }
 
-        // get json object in the request body
-        JSONObject jObj = new JSONObject(getBody(request));
-        String queryWord = jObj.getString("queryword");
-
-        // get all gyms matching query_word
-        List<String> gyms = null;
-        try {
-            gyms = GymController.getGymsByQueryWord(queryWord);
-        } catch (Exception e) {
-            response.getWriter().println(e.getMessage());
-        }
-
-        // error: unable to get gyms
-        if (gyms == null) {
-            response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED);
+        // parse the request body
+        JSONObject body = getBodyAsJson(request);
+        if (body == null) {
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "Request body is not a valid JSON object"
+            );
             return;
         }
 
+        // ensure the request body contains the query word
+        if (!body.has("queryword")) {
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "Request body does not contain the query word"
+            );
+            return;
+        }
+
+        // get the query word
+        String queryWord = body.getString("queryword");
+
+        // get all gyms matching the query word
+        List<String> gyms = GymController.getGymsByQueryWord(queryWord);
+
+        // convert the list of gyms to a json string
         String[] gymArray = gyms.toArray(new String[0]);
         GymList gymList = new GymList(gymArray);
         String json = new Gson().toJson(gymList);
 
+        // return the list of gyms as a json string
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(json);
+
+        // report success
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

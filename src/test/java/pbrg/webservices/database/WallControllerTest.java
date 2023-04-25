@@ -1,6 +1,7 @@
 package pbrg.webservices.database;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -13,7 +14,7 @@ import static pbrg.webservices.database.WallController.addWall;
 import static pbrg.webservices.database.WallController.deleteWall;
 import static pbrg.webservices.database.WallController.getWallIdFromGymId;
 import static pbrg.webservices.database.WallController.getWallIdFromRouteId;
-import static pbrg.webservices.database.WallController.getWallImageFileNameFromWallId;
+import static pbrg.webservices.database.WallController.getWallImageFileName;
 import static pbrg.webservices.database.WallController.gymHasWall;
 
 import java.lang.reflect.Constructor;
@@ -37,7 +38,10 @@ public final class WallControllerTest {
      * @return the wall id
      */
     public static int createTestWall(final int gymId) {
-        return addWall(gymId, TEST_WALL_CONTENT, TEST_WALL_IMAGE_FILE_NAME);
+        Integer wallId =
+            addWall(gymId, TEST_WALL_CONTENT, TEST_WALL_IMAGE_FILE_NAME);
+        assertNotNull(wallId);
+        return wallId;
     }
 
     @BeforeAll
@@ -103,7 +107,7 @@ public final class WallControllerTest {
         DatabaseController.setDataSource(mockDataSource);
 
         // when: getting the wall image file name from the wallId
-        String fileName = getWallImageFileNameFromWallId(-1);
+        String fileName = getWallImageFileName(-1);
 
         // then: file name should be null
         assertNull(fileName);

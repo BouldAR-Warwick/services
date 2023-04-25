@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static pbrg.webservices.database.CredentialController.userExists;
+import static pbrg.webservices.database.AuthenticationController.userExists;
 import static pbrg.webservices.database.DatabaseTestMethods.mockConnectionThrowsException;
 import static pbrg.webservices.database.DatabaseTestMethods.mockEmptyResultSet;
 import static pbrg.webservices.database.DatabaseTestMethods.mockNoAffectedRows;
@@ -119,7 +119,7 @@ public final class RouteControllerTest {
     }
 
     @Test
-    void userOwnsRouteEmptyResults() throws SQLException {
+    void userOwnsRouteEmptyResults() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
         DataSource mockDataSource = mockEmptyResultSet();
@@ -325,20 +325,18 @@ public final class RouteControllerTest {
         DataSource mockDataSource = mockConnectionThrowsException();
         DatabaseController.setDataSource(mockDataSource);
 
-        assertThrows(
-            // then: SQLException should be thrown
-            SQLException.class,
+        // when: getting routes
+        List<Route> routes = getRoutesInGymMadeByUser(gymId, userId);
 
-            // when: getting routes
-            () -> getRoutesInGymMadeByUser(gymId, userId)
-        );
+        // then: routes should be empty
+        assertTrue(routes.isEmpty());
 
         // after: restore original data source
         DatabaseController.setDataSource(originalDataSource);
     }
 
     @Test
-    void getRoutesInGymMadeByUserEmptyResultSet() throws SQLException {
+    void getRoutesInGymMadeByUserEmptyResultSet() {
         DataSource originalDataSource = DatabaseController.getDataSource();
         DatabaseController.setDataSource(mockEmptyResultSet());
 

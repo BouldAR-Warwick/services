@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 final class HelloServletTest {
@@ -27,5 +28,6 @@ final class HelloServletTest {
         // then: Hello World! is a substring of result
         String result = stringWriter.toString();
         assertTrue(result.contains("Hello World!"));
+        verify(response).setStatus(HttpServletResponse.SC_OK);
     }
 }

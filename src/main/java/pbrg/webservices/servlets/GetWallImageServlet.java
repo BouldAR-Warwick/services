@@ -13,7 +13,7 @@ import static pbrg.webservices.database.GymController.gymExists;
 import static pbrg.webservices.database.WallController
     .getWallIdFromGymId;
 import static pbrg.webservices.database.WallController
-    .getWallImageFileNameFromWallId;
+    .getWallImageFileName;
 import static pbrg.webservices.database.WallController.gymHasWall;
 import static pbrg.webservices.utils.ServletUtils.returnWallImageAsBitmap;
 
@@ -35,14 +35,14 @@ public class GetWallImageServlet extends MyHttpServlet {
     ) throws IOException {
         // validate request, session, session requires gid
         String gymIdKey = "gid";
-        HttpSession session = getSession(request);
 
-        // error if request is unauthorized
+        // ensure session exists
+        HttpSession session = getSession(request);
         if (session == null) {
             // return unauthorized error message
             response.sendError(
                 HttpServletResponse.SC_UNAUTHORIZED,
-                "Session is null"
+                "Session does not exist"
             );
             return;
         }
@@ -53,14 +53,13 @@ public class GetWallImageServlet extends MyHttpServlet {
             // return unauthorized error message
             response.sendError(
                 HttpServletResponse.SC_UNAUTHORIZED,
-                "Session has no gid"
+                "Session does not have a gym id"
             );
             return;
         }
 
-        int gymId = (int) session.getAttribute(gymIdKey);
-
         // ensure the gym exists
+        int gymId = (int) session.getAttribute(gymIdKey);
         if (!gymExists(gymId)) {
             // return unauthorized error message
             response.sendError(
@@ -80,17 +79,11 @@ public class GetWallImageServlet extends MyHttpServlet {
             return;
         }
 
-        // ensure the wall has an image
+        // get the wall image file name
         Integer wallId = getWallIdFromGymId(gymId);
         assert wallId != null;
-        String wallImageFileName = getWallImageFileNameFromWallId(wallId);
-        if (wallImageFileName == null) {
-            response.sendError(
-                HttpServletResponse.SC_EXPECTATION_FAILED,
-                "Image file name is null, but wall exists in gym"
-            );
-            return;
-        }
+        String wallImageFileName = getWallImageFileName(wallId);
+        assert wallImageFileName != null;
 
         // ensure the file exists
         File wallImageFile = new File(
@@ -109,8 +102,12 @@ public class GetWallImageServlet extends MyHttpServlet {
         } catch (IOException e) {
             response.sendError(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error reading image file"
+                "Error reading image file, ensure it is in a supported format"
             );
+            return;
         }
+
+        // report success
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

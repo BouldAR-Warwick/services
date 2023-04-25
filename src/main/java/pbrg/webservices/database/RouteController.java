@@ -27,12 +27,11 @@ public final class RouteController {
      * @param gymId  gym ID
      * @param userId creator user ID
      * @return list of routes
-     * @throws SQLException if SQL error occurs
      */
     public static @NotNull List<Route> getRoutesInGymMadeByUser(
         final int gymId, final int userId
-    ) throws SQLException {
-        List<Route> routes = new ArrayList<>();
+    ) {
+        List<@NotNull Route> routes = new ArrayList<>();
         try (
             Connection connection = getDataSource().getConnection();
             PreparedStatement pst = connection.prepareStatement(
@@ -54,6 +53,8 @@ public final class RouteController {
                     "Route #" + rs.getInt("RID")
                 ));
             }
+        } catch (SQLException e) {
+            return routes;
         }
         return routes;
     }
@@ -100,11 +101,10 @@ public final class RouteController {
      * @param userId  creator user ID
      * @param routeId route ID
      * @return user has created route
-     * @throws SQLException Query or database get fails
      */
     public static boolean userOwnsRoute(
         final int userId, final int routeId
-    ) throws SQLException {
+    ) {
         boolean ownsRoute = false;
         try (
             Connection connection = getDataSource().getConnection();
@@ -121,6 +121,8 @@ public final class RouteController {
             if (rs.next()) {
                 ownsRoute = rs.getBoolean(1);
             }
+        } catch (SQLException e) {
+            return false;
         }
         return ownsRoute;
     }
