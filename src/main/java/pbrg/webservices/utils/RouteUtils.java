@@ -4,26 +4,25 @@ import static pbrg.webservices.database.ProductionDatabase.production;
 import static pbrg.webservices.database.RouteController.addImageToRoute;
 import static pbrg.webservices.database.RouteController.routeExists;
 import static pbrg.webservices.database.WallController.getWallImageFileNameFromRouteId;
-import static pbrg.webservices.database.WallController.routeHasWall;
 import static pbrg.webservices.utils.ProcessUtils.runProcessEnsureSuccess;
 import static pbrg.webservices.utils.ProcessUtils.runProcessGetOutputEnsureSuccess;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Objects;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
+import org.json.JSONException;
 import pbrg.webservices.database.RouteController;
 import pbrg.webservices.models.RouteFull;
 
 public final class RouteUtils {
 
     static {
-        // set the python scripts directory
-        setPythonScriptsDir(production());
+        // set the python scripts directory based on environment
+        resetPythonScriptsDirectory();
     }
 
     /** The path to the python scripts directory. */
@@ -38,6 +37,13 @@ public final class RouteUtils {
     /** Util class, no instances. */
     private RouteUtils() {
         throw new IllegalStateException("Utility class");
+    }
+
+    /**
+     * Reset the python scripts directory based on environment.
+     */
+    public static void resetPythonScriptsDirectory() {
+        setPythonScriptsDir(production());
     }
 
     /**
@@ -153,10 +159,7 @@ public final class RouteUtils {
             return null;
         }
 
-        // ensure the route has a wall
-        if (!routeHasWall(routeId)) {
-            return null;
-        }
+        // note every route has a wall
 
         // load the wall image file
         String wallImageFileName = getWallImageFileNameFromRouteId(routeId);
@@ -195,10 +198,7 @@ public final class RouteUtils {
             return false;
         }
 
-        // ensure the route has a wall
-        if (!routeHasWall(routeId)) {
-            return false;
-        }
+        // note every route has a wall
 
         // create the route image
         String routeImageFileName = createRouteImagePython(routeId);
@@ -209,9 +209,7 @@ public final class RouteUtils {
         // ensure routeImageFileName exists
         File routeImage =
             new File(ServletUtils.getRouteImagePath(), routeImageFileName);
-        if (!routeImage.exists()) {
-            return false;
-        }
+        assert routeImage.exists();
 
         // store the route image
         return addImageToRoute(routeId, routeImageFileName);
@@ -277,7 +275,11 @@ public final class RouteUtils {
         }
         String routeContent = RouteController.getRouteContent(routeId);
         assert routeContent != null;
-        return new JSONArray(Objects.requireNonNull(routeContent));
+        try {
+            return new JSONArray(routeContent);
+        } catch (JSONException e) {
+            return null;
+        }
     }
 
     /**

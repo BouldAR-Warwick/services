@@ -6,10 +6,8 @@ import static pbrg.webservices.database.ProductionDatabase.production;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.Map;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -119,23 +117,6 @@ public final class ServletUtils {
             return null;
         }
         return CONTENT_TYPE_MAP.get(imageFormat);
-    }
-
-    /**
-     * Check if a session has required attributes.
-     * @param session session
-     * @param requiredSessionAttributes string array of required attributes
-     * @return true if session has all required attributes
-     */
-    public static boolean sessionHasAttributes(
-        final HttpSession session,
-        final String[] requiredSessionAttributes
-    ) {
-        return Arrays
-            .stream(requiredSessionAttributes)
-            .allMatch(
-                attribute -> session.getAttribute(attribute) != null
-            );
     }
 
     /**

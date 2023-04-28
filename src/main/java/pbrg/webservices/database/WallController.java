@@ -198,34 +198,6 @@ public final class WallController {
     }
 
     /**
-     * Check if a route has a wall.
-     * @param routeId the route id
-     * @return true if the route has a wall, false otherwise
-     */
-    public static boolean routeHasWall(final int routeId) {
-        boolean has = false;
-        try (
-            Connection connection = getDataSource().getConnection();
-            PreparedStatement pst = connection.prepareStatement(
-                "SELECT EXISTS (SELECT routes.WID "
-                    + "FROM routes "
-                    + "WHERE RID = ?)"
-            )
-        ) {
-            pst.setInt(1, routeId);
-            ResultSet rs = pst.executeQuery();
-
-            // get JSON list of holds
-            if (rs.next()) {
-                has = rs.getBoolean(1);
-            }
-        } catch (SQLException e) {
-            return false;
-        }
-        return has;
-    }
-
-    /**
      * Check if a wall exists by id.
      * @param wallId the wall id
      * @return true if the wall exists, false otherwise

@@ -3,12 +3,8 @@ r
 Bsrc/main/java/pbrg/webservices/models/ChainingMysqlDataSource.java,c/b/cbd05d4b3a61a21ce256bb4a6517a17591733387
 ^
 .src/main/java/pbrg/webservices/models/Gym.java,a/2/a2729096b231798e79286463049708ca8e03836a
-b
-2src/main/java/pbrg/webservices/models/GymList.java,0/c/0c8d77ea3581cb377ae2863266c5fd1254a9bc04
 g
 7src/main/java/pbrg/webservices/models/package-info.java,1/1/11e4862e1379d7c646ef1e6dac59b1a395ba6e50
-d
-4src/main/java/pbrg/webservices/models/RouteFull.java,1/7/174669be432ea1f28b3c439842818eb55bb24c28
 _
 /src/main/java/pbrg/webservices/models/User.java,1/5/15b2ad0a704a057442ddb512320f6c5b3da15104
 `

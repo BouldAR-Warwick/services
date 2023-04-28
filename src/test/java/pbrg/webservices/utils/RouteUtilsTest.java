@@ -1,5 +1,6 @@
 package pbrg.webservices.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -9,8 +10,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static pbrg.webservices.database.AuthenticationController.addUser;
 import static pbrg.webservices.database.AuthenticationController.deleteUser;
+import static pbrg.webservices.database.AuthenticationControllerTest.createTestUser;
 import static pbrg.webservices.database.GymController.addGym;
 import static pbrg.webservices.database.GymController.deleteGym;
+import static pbrg.webservices.database.GymControllerTest.createTestGym;
 import static pbrg.webservices.database.RouteController.addImageToRoute;
 import static pbrg.webservices.database.RouteController.addRoute;
 import static pbrg.webservices.database.RouteController.routeExists;
@@ -19,13 +22,19 @@ import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
 import static pbrg.webservices.database.WallController.addWall;
 import static pbrg.webservices.database.WallController.deleteWall;
+import static pbrg.webservices.database.WallControllerTest.createTestWall;
+import static pbrg.webservices.utils.RouteUtils.createAndStoreRouteImage;
 import static pbrg.webservices.utils.RouteUtils.createRouteImagePython;
 import static pbrg.webservices.utils.RouteUtils.generateRouteMoonBoard;
 import static pbrg.webservices.utils.RouteUtils.getPythonScriptsDir;
 import static pbrg.webservices.utils.RouteUtils.getRouteContentJSONArray;
 import static pbrg.webservices.utils.RouteUtils.getRouteImageFileName;
 import static pbrg.webservices.utils.RouteUtils.plotHoldsOnImagePython;
+import static pbrg.webservices.utils.RouteUtils.resetPythonScriptsDirectory;
 import static pbrg.webservices.utils.RouteUtils.setPythonScriptsDir;
+import static pbrg.webservices.utils.ServletUtils.getRouteImagePath;
+import static pbrg.webservices.utils.ServletUtils.setRouteImagePath;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -118,7 +127,7 @@ final class RouteUtilsTest {
         assertNotNull(newFile);
 
         // after: remove the file
-        File file = new File(ServletUtils.getRouteImagePath(), newFile);
+        File file = new File(getRouteImagePath(), newFile);
         assertTrue(file.delete());
     }
 
@@ -203,7 +212,7 @@ final class RouteUtilsTest {
         assertNotNull(routeImage);
 
         // after: remove image
-        File file = new File(ServletUtils.getRouteImagePath(), routeImage);
+        File file = new File(getRouteImagePath(), routeImage);
         assertTrue(file.delete());
 
         // after: delete models
@@ -267,5 +276,126 @@ final class RouteUtilsTest {
         assertTrue(deleteWall(wallId));
         assertTrue(deleteGym(gymId));
         assertTrue(deleteUser(userId));
+    }
+
+    @Test
+    void testPathsInProduction() {
+        // given: the production environment
+        boolean inProduction = true;
+
+        // when setting the paths
+        setPythonScriptsDir(inProduction);
+
+        // then the paths should be set correctly
+        assertEquals(
+            System.getProperty("user.home")
+                + "/Projects/services/scripts/python/",
+            getPythonScriptsDir()
+        );
+
+        // after: reset the paths
+        resetPythonScriptsDirectory();
+    }
+
+    @Test
+    void testPathsNotInProduction() {
+        // given: not the production environment
+        boolean inProduction = false;
+
+        // when setting the paths
+        setPythonScriptsDir(inProduction);
+
+        // then the paths should be set correctly
+        assertEquals(
+            System.getProperty("user.dir") + "/scripts/python/",
+            getPythonScriptsDir()
+        );
+
+        // after: reset the paths
+        resetPythonScriptsDirectory();
+    }
+
+    @Test
+    void deleteRouteInvalidRoute() {
+        // given: a route ID that does not exist
+        int routeId = -1;
+        assertFalse(routeExists(routeId));
+
+        // when: trying to delete the route
+        RouteUtils.deleteRoute(routeId);
+
+        // then: the route still does not exist
+        assertFalse(routeExists(routeId));
+    }
+
+    @Test
+    void createRouteImagePythonFailingWallHasNoHolds() {
+        // given: a route that has no wall image
+        int userId = createTestUser();
+        int gymId = createTestGym();
+        int wallId = createTestWall(gymId);
+        Integer routeId = addRoute(
+            "", AVERAGE_GRADE, userId, wallId
+        );
+        assertNotNull(routeId);
+
+        JSONArray holdArray = getRouteContentJSONArray(routeId);
+        assertNull(holdArray);
+
+        // when: trying to create the route thumbnail
+        String routeImageFileName = createRouteImagePython(routeId);
+
+        // then: routeImageFileName should be null
+        assertNull(routeImageFileName);
+
+        // after: delete models
+        RouteUtils.deleteRoute(routeId);
+        assertFalse(routeExists(routeId));
+        assertTrue(deleteWall(wallId));
+        assertTrue(deleteGym(gymId));
+        assertTrue(deleteUser(userId));
+    }
+
+    @Test
+    void createAndStoreRouteImageFailingInvalidUser() {
+        // given: an invalid user ID
+        int userId = -1;
+
+        // when: trying to create and store a route image
+        boolean success = createAndStoreRouteImage(userId);
+
+        // then: the route image file name should be null
+        assertFalse(success);
+    }
+
+    @Test
+    void createAndStoreRouteImageFailingFileNotFound() {
+        String originalPath = getRouteImagePath();
+        setRouteImagePath("/dev/null/invalid/path");
+
+        // given: a valid route
+        int userId = createTestUser();
+        int gymId = createTestGym();
+        int wallId = createTestWall(gymId);
+        Integer routeId = addRoute(
+            "{}", AVERAGE_GRADE, userId, wallId
+        );
+        assertNotNull(routeId);
+
+        // when: trying to create and store a route image
+        boolean success = createAndStoreRouteImage(routeId);
+
+        // then: the route image file name should be null
+        assertFalse(success);
+
+        // after: delete models
+        RouteUtils.deleteRoute(routeId);
+        assertFalse(routeExists(routeId));
+        assertTrue(deleteWall(wallId));
+        assertTrue(deleteGym(gymId));
+        assertTrue(deleteUser(userId));
+
+        // reset route image path
+        setRouteImagePath(originalPath);
     }
 }
