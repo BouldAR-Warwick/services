@@ -116,6 +116,10 @@ final class RouteUtilsTest {
 
         // then: file is successfully created
         assertNotNull(newFile);
+
+        // after: remove the file
+        File file = new File(ServletUtils.getRouteImagePath(), newFile);
+        assertTrue(file.delete());
     }
 
     @Test
@@ -197,6 +201,10 @@ final class RouteUtilsTest {
 
         // then: routeImage should be generated
         assertNotNull(routeImage);
+
+        // after: remove image
+        File file = new File(ServletUtils.getRouteImagePath(), routeImage);
+        assertTrue(file.delete());
 
         // after: delete models
         RouteUtils.deleteRoute(routeId);

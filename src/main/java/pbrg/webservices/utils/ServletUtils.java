@@ -35,6 +35,30 @@ public final class ServletUtils {
         return wallImagePath;
     }
 
+    /**
+     * Set the path to the wall images directory.
+     * @param path the path to the wall images directory
+     */
+    public static void setWallImagePath(final String path) {
+        wallImagePath = path;
+    }
+
+    /**
+     * Get the path to the route images directory.
+     * @return the path to the route images directory
+     */
+    public static String getRouteImagePath() {
+        return routeImagePath;
+    }
+
+    /**
+     * Set the path to the route images directory.
+     * @param path the path to the route images directory
+     */
+    public static void setRouteImagePath(final String path) {
+        routeImagePath = path;
+    }
+
     /** Set the image paths according to the environment. */
     public static void setPaths() {
         setPaths(production());
@@ -59,14 +83,6 @@ public final class ServletUtils {
             + "/src/main/resources/";
         routeImagePath = System.getProperty("user.dir")
             + "/src/main/resources/";
-    }
-
-    /**
-     * Get the path to the route images directory.
-     * @return the path to the route images directory
-     */
-    public static String getRouteImagePath() {
-        return routeImagePath;
     }
 
     /**

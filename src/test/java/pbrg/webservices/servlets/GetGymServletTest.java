@@ -62,7 +62,7 @@ class GetGymServletTest {
 
     @AfterAll
     static void closeResources() {
-        closeTestDatabaseInThread();
+       closeTestDatabaseInThread();
     }
 
     @BeforeEach

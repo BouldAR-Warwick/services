@@ -17,8 +17,8 @@ import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import pbrg.webservices.database.RouteController;
 import pbrg.webservices.database.WallController;
+import pbrg.webservices.utils.RouteUtils;
 
 @WebServlet(
     name = "GenerateRouteServlet",
@@ -125,7 +125,7 @@ public class GenerateRouteServlet extends MyHttpServlet {
         boolean routeImageGenerated = createAndStoreRouteImage(routeId);
         if (!routeImageGenerated) {
             // cleanup the route, wall (if mocked)
-            RouteController.deleteRoute(routeId);
+            RouteUtils.deleteRoute(routeId);
             if (mockingWall) {
                 WallController.deleteWall(wallID);
             }

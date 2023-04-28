@@ -31,9 +31,5 @@ f
 6src/main/java/pbrg/webservices/utils/package-info.java,4/d/4da292f78ce46f05db2f480e5aea47c63621dad6
 g
 7src/test/java/pbrg/webservices/utils/TestUtilsTest.java,d/8/d8f2a63e28d0bf6a1ace9f7af4869d0cc9b71031
-i
-9src/main/java/pbrg/webservices/database/TestDatabase.java,6/5/6541f9632df6108451bb5e53e032d7fd6a0b0103
-g
-7src/main/java/pbrg/webservices/utils/DatabaseUtils.java,a/8/a8eb55d91f0a7322f8674074c18ea390f41e7830
 u
 Esrc/test/java/pbrg/webservices/database/CredentialControllerTest.java,c/d/cdd1c30fbd0efe6c07cc50464b5a12e2d7683ef7

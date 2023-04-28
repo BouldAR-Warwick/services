@@ -49,7 +49,7 @@ public class GetRouteImageServlet extends MyHttpServlet {
         // ensure the route exists
         if (!routeExists(routeId)) {
             response.sendError(
-                HttpServletResponse.SC_EXPECTATION_FAILED,
+                HttpServletResponse.SC_BAD_REQUEST,
                 "Route does not exist"
             );
             return;
@@ -67,10 +67,10 @@ public class GetRouteImageServlet extends MyHttpServlet {
         }
 
         // ensure the file exists
-        File wallImageFile = new File(
+        File routeImageFile = new File(
             ServletUtils.getRouteImagePath(), routeImageFileName
         );
-        if (!wallImageFile.exists()) {
+        if (!routeImageFile.exists()) {
             response.sendError(
                 HttpServletResponse.SC_EXPECTATION_FAILED,
                 "Image file does not exist"

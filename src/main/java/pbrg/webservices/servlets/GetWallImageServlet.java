@@ -52,9 +52,8 @@ public class GetWallImageServlet extends MyHttpServlet {
 
         // ensure the gym exists
         if (!gymExists(gymId)) {
-            // return unauthorized error message
             response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
+                HttpServletResponse.SC_BAD_REQUEST,
                 "Gym does not exist"
             );
             return;
@@ -62,9 +61,8 @@ public class GetWallImageServlet extends MyHttpServlet {
 
         // ensure the gym has a wall
         if (!gymHasWall(gymId)) {
-            // return unauthorized error message
             response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
+                HttpServletResponse.SC_BAD_REQUEST,
                 "Gym has no wall"
             );
             return;
