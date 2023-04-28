@@ -1,5 +1,10 @@
 package pbrg.webservices.servlets;
 
+import static pbrg.webservices.database.AuthenticationController.userExists;
+import static pbrg.webservices.database.GymController.getGym;
+import static pbrg.webservices.database.GymController.getPrimaryGymOfUser;
+import static pbrg.webservices.database.GymController.userHasPrimaryGym;
+
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,7 +13,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.Duration;
 import org.jetbrains.annotations.NotNull;
-import pbrg.webservices.database.GymController;
 import pbrg.webservices.models.Gym;
 import pbrg.webservices.utils.ServletUtils;
 
@@ -28,35 +32,46 @@ public class StoreGymServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // ensure session exists
-        HttpSession session = getSession(request);
-        if (session == null) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not exist"
-            );
-            return;
-        }
-
-        // ensure session has a user id
+        // validate request
+        boolean requiresSession = true;
         String userIdKey = "uid";
-        boolean sessionHasUserId = session.getAttribute(userIdKey) != null;
-        if (!sessionHasUserId) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not have a user id"
-            );
+        String[] sessionAttributes = {userIdKey};
+        String[] bodyAttributes = {};
+        if (!validateRequest(
+            request, response, null, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
             return;
         }
 
         // get user id from session
-        int userId = (int) session.getAttribute("uid");
+        HttpSession session = getSession(request);
+        assert session != null;
+        int userId = (int) session.getAttribute(userIdKey);
 
-        // when no gyms are matched
-        Gym gym = GymController.getPrimaryGymOfUser(userId);
-        if (gym == null) {
+        // ensure the user id is valid
+        if (!userExists(userId)) {
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "Invalid user id"
+            );
             return;
         }
+
+        // ensure the user has a primary gym
+        if (!userHasPrimaryGym(userId)) {
+            response.sendError(
+                HttpServletResponse.SC_NOT_FOUND,
+                "User has no primary gym"
+            );
+            return;
+        }
+
+        // get primary gym of user
+        Integer gymId = getPrimaryGymOfUser(userId);
+        assert gymId != null;
+        Gym gym = getGym(gymId);
+        assert gym != null;
 
         // store gym ID in session cookie
 

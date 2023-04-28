@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
@@ -28,37 +27,23 @@ public class SearchGymServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // ensure session exists
-        HttpSession session = getSession(request);
-        if (session == null) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not exist"
-            );
-            return;
-        }
-
-        // parse the request body
+        // validate request
+        boolean requiresSession = true;
+        String[] sessionAttributes = {};
+        String queryWordKey = "queryword";
         JSONObject body = getBodyAsJson(request);
-        if (body == null) {
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Request body is not a valid JSON object"
-            );
-            return;
-        }
-
-        // ensure the request body contains the query word
-        if (!body.has("queryword")) {
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Request body does not contain the query word"
-            );
+        String[] bodyAttributes = {queryWordKey};
+        if (!validateRequest(
+            request, response, body, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
             return;
         }
 
         // get the query word
-        String queryWord = body.getString("queryword");
+        assert body != null;
+        String queryWord = body.getString(queryWordKey);
+        assert queryWord != null;
 
         // get all gyms matching the query word
         List<String> gyms = GymController.getGymsByQueryWord(queryWord);

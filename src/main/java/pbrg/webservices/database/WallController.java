@@ -273,4 +273,33 @@ public final class WallController {
         }
         return removed;
     }
+
+    /**
+     * Get the wall ID from a route ID.
+     * @param routeId the route ID
+     * @return the wall ID, or null if none found
+     */
+    public static Integer getWallIdFromRoute(
+        final int routeId
+    ) {
+        Integer wallId = null;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT WID FROM routes WHERE RID = ?"
+            )
+        ) {
+            pst.setInt(1, routeId);
+            ResultSet rs = pst.executeQuery();
+
+            // get JSON list of holds
+            if (rs.next()) {
+                wallId = rs.getInt("WID");
+            }
+        } catch (SQLException e) {
+            return null;
+        }
+        return wallId;
+
+    }
 }

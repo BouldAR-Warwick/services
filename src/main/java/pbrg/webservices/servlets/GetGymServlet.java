@@ -29,35 +29,26 @@ public class GetGymServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // ensure session exists
-        HttpSession session = getSession(request);
-        if (session == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
-        // get json object in the request body
+        // validate request
+        boolean requiresSession = true;
+        String[] sessionAttributes = {};
         String gymNameKey = "gymname";
-        JSONObject arguments = getBodyAsJson(request);
-        if (arguments == null) {
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Request body is not a valid JSON object"
-            );
+        JSONObject body = getBodyAsJson(request);
+        String[] bodyAttributes = {gymNameKey};
+        if (!validateRequest(
+            request, response, body, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
             return;
         }
 
-        // ensure request has gym name
-        if (!arguments.has(gymNameKey)) {
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Request body is missing " + gymNameKey
-            );
-            return;
-        }
+        // get session
+        HttpSession session = getSession(request);
+        assert session != null;
 
-        // get gym name, gym
-        String gymName = arguments.getString(gymNameKey);
+        // get gym name, gym from body
+        assert body != null;
+        String gymName = body.getString(gymNameKey);
         Gym gym = getGymByGymName(gymName);
 
         response.setContentType("application/json");
@@ -66,6 +57,7 @@ public class GetGymServlet extends MyHttpServlet {
         if (gym == null) {
             // when no gyms are matched
             response.getWriter().write("{}");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 

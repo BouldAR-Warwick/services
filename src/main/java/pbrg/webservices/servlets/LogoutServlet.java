@@ -30,8 +30,9 @@ public class LogoutServlet extends MyHttpServlet {
         // invalidate cookies, if they exist
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                String field =
-                    URLDecoder.decode(cookie.getName(), StandardCharsets.UTF_8);
+                String field = URLDecoder.decode(
+                    cookie.getName(), StandardCharsets.UTF_8
+                );
                 if (field.equals("username")) {
                     cookie.setMaxAge(0);
                     response.addCookie(cookie);

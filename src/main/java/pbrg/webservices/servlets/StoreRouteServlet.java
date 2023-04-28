@@ -1,5 +1,7 @@
 package pbrg.webservices.servlets;
 
+import static pbrg.webservices.database.AuthenticationController.userExists;
+import static pbrg.webservices.database.RouteController.routeExists;
 import static pbrg.webservices.database.RouteController.userOwnsRoute;
 
 import jakarta.servlet.annotation.WebServlet;
@@ -26,48 +28,46 @@ public class StoreRouteServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // ensure session exists
-        HttpSession session = getSession(request);
-        if (session == null) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not exist"
-            );
-            return;
-        }
-
-        // ensure session has user id
+        // validate request
+        boolean requiresSession = true;
         String userIdKey = "uid";
-        boolean sessionHasUserId = session.getAttribute(userIdKey) != null;
-        if (!sessionHasUserId) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not have the user id"
-            );
-            return;
-        }
-
-        // convert request body to json object
+        String[] sessionAttributes = {userIdKey};
+        String routeIdKey = "routeID";
         JSONObject body = getBodyAsJson(request);
-        if (body == null) {
+        String[] bodyAttributes = {routeIdKey};
+        if (!validateRequest(
+            request, response, body, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
+            return;
+        }
+
+        // get user ID from session attribute
+        HttpSession session = getSession(request);
+        assert session != null;
+        int userID = (int) session.getAttribute(userIdKey);
+
+        // get route ID from request body
+        assert body != null;
+        int routeID = (int) body.get(routeIdKey);
+
+        // ensure the user id is valid
+        if (!userExists(userID)) {
             response.sendError(
                 HttpServletResponse.SC_BAD_REQUEST,
-                "Request body is not a valid JSON object"
+                "User ID does not exist"
             );
             return;
         }
 
-        // ensure request body contains routeID
-        if (!body.has("routeID")) {
+        // ensure the route exists
+        if (!routeExists(routeID)) {
             response.sendError(
                 HttpServletResponse.SC_BAD_REQUEST,
-                "Request body does not contain routeID"
+                "Route ID does not exist"
             );
             return;
         }
-
-        int userID = (int) session.getAttribute("uid");
-        int routeID = (int) body.get("routeID");
 
         // ensure this user created this route
         boolean userCreatedRoute = userOwnsRoute(userID, routeID);

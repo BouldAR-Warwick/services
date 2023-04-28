@@ -209,6 +209,26 @@ public final class GymController {
     }
 
     /**
+     * Find a gym by its id.
+     * @param gymId The id of the gym.
+     * @return The gym.
+     */
+    public static @Nullable Gym getGym(final int gymId) {
+        Gym gym;
+        try (
+            Connection connection = getDataSource().getConnection();
+            PreparedStatement pst = connection.prepareStatement(
+                "SELECT GID, GymName, GymLocation FROM gyms WHERE GID = ?")
+        ) {
+            pst.setInt(1, gymId);
+            gym = extractGym(pst);
+        } catch (SQLException e) {
+            return null;
+        }
+        return gym;
+    }
+
+    /**
      * Extract a Gym from a result set.
      * @param pst prepared statement
      * @return gym
@@ -278,26 +298,51 @@ public final class GymController {
     /**
      * Get a user's primary gym id.
      * @param userId user ID
-     * @return a gym
+     * @return a gym ID
      */
-    public static @Nullable Gym getPrimaryGymOfUser(final int userId) {
-        Gym gym;
+    public static @Nullable Integer getPrimaryGymOfUser(final int userId) {
+        Integer gymId = null;
         try (
             Connection connection = getDataSource().getConnection();
             PreparedStatement pst = connection.prepareStatement(
-                "SELECT gyms.GID, gyms.GymName, gyms.GymLocation "
-                    + "FROM gyms "
-                    + "INNER JOIN user_in_gym ON gyms.GID = user_in_gym.GID "
-                    + "WHERE user_in_gym.UID = ?"
+                "SELECT GID FROM user_in_gym WHERE UID = ?"
             )
         ) {
             pst.setInt(1, userId);
-            gym = extractGym(pst);
+
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                gymId = rs.getInt("GID");
+            }
         } catch (SQLException e) {
             return null;
         }
-        return gym;
+        return gymId;
     }
+
+    ///**
+    // * Get a user's primary gym id.
+    // * @param userId user ID
+    // * @return a gym
+    // */
+    //public static @Nullable Gym getPrimaryGymOfUser(final int userId) {
+    //    Gym gym;
+    //    try (
+    //        Connection connection = getDataSource().getConnection();
+    //        PreparedStatement pst = connection.prepareStatement(
+    //            "SELECT gyms.GID, gyms.GymName, gyms.GymLocation "
+    //                + "FROM gyms "
+    //                + "INNER JOIN user_in_gym ON gyms.GID = user_in_gym.GID "
+    //                + "WHERE user_in_gym.UID = ?"
+    //        )
+    //    ) {
+    //        pst.setInt(1, userId);
+    //        gym = extractGym(pst);
+    //    } catch (SQLException e) {
+    //        return null;
+    //    }
+    //    return gym;
+    //}
 
     /**
      * Get a gym id from the gym name.

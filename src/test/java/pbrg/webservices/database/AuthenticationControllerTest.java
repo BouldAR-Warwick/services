@@ -46,13 +46,13 @@ import pbrg.webservices.models.User;
 public final class AuthenticationControllerTest {
 
     /** The test username. */
-    private static final String TEST_USERNAME = "username_test";
+    public static final String TEST_USERNAME = "username_test";
 
     /** The test email. */
-    private static final String TEST_EMAIL = "email_test";
+    public static final String TEST_EMAIL = "email_test";
 
     /** The test password. */
-    private static final String TEST_PASSWORD = "password";
+    public static final String TEST_PASSWORD = "password";
 
     static void clearTestUser() {
         // remove the test user credentials if they exist

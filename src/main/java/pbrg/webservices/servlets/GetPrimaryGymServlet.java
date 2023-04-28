@@ -1,7 +1,9 @@
 package pbrg.webservices.servlets;
 
 import static pbrg.webservices.database.AuthenticationController.userExists;
+import static pbrg.webservices.database.GymController.getGym;
 import static pbrg.webservices.database.GymController.getPrimaryGymOfUser;
+import static pbrg.webservices.database.GymController.userHasPrimaryGym;
 
 import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
@@ -28,29 +30,24 @@ public class GetPrimaryGymServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // ensure session exists
-        HttpSession session = getSession(request);
-        if (session == null) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not exist"
-            );
+        // validate request
+        boolean requiresSession = true;
+        String userIdKey = "uid";
+        String[] sessionAttributes = {userIdKey};
+        String[] bodyAttributes = {};
+        if (!validateRequest(
+            request, response, null, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
             return;
         }
 
-        // ensure the session has a user id
-        String userIdKey = "uid";
-        boolean sessionHasUserId = session.getAttribute(userIdKey) != null;
-        if (!sessionHasUserId) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not have a user id"
-            );
-            return;
-        }
+        // get the user id
+        HttpSession session = getSession(request);
+        assert session != null;
+        int userId = (int) session.getAttribute("uid");
 
         // ensure the user id exists
-        int userId = (int) session.getAttribute("uid");
         if (!userExists(userId)) {
             response.sendError(
                 HttpServletResponse.SC_UNAUTHORIZED,
@@ -59,19 +56,24 @@ public class GetPrimaryGymServlet extends MyHttpServlet {
             return;
         }
 
-        Gym gym = getPrimaryGymOfUser(userId);
-
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        // when no gyms are matched
-        if (gym == null) {
+        // check the user has a primary gym
+        if (!userHasPrimaryGym(userId)) {
             response.getWriter().write("{}");
-        } else {
-            session.setAttribute("gid", gym.getGid());
-            String json = new Gson().toJson(gym);
-            response.getWriter().write(json);
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
         }
+
+        // get the primary gym of the user
+        Integer gymId = getPrimaryGymOfUser(userId);
+        assert gymId != null;
+        Gym gym = getGym(gymId);
+
+        session.setAttribute("gid", gym.getGid());
+        String json = new Gson().toJson(gym);
+        response.getWriter().write(json);
 
         // report success
         response.setStatus(HttpServletResponse.SC_OK);

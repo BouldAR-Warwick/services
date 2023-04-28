@@ -11,14 +11,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.AuthenticationController.deleteUser;
 import static pbrg.webservices.database.AuthenticationController.userExists;
-import static pbrg.webservices.database.AuthenticationControllerTest
-    .createTestUser;
-import static pbrg.webservices.database.DatabaseTestMethods
-    .mockConnectionThrowsException;
+import static pbrg.webservices.database.AuthenticationControllerTest.createTestUser;
+import static pbrg.webservices.database.DatabaseTestMethods.mockConnectionThrowsException;
 import static pbrg.webservices.database.GymController.deleteGym;
 import static pbrg.webservices.database.GymController.gymExists;
 import static pbrg.webservices.database.GymControllerTest.createTestGym;
-import static pbrg.webservices.database.RouteController.deleteRoute;
 import static pbrg.webservices.database.RouteController.routeExists;
 import static pbrg.webservices.database.RouteControllerTest.createTestRoute;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
@@ -42,6 +39,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pbrg.webservices.database.DatabaseController;
+import pbrg.webservices.utils.RouteUtils;
 import pbrg.webservices.utils.ServletUtils;
 
 class DeleteRouteServletTest {
@@ -73,6 +71,7 @@ class DeleteRouteServletTest {
 
     @BeforeEach
     void createModels() {
+        deleteModels();
         userId = createTestUser();
         gymId = createTestGym();
         wallId = createTestWall(gymId);
@@ -84,16 +83,20 @@ class DeleteRouteServletTest {
     void deleteModels() {
         // after: remove the database assets
         if (routeExists(routeId)) {
-            assertTrue(deleteRoute(routeId));
+            RouteUtils.deleteRoute(routeId);
+            assertFalse(routeExists(routeId));
         }
         if (wallExists(wallId)) {
             assertTrue(deleteWall(wallId));
+            assertFalse(wallExists(wallId));
         }
         if (gymExists(gymId)) {
             assertTrue(deleteGym(gymId));
+            assertFalse(gymExists(gymId));
         }
         if (userExists(userId)) {
             assertTrue(deleteUser(userId));
+            assertFalse(userExists(userId));
         }
     }
 
@@ -141,7 +144,7 @@ class DeleteRouteServletTest {
         new DeleteRouteServlet().doPost(request, response);
 
         verify(response).sendError(
-            eq(HttpServletResponse.SC_BAD_REQUEST),
+            eq(HttpServletResponse.SC_UNAUTHORIZED),
             anyString()
         );
     }

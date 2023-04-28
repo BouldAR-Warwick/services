@@ -181,7 +181,7 @@ public final class AuthenticationController {
      * @param username username
      * @return user ID
      */
-    static @Nullable Integer getUserIDFromUsername(
+    public static @Nullable Integer getUserIDFromUsername(
         final String username
     ) {
         Integer uid = null;

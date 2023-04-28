@@ -31,42 +31,37 @@ public class LoginServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // parse request body to json object
-        JSONObject arguments = getBodyAsJson(request);
-        if (arguments == null) {
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Request body is not a valid JSON object"
-            );
-            return;
-        }
-
-        // ensure request has all credentials
+        // validate request
+        boolean requiresSession = false;
+        String[] sessionAttributes = {};
         String usernameKey = "username";
         String passwordKey = "password";
         String persistKey = "stayLoggedIn";
-        String[] credentials = {usernameKey, passwordKey, persistKey};
-        for (String credential : credentials) {
-            if (!arguments.has(credential)) {
-                response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Request body is missing " + credential
-                );
-                return;
-            }
+        JSONObject body = getBodyAsJson(request);
+        String[] bodyAttributes = {usernameKey, passwordKey, persistKey};
+        if (!validateRequest(
+            request, response, body, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
+            return;
         }
 
         // collect credentials
-        String username = arguments.getString(usernameKey);
-        String password = arguments.getString(passwordKey);
-        boolean stayLoggedIn = arguments.getBoolean(persistKey);
+        assert body != null;
+        String username = body.getString(usernameKey);
+        String password = body.getString(passwordKey);
+        boolean stayLoggedIn = body.getBoolean(persistKey);
 
         User user = signIn(username, password);
         if (user == null) {
             // first case -> user not been authenticated (wrong credentials)
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Failed to authenticate user"
+            );
             return;
         }
+
 
         // user is authenticated
         HttpSession session = request.getSession();

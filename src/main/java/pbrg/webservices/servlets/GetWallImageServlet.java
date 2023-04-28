@@ -33,33 +33,24 @@ public class GetWallImageServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // validate request, session, session requires gid
+        // validate request
+        boolean requiresSession = true;
         String gymIdKey = "gid";
+        String[] sessionAttributes = {gymIdKey};
+        String[] bodyAttributes = {};
+        if (!validateRequest(
+            request, response, null, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
+            return;
+        }
 
-        // ensure session exists
+        // get gym id
         HttpSession session = getSession(request);
-        if (session == null) {
-            // return unauthorized error message
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not exist"
-            );
-            return;
-        }
-
-        // ensure session has attributes
-        boolean sessionHasGid = session.getAttribute(gymIdKey) != null;
-        if (!sessionHasGid) {
-            // return unauthorized error message
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not have a gym id"
-            );
-            return;
-        }
+        assert session != null;
+        int gymId = (int) session.getAttribute(gymIdKey);
 
         // ensure the gym exists
-        int gymId = (int) session.getAttribute(gymIdKey);
         if (!gymExists(gymId)) {
             // return unauthorized error message
             response.sendError(

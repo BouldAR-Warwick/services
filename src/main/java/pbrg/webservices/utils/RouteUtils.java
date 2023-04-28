@@ -29,9 +29,47 @@ public final class RouteUtils {
     /** The path to the python scripts directory. */
     private static String pythonScriptsDir;
 
+    /** The file name for the route generation script. */
+    private static String routeGenerationScript = "route-gen-moon-board.py";
+
+    /** The file name for the hold plotting script. */
+    private static String holdPlottingScript = "plot-holds.py";
+
     /** Util class, no instances. */
     private RouteUtils() {
         throw new IllegalStateException("Utility class");
+    }
+
+    /**
+     * Set the hold plotting script.
+     * @param script the hold plotting script
+     */
+    public static void setHoldPlottingScript(final String script) {
+        holdPlottingScript = script;
+    }
+
+    /**
+     * Get the hold plotting script.
+     * @return the hold plotting script
+     */
+    public static String getHoldPlottingScript() {
+        return holdPlottingScript;
+    }
+
+    /**
+     * Configure the route generation script.
+     * @param script the route generation script
+     */
+    public static void setRouteGenerationScript(final String script) {
+        routeGenerationScript = script;
+    }
+
+    /**
+     * Get the route generation script.
+     * @return the route generation script
+     */
+    public static String getRouteGenerationScript() {
+        return routeGenerationScript;
     }
 
     /**
@@ -76,8 +114,7 @@ public final class RouteUtils {
         throws IOException {
         // path is working dir + python-scripts/plot-holds.py
         File pythonFile = new File(
-            RouteUtils.getPythonScriptsDir(),
-            "route-gen-moon-board.py"
+            getPythonScriptsDir(), getRouteGenerationScript()
         );
 
         // ensure file exists
@@ -198,8 +235,7 @@ public final class RouteUtils {
     ) throws IOException {
         // path is working dir + python-scripts/plot-holds.py
         File pythonFile = new File(
-            pythonScriptsDir,
-            "plot-holds.py"
+            getPythonScriptsDir(), getHoldPlottingScript()
         );
 
         // ensure file exists

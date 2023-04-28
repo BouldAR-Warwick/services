@@ -150,7 +150,7 @@ class GetPrimaryGymServletTest {
     }
 
     @Test
-    void testDoPostNotPrimaryGym() throws IOException {
+    void testDoPostNoPrimaryGym() throws IOException {
         // given user, gym where gym is not the user's primary gym
         assertFalse(userHasPrimaryGym(userId));
 

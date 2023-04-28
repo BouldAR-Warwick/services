@@ -29,31 +29,24 @@ public class GetRouteImageServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // ensure session exists
-        HttpSession session = getSession(request);
-        if (session == null) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not exist"
-            );
+        // validate request
+        boolean requiresSession = true;
+        String routeIdKey = "rid";
+        String[] sessionAttributes = {routeIdKey};
+        String[] bodyAttributes = {};
+        if (!validateRequest(
+            request, response, null, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
             return;
         }
 
-        // ensure session has the route id
-        String routeIdKey = "rid";
-        boolean sessionWithoutRouteId =
-            session.getAttribute(routeIdKey) == null;
-        if (sessionWithoutRouteId) {
-            // no route id in session
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Session has no route id"
-            );
-            return;
-        }
+        // get route id
+        HttpSession session = getSession(request);
+        assert session != null;
+        int routeId = (int) session.getAttribute(routeIdKey);
 
         // ensure the route exists
-        int routeId = (int) session.getAttribute(routeIdKey);
         if (!routeExists(routeId)) {
             response.sendError(
                 HttpServletResponse.SC_EXPECTATION_FAILED,

@@ -27,29 +27,24 @@ public class GetRouteInfoServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // ensure session exists
-        HttpSession session = getSession(request);
-        if (session == null) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not exist"
-            );
+        // validate request
+        boolean requiresSession = true;
+        String routeIdKey = "rid";
+        String[] sessionAttributes = {routeIdKey};
+        String[] bodyAttributes = {};
+        if (!validateRequest(
+            request, response, null, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
             return;
         }
 
-        // ensure route is stored in session
-        String routeIdKey = "rid";
-        boolean sessionHasRouteId = session.getAttribute(routeIdKey) != null;
-        if (!sessionHasRouteId) {
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Session does not have a route id"
-            );
-            return;
-        }
+        // get route id
+        HttpSession session = getSession(request);
+        assert session != null;
+        int routeId = (int) session.getAttribute(routeIdKey);
 
         // ensure the route exists
-        int routeId = (int) session.getAttribute(routeIdKey);
         if (!routeExists(routeId)) {
             response.sendError(
                 HttpServletResponse.SC_BAD_REQUEST,

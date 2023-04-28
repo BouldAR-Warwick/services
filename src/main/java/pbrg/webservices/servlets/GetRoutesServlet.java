@@ -1,5 +1,7 @@
 package pbrg.webservices.servlets;
 
+import static pbrg.webservices.database.AuthenticationController.userExists;
+import static pbrg.webservices.database.GymController.gymExists;
 import static pbrg.webservices.database.RouteController
     .getRoutesInGymMadeByUser;
 
@@ -29,31 +31,42 @@ public class GetRoutesServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // ensure session exists
-        HttpSession session = getSession(request);
-        if (session == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        // validate request
+        boolean requiresSession = true;
+        String userIdKey = "uid";
+        String gymIdKey = "gid";
+        String[] sessionAttributes = {userIdKey, gymIdKey};
+        String[] bodyAttributes = {};
+        if (!validateRequest(
+            request, response, null, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
             return;
         }
 
-        // ensure session has gym id, user id
-        String userIdKey = "uid";
-        String gymIdKey = "gid";
-        String[] requiredAttributes = {userIdKey, gymIdKey};
-        for (String attribute : requiredAttributes) {
-            boolean inSession = session.getAttribute(attribute) != null;
-            if (!inSession) {
-                response.sendError(
-                    HttpServletResponse.SC_UNAUTHORIZED,
-                    "Session does not have " + attribute
-                );
-                return;
-            }
-        }
-
         // collect user id, gym id from cookies
+        HttpSession session = getSession(request);
+        assert session != null;
         int userId = (int) session.getAttribute("uid");
         int gymId = (int) session.getAttribute("gid");
+
+        // ensure the user id is valid
+        if (!userExists(userId)) {
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "User ID does not exist"
+            );
+            return;
+        }
+
+        // ensure the gym id is valid
+        if (!gymExists(gymId)) {
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "Gym ID does not exist"
+            );
+            return;
+        }
 
         // get routes in gym made by user
         List<Route> routes = getRoutesInGymMadeByUser(gymId, userId);

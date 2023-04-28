@@ -10,11 +10,13 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.AuthenticationController.deleteUser;
+import static pbrg.webservices.database.AuthenticationController.userExists;
 import static pbrg.webservices.database.AuthenticationControllerTest
     .createTestUser;
 import static pbrg.webservices.database.DatabaseTestMethods.mockEmptyResultSet;
 import static pbrg.webservices.database.GymController.addGym;
 import static pbrg.webservices.database.GymController.deleteGym;
+import static pbrg.webservices.database.GymController.getGym;
 import static pbrg.webservices.database.GymController.getPrimaryGymOfUser;
 import static pbrg.webservices.database.GymController.getGymIdByGymName;
 import static pbrg.webservices.database.GymController.gymExists;
@@ -40,7 +42,7 @@ import pbrg.webservices.models.Gym;
 public final class GymControllerTest {
 
     /** The test gym name. */
-    private static final String TEST_GYM_NAME = "gym_name";
+    public static final String TEST_GYM_NAME = "gym_name";
 
     /** The test gym location. */
     private static final String TEST_GYM_LOCATION = "Warwick, UK";
@@ -362,6 +364,8 @@ public final class GymControllerTest {
         // given: a valid user and gym without a primary gym relationship
         int uid = createTestUser();
         int gid = createTestGym();
+        assertTrue(userExists(uid));
+        assertTrue(gymExists(gid));
         assertNull(getPrimaryGymOfUser(uid));
 
         // when: adding the gym to the user
@@ -433,13 +437,17 @@ public final class GymControllerTest {
         // given: a valid user and gym, gym is user's primary gym
         int uid = createTestUser();
         int gid = createTestGym();
+        assertTrue(userExists(uid));
+        assertTrue(gymExists(gid));
         assertNull(getPrimaryGymOfUser(uid));
         boolean added = GymController.setPrimaryGym(uid, gid);
         assertTrue(added);
 
         // when: getting the gym by user id
         // then: the gym is found
-        Gym gym = getPrimaryGymOfUser(uid);
+        Integer gymId = getPrimaryGymOfUser(uid);
+        assertNotNull(gymId);
+        Gym gym = getGym(gymId);
         assertNotNull(gym);
         assertEquals(gid, gym.getGid());
 

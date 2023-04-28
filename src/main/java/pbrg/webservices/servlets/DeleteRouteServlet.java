@@ -26,30 +26,24 @@ public class DeleteRouteServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // ensure session exists
-        HttpSession session = getSession(request);
-        if (session == null) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Session does not exist"
-            );
+        // validate request
+        boolean requiresSession = true;
+        String routeIdKey = "rid";
+        String[] sessionAttributes = {routeIdKey};
+        String[] bodyAttributes = {};
+        if (!validateRequest(
+            request, response, null, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
             return;
         }
 
-        // ensure route is stored in session
-        String routeIdKey = "rid";
-        boolean sessionWithoutRouteId =
-            session.getAttribute(routeIdKey) == null;
-        if (sessionWithoutRouteId) {
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Route id is not stored in session"
-            );
-            return;
-        }
+        // get parameters
+        HttpSession session = getSession(request);
+        assert session != null;
+        int routeId = (int) session.getAttribute(routeIdKey);
 
         // ensure the route exists
-        int routeId = (int) session.getAttribute(routeIdKey);
         if (!routeExists(routeId)) {
             response.sendError(
                 HttpServletResponse.SC_EXPECTATION_FAILED,

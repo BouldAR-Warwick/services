@@ -29,32 +29,23 @@ public class RegisterServlet extends MyHttpServlet {
         final @NotNull HttpServletRequest request,
         final @NotNull HttpServletResponse response
     ) throws IOException {
-        // parse credentials
-        JSONObject body = getBodyAsJson(request);
-        if (body == null) {
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Request body is not a valid JSON object"
-            );
-            return;
-        }
-
-        // ensure request has all credentials
+        // validate request
+        boolean requiresSession = false;
+        String[] sessionAttributes = {};
         String usernameKey = "username";
         String emailKey = "email";
         String passwordKey = "password";
-        String[] requiredCredentials = {usernameKey, emailKey, passwordKey};
-        for (String credential : requiredCredentials) {
-            if (!body.has(credential)) {
-                response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Request body is missing " + credential
-                );
-                return;
-            }
+        JSONObject body = getBodyAsJson(request);
+        String[] bodyAttributes = {usernameKey, emailKey, passwordKey};
+        if (!validateRequest(
+            request, response, body, requiresSession,
+            sessionAttributes, bodyAttributes
+        )) {
+            return;
         }
 
         // store credentials
+        assert body != null;
         String username = body.getString(usernameKey);
         String email = body.getString(emailKey);
         String password = body.getString(passwordKey);
@@ -71,17 +62,7 @@ public class RegisterServlet extends MyHttpServlet {
 
         // select user
         User user = signIn(username, password);
-
-        // case one: the user has not been authenticated (wrong credentials)
-        if (user == null) {
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "Invalid credentials"
-            );
-            return;
-        }
-
-        // case two: user is authenticated
+        assert user != null;
 
         // store user id in session
         HttpSession session = request.getSession();

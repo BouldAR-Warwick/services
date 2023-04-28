@@ -2,9 +2,11 @@ package pbrg.webservices.servlets;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -80,5 +82,40 @@ class GetWallImageServletTest {
             eq(HttpServletResponse.SC_UNAUTHORIZED),
             anyString()
         );
+    }
+
+    @Disabled
+    @Test
+    void failingInvalidGym() {
+        // given a gym that does not exist
+        fail();
+    }
+
+    @Disabled
+    @Test
+    void failingGymWithoutWall() {
+        // given a gym that does not have a wall
+        fail();
+    }
+
+    @Disabled
+    @Test
+    void failingWallImageFileNotFound() {
+        // given a gym that has a wall but no local image
+        fail();
+    }
+
+    @Disabled
+    @Test
+    void failingWallImageNotReturned() {
+        // given a gym that has a wall and a local image, but return fails
+        fail();
+    }
+
+    @Disabled
+    @Test
+    void passing() {
+        // given a gym that has a wall and a local image
+        fail();
     }
 }

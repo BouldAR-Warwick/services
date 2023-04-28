@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
@@ -65,12 +64,11 @@ public class MyHttpServlet extends HttpServlet {
         // for constructing the body
         StringBuilder stringBuilder = new StringBuilder();
 
-        try (
-            BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(request.getInputStream())
-            )
-        ) {
-            int size = request.getInputStream().available();
+        try (BufferedReader bufferedReader = request.getReader()) {
+            if (bufferedReader == null) {
+                throw new IOException("Request body is empty");
+            }
+            int size = request.getContentLength();
             char[] charBuffer = new char[size];
             int bytesRead;
             while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
@@ -131,7 +129,7 @@ public class MyHttpServlet extends HttpServlet {
             }
         }
         if (!uid.isEmpty()) {
-            // create a new session for stay logged-in user
+            // create a new session for a logged-in user
             int id = Integer.parseInt(uid);
             session = request.getSession(true);
             session.setAttribute("uid", id);
@@ -140,5 +138,106 @@ public class MyHttpServlet extends HttpServlet {
 
         // session doesn't exist and no data in cookies
         return null;
+    }
+
+    static boolean validateRequest(
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response,
+        final @Nullable JSONObject body,
+        final boolean sessionRequired,
+        final @NotNull String[] sessionAttributes,
+        final @NotNull String[] bodyParameters
+    ) throws IOException {
+        // validate the body, if necessary
+        if (!validateBody(response, body, bodyParameters)) {
+            return false;
+        }
+
+        // validate the session, if necessary
+        if (sessionRequired) {
+            return validateSession(request, response, sessionAttributes);
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate the body of the request,
+     * ensuring it has the required parameters.
+     * @param response the http servlet response
+     * @param bodyParameters the required body parameters
+     * @param body the request body
+     * @return true if the body is valid
+     * @throws IOException if an input or output error is detected when
+     */
+    static boolean validateBody(
+        final @NotNull HttpServletResponse response,
+        final @Nullable JSONObject body,
+        final @NotNull String @NotNull [] bodyParameters
+    ) throws IOException {
+        // ensure we need to check
+        if (bodyParameters.length == 0) {
+            return true;
+        }
+
+        // ensure we have the required body parameters
+        if (body == null) {
+            response.sendError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                "Request body is not valid JSON"
+            );
+            return false;
+        }
+
+        for (String parameter : bodyParameters) {
+            boolean inBody = body.has(parameter);
+            if (!inBody) {
+                response.sendError(
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    "Request body does not have key: " + parameter
+                );
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate the session, ensuring it exists and has the required attributes.
+     * @param request the http servlet request
+     * @param response the http servlet response
+     * @param sessionAttributes the required session attributes
+     * @return true if the session is valid; false otherwise
+     * @throws IOException if an input or output error is detected when
+     */
+    static boolean validateSession(
+        final @NotNull HttpServletRequest request,
+        final @NotNull HttpServletResponse response,
+        final @NotNull String[] sessionAttributes
+    ) throws IOException {
+        // ensure session exists
+        HttpSession session = getSession(request);
+        if (session == null) {
+            response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Session does not exist"
+            );
+            return false;
+        }
+
+        // ensure we have the required session attributes
+        for (String attribute : sessionAttributes) {
+            boolean inSession = session.getAttribute(attribute) != null;
+            if (!inSession) {
+                response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Session does not have key: " + attribute
+                );
+                return false;
+            }
+        }
+
+        return true;
     }
 }
