@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD041 -->
 <!-- markdownlint-disable MD033 -->
-<a href="https://github.com/BouldAR-Warwick"><img alt="BouldAR Logo" src="https://github.com/BouldAR-Warwick/bouldar-assets/raw/main/logo_purple.png" width="512"/></a>
+<a href="https://github.com/BouldAR-Warwick"><img alt="BouldAR Logo" src="https://github.com/BouldAR-Warwick/assets/raw/main/logo_purple.png" width="512"/></a>
 
 # Services
 
