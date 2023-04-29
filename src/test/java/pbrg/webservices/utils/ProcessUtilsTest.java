@@ -199,7 +199,7 @@ class ProcessUtilsTest {
         );
 
         assertThrows(IOException.class, () -> {
-            try (BufferedReader reader = new BufferedReader(
+            try (BufferedReader ignored = new BufferedReader(
                 new InputStreamReader(process.getInputStream())
             ) {
                 @Override

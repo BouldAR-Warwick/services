@@ -14,6 +14,8 @@ import static pbrg.webservices.database.AuthenticationController.userExists;
 import static pbrg.webservices.database.AuthenticationControllerTest
     .createTestUser;
 import static pbrg.webservices.database.DatabaseTestMethods.mockEmptyResultSet;
+import static pbrg.webservices.database.DatabaseTestMethods
+    .mockThrowsExceptionOnGetConnection;
 import static pbrg.webservices.database.GymController.addGym;
 import static pbrg.webservices.database.GymController.deleteGym;
 import static pbrg.webservices.database.GymController.getGym;
@@ -31,6 +33,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import javax.sql.DataSource;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
@@ -505,5 +508,203 @@ public final class GymControllerTest {
         assertTrue(deleteGym(gymId));
         assertFalse(gymExists(gymId));
         assertFalse(gymExists(TEST_GYM_NAME));
+    }
+
+    @Test
+    void userHasPrimaryGymEmptyResultsSet() {
+        // mock a executeQuery that returns an empty result set
+        DataSource dataSource = mockEmptyResultSet();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: checking if user has primary gym
+        boolean hasPrimaryGym = GymController.userHasPrimaryGym(-1);
+
+        // then: the user does not have a primary gym
+        assertFalse(hasPrimaryGym);
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void userHasPrimaryGymThrowing() {
+        // mock a executeQuery that throws an exception
+        DataSource dataSource = mockThrowsExceptionOnGetConnection();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: checking if user has primary gym
+        boolean hasPrimaryGym = GymController.userHasPrimaryGym(-1);
+
+        // then: the user does not have a primary gym
+        assertFalse(hasPrimaryGym);
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void getGymIdByGymNameThrowing() {
+        // mock a executeQuery that throws an exception
+        DataSource dataSource = mockThrowsExceptionOnGetConnection();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: getting the gym id
+        Integer gymId = GymController.getGymIdByGymName(TEST_GYM_NAME);
+
+        // then: the gym id is not found
+        assertNull(gymId);
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void getPrimaryGymOfUserThrowing() {
+        // mock a executeQuery that throws an exception
+        DataSource dataSource = mockThrowsExceptionOnGetConnection();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: getting the primary gym of user
+        Integer gymId = GymController.getPrimaryGymOfUser(-1);
+
+        // then: the gym id is not found
+        assertNull(gymId);
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void removeUserPrimaryGymThrowing() {
+        // mock a executeUpdate that throws an exception
+        DataSource dataSource = mockThrowsExceptionOnGetConnection();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: removing the primary gym of user
+        boolean removed = GymController.removeUserPrimaryGym(-1);
+
+        // then: the gym is not removed
+        assertFalse(removed);
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void getGymThrowing() {
+        // mock a executeQuery that throws an exception
+        DataSource dataSource = mockThrowsExceptionOnGetConnection();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: getting the gym
+        Gym gym = GymController.getGym(-1);
+
+        // then: the gym is not found
+        assertNull(gym);
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void getGymByGymNameThrowing() {
+        // mock a executeQuery that throws an exception
+        DataSource dataSource = mockThrowsExceptionOnGetConnection();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: getting the gym
+        Gym gym = GymController.getGymByGymName("test");
+
+        // then: the gym is not found
+        assertNull(gym);
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void getGymsByQueryWordThrowing() {
+        // mock a executeQuery that throws an exception
+        DataSource dataSource = mockThrowsExceptionOnGetConnection();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: getting the gyms
+        List<String> gyms = GymController.getGymsByQueryWord("test");
+
+        // then: the gyms are not found
+        assertTrue(gyms.isEmpty());
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void deleteGymThrowing() {
+        // mock a executeUpdate that throws an exception
+        DataSource dataSource = mockThrowsExceptionOnGetConnection();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: deleting the gym
+        boolean deleted = GymController.deleteGym(-1);
+
+        // then: the gym is not deleted
+        assertFalse(deleted);
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void gymExistsByNameThrowing() {
+        // mock a executeQuery that throws an exception
+        DataSource dataSource = mockThrowsExceptionOnGetConnection();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: checking if gym exists
+        boolean exists = GymController.gymExists("test");
+
+        // then: the gym is not found
+        assertFalse(exists);
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void gymExistsThrowing() {
+        // mock a executeQuery that throws an exception
+        DataSource dataSource = mockThrowsExceptionOnGetConnection();
+
+        // inject the mock data source
+        DatabaseController.setDataSource(dataSource);
+
+        // when: checking if gym exists
+        boolean exists = GymController.gymExists(-1);
+
+        // then: the gym is not found
+        assertFalse(exists);
+
+        // after: restore the original data source
+        DatabaseController.setDataSource(getTestDataSource());
     }
 }

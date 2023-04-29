@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static pbrg.webservices.database.DatabaseTestMethods.mockConnectionThrowsException;
+import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnGetConnection;
 import static pbrg.webservices.database.DatabaseTestMethods.mockEmptyResultSet;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
@@ -13,7 +13,7 @@ import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
 import static pbrg.webservices.database.WallController.addWall;
 import static pbrg.webservices.database.WallController.deleteWall;
 import static pbrg.webservices.database.WallController.getWallIdFromGymId;
-import static pbrg.webservices.database.WallController.getWallIdFromRouteId;
+import static pbrg.webservices.database.WallController.getWallIdFromRoute;
 import static pbrg.webservices.database.WallController.getWallImageFileName;
 import static pbrg.webservices.database.WallController.getWallImageFileNameFromRouteId;
 import static pbrg.webservices.database.WallController.gymHasWall;
@@ -119,12 +119,12 @@ public final class WallControllerTest {
     }
 
     @Test
-    void getWallIdFromRouteIdTestNonExistentRoute() {
+    void getWallIdFromRouteTestNonExistentRoute() {
         // given an invalid routeId
         int routeId = -1;
 
         // when: get wallId from routeId
-        Integer wallId = getWallIdFromRouteId(routeId);
+        Integer wallId = getWallIdFromRoute(routeId);
 
         // then: wall should be null
         assertNull(wallId);
@@ -185,7 +185,7 @@ public final class WallControllerTest {
     void addWallThrowsException() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(mockConnectionThrowsException());
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
 
         // when: adding the wall
         Integer wallId = addWall(-1, "", "");
@@ -199,13 +199,13 @@ public final class WallControllerTest {
     }
 
     @Test
-    void getWallIdFromRouteIdThrowsException() {
+    void getWallIdFromRouteThrowsException() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(mockConnectionThrowsException());
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
 
         // when: getting the wallId from the routeId
-        Integer wallId = getWallIdFromRouteId(-1);
+        Integer wallId = getWallIdFromRoute(-1);
 
         // then: wallId should be null
         assertNull(wallId);
@@ -218,7 +218,7 @@ public final class WallControllerTest {
     void gymHasWallThrowsException() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(mockConnectionThrowsException());
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
 
         // when: checking if the gym has a wall
         boolean hasWall = gymHasWall(-1);
@@ -234,7 +234,7 @@ public final class WallControllerTest {
     void deleteWallThrowsException() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(mockConnectionThrowsException());
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
 
         // when: deleting the wall
         boolean deleted = deleteWall(-1);
@@ -262,10 +262,12 @@ public final class WallControllerTest {
     void getWallImageFileNameThrowing() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(mockConnectionThrowsException());
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
+        int wallId = -1;
 
-        // when: get wall image file name from routeId
-        String fileName = getWallImageFileNameFromRouteId(-1);
+
+        // when: get wall image file name from wallId
+        String fileName = getWallImageFileName(wallId);
 
         // then: file name should be null
         assertNull(fileName);
@@ -278,7 +280,7 @@ public final class WallControllerTest {
     void getWallIdFromGymIdThrowing() {
         // inject the mock data source
         DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(mockConnectionThrowsException());
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
 
         // when: get wallId from gymId
         Integer wallId = getWallIdFromGymId(-1);
@@ -293,13 +295,36 @@ public final class WallControllerTest {
     @Test
     void wallExistsInvalidWallId() {
         // given an invalid wallId
-        int wallId = 10;
-        assertFalse(wallExists(wallId));
+        DataSource originalDataSource = DatabaseController.getDataSource();
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
+
+        int wallId = -1;
 
         // when: checking if the wall exists
         boolean exists = wallExists(wallId);
 
         // then: wall should not exist
         assertFalse(exists);
+
+        // after: restore original data source
+        DatabaseController.setDataSource(originalDataSource);
+    }
+
+    @Test
+    void wallExistsEmptyResults() {
+        // given an invalid wallId
+        DataSource originalDataSource = DatabaseController.getDataSource();
+        DatabaseController.setDataSource(mockEmptyResultSet());
+
+        int wallId = -1;
+
+        // when: checking if the wall exists
+        boolean exists = wallExists(wallId);
+
+        // then: wall should not exist
+        assertFalse(exists);
+
+        // after: restore original data source
+        DatabaseController.setDataSource(originalDataSource);
     }
 }

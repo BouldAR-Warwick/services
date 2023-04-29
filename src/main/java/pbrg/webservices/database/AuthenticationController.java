@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pbrg.webservices.models.User;
 
@@ -98,8 +99,7 @@ public final class AuthenticationController {
                 userId = rs.getInt(1);
             }
         } catch (SQLException e) {
-            return usernameExists(username)
-                ? getUserIDFromUsername(username) : null;
+            return null;
         }
         return userId;
     }
@@ -133,7 +133,7 @@ public final class AuthenticationController {
      * @param username username
      * @return true if username exists, false otherwise
      */
-    static boolean usernameExists(final String username) {
+    static boolean usernameExists(final @NotNull String username) {
         boolean exists = false;
         try (
             Connection connection = getDataSource().getConnection();

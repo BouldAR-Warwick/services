@@ -9,12 +9,19 @@ public final class DatabaseController {
     private static javax.sql.DataSource dataSource;
 
     static {
-        setDataSource(production());
+        setDataSource();
     }
 
     /** Static class, no need to instantiate. */
     private DatabaseController() {
         throw new IllegalStateException("Utility class");
+    }
+
+    /**
+     * Set the data source, depending on the environment.
+     */
+    public static void setDataSource() {
+        setDataSource(production());
     }
 
     /**

@@ -266,32 +266,6 @@ public final class RouteController {
     }
 
     /**
-     * Delete a route from the database.
-     * @param creatorUserId creator user identifier
-     * @param wallId wall identifier
-     * @return true if route was deleted, false otherwise
-     */
-    public static boolean deleteRoute(
-        final int creatorUserId, final int wallId
-    ) {
-        boolean removed;
-        try (
-            Connection connection = getDataSource().getConnection();
-            PreparedStatement pst = connection.prepareStatement(
-                "DELETE FROM routes "
-                    + "WHERE creator_user_id = ? AND WID = ?"
-            )
-        ) {
-            pst.setInt(1, creatorUserId);
-            pst.setInt(2, wallId);
-            removed = pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            return false;
-        }
-        return removed;
-    }
-
-    /**
      * Delete a route from the database only.
      * Note does NOT delete the route image.
      * @param routeId route identifier
@@ -304,8 +278,7 @@ public final class RouteController {
         try (
             Connection connection = getDataSource().getConnection();
             PreparedStatement pst = connection.prepareStatement(
-                "DELETE FROM routes "
-                    + "WHERE rid = ?"
+                "DELETE FROM routes WHERE rid = ?"
             )
         ) {
             pst.setInt(1, routeId);

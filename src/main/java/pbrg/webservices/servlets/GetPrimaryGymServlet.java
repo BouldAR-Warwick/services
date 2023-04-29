@@ -70,8 +70,9 @@ public class GetPrimaryGymServlet extends MyHttpServlet {
         Integer gymId = getPrimaryGymOfUser(userId);
         assert gymId != null;
         Gym gym = getGym(gymId);
+        assert gym != null;
 
-        session.setAttribute("gid", gym.getGid());
+        session.setAttribute("gid", gymId);
         String json = new Gson().toJson(gym);
         response.getWriter().write(json);
 

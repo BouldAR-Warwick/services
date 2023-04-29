@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.AuthenticationController.deleteUser;
 import static pbrg.webservices.database.AuthenticationController.userExists;
 import static pbrg.webservices.database.AuthenticationControllerTest.createTestUser;
-import static pbrg.webservices.database.DatabaseTestMethods.mockConnectionThrowsException;
+import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnGetConnection;
 import static pbrg.webservices.database.GymController.deleteGym;
 import static pbrg.webservices.database.GymController.gymExists;
 import static pbrg.webservices.database.GymControllerTest.createTestGym;
@@ -181,7 +181,7 @@ class DeleteRouteServletTest {
 
         // given: route fails to delete (mock SQLException)
         DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(mockConnectionThrowsException());
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
 
         when(request.getSession(false)).thenReturn(session);
         when(session.getAttribute("rid")).thenReturn(routeId);

@@ -10,10 +10,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.AuthenticationController.userExists;
-import static pbrg.webservices.database.DatabaseTestMethods.mockConnectionThrowsException;
+import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnGetConnection;
 import static pbrg.webservices.database.DatabaseTestMethods.mockEmptyResultSet;
 import static pbrg.webservices.database.DatabaseTestMethods.mockNoAffectedRows;
 import static pbrg.webservices.database.RouteController.addRoute;
+import static pbrg.webservices.database.RouteController.getRouteByRouteId;
+import static pbrg.webservices.database.RouteController.getRouteContent;
 import static pbrg.webservices.database.RouteController.getRoutesInGymMadeByUser;
 import static pbrg.webservices.database.RouteController.routeExists;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
@@ -31,8 +33,10 @@ import java.util.List;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import pbrg.webservices.models.Route;
+import pbrg.webservices.models.RouteFull;
 
 public final class RouteControllerTest {
 
@@ -135,11 +139,26 @@ public final class RouteControllerTest {
     }
 
     @Test
+    void userOwnsRouteThrowing() {
+        // inject the mock data source
+        DatabaseController.setDataSource(
+            mockThrowsExceptionOnGetConnection()
+        );
+
+        // when checking if user owns route
+        boolean userOwnsRoute = RouteController.userOwnsRoute(-1, -1);
+
+        // then: user should not own route
+        assertFalse(userOwnsRoute);
+
+        // after: restore original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
     void addRouteEmptyResults() {
         // inject the mock data source
-        DataSource originalDataSource = DatabaseController.getDataSource();
-        DataSource mockDataSource = mockEmptyResultSet();
-        DatabaseController.setDataSource(mockDataSource);
+        DatabaseController.setDataSource(mockEmptyResultSet());
 
         // when adding a route with empty results
         Integer routeId = addRoute("[]", -1, -1, -1);
@@ -148,15 +167,28 @@ public final class RouteControllerTest {
         assertNull(routeId);
 
         // after: restore original data source
-        DatabaseController.setDataSource(originalDataSource);
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void addRouteThrowing() {
+        // inject the mock data source
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
+
+        // when adding a route with empty results
+        Integer routeId = addRoute("[]", -1, -1, -1);
+
+        // then: routeId should be null
+        assertNull(routeId);
+
+        // after: restore original data source
+        DatabaseController.setDataSource(getTestDataSource());
     }
 
     @Test
     void addImageToRouteNoAffectedRows() {
         // inject the mock data source
-        DataSource originalDataSource = DatabaseController.getDataSource();
-        DataSource mockDataSource = mockNoAffectedRows();
-        DatabaseController.setDataSource(mockDataSource);
+        DatabaseController.setDataSource(mockNoAffectedRows());
 
         // when adding an image to a route with no rows effected
         boolean imageAdded = RouteController.addImageToRoute(-1, "");
@@ -165,75 +197,60 @@ public final class RouteControllerTest {
         assertFalse(imageAdded);
 
         // after: restore original data source
-        DatabaseController.setDataSource(originalDataSource);
+        DatabaseController.setDataSource(getTestDataSource());
     }
 
     @Test
-    void deleteRouteByCreatorAndWallNoAffectedRows() {
+    void addImageToRouteThrowsException() {
         // inject the mock data source
-        DataSource originalDataSource = DatabaseController.getDataSource();
-        DataSource mockDataSource = mockNoAffectedRows();
-        DatabaseController.setDataSource(mockDataSource);
+        DatabaseController.setDataSource(
+            mockThrowsExceptionOnGetConnection()
+        );
 
-        // when deleting a route with no rows effected
-        boolean routeDeleted = RouteController.deleteRoute(-1, -1);
+        // when adding an image to a route with no rows effected
+        boolean imageAdded = RouteController.addImageToRoute(-1, "");
 
-        // then: route should not be deleted
-        assertFalse(routeDeleted);
+        // then: image should not be added
+        assertFalse(imageAdded);
 
         // after: restore original data source
-        DatabaseController.setDataSource(originalDataSource);
+        DatabaseController.setDataSource(getTestDataSource());
     }
 
-    @Test
-    void deleteRouteNoAffectedRows() {
-        // inject the mock data source
-        DataSource originalDataSource = DatabaseController.getDataSource();
-        DataSource mockDataSource = mockNoAffectedRows();
-        DatabaseController.setDataSource(mockDataSource);
+    @Nested
+    class DeleteRoute {
+        @Test
+        void deleteRouteNoAffectedRows() {
+            // inject the mock data source
+            DatabaseController.setDataSource(mockNoAffectedRows());
+            int invalidRouteId = -1;
 
-        // when deleting a route with no rows effected
-        boolean routeDeleted = RouteController.deleteRoute(-1);
+            // when deleting a route with no rows effected
+            boolean routeDeleted = RouteController.deleteRoute(invalidRouteId);
 
-        // then: route should not be deleted
-        assertFalse(routeDeleted);
+            // then: route should not be deleted
+            assertFalse(routeDeleted);
 
-        // after: restore original data source
-        DatabaseController.setDataSource(originalDataSource);
-    }
+            // after: restore original data source
+            DatabaseController.setDataSource(getTestDataSource());
+        }
 
-    @Test
-    void deleteRouteByCreatorAndWallConnectionThrowsException() {
-        // inject the mock data source
-        DataSource originalDataSource = DatabaseController.getDataSource();
-        DataSource mockDataSource = mockConnectionThrowsException();
-        DatabaseController.setDataSource(mockDataSource);
+        @Test
+        void deleteRouteConnectionThrowsException() {
+            // inject the mock data source
+            DataSource originalDataSource = DatabaseController.getDataSource();
+            DataSource mockDataSource = mockThrowsExceptionOnGetConnection();
+            DatabaseController.setDataSource(mockDataSource);
 
-        // when deleting a route with no rows effected
-        boolean routeDeleted = RouteController.deleteRoute(-1, -1);
+            // when deleting a route with no rows effected
+            boolean routeDeleted = RouteController.deleteRoute(-1);
 
-        // then: route should not be deleted
-        assertFalse(routeDeleted);
+            // then: route should not be deleted
+            assertFalse(routeDeleted);
 
-        // after: restore original data source
-        DatabaseController.setDataSource(originalDataSource);
-    }
-
-    @Test
-    void deleteRouteConnectionThrowsException() {
-        // inject the mock data source
-        DataSource originalDataSource = DatabaseController.getDataSource();
-        DataSource mockDataSource = mockConnectionThrowsException();
-        DatabaseController.setDataSource(mockDataSource);
-
-        // when deleting a route with no rows effected
-        boolean routeDeleted = RouteController.deleteRoute(-1);
-
-        // then: route should not be deleted
-        assertFalse(routeDeleted);
-
-        // after: restore original data source
-        DatabaseController.setDataSource(originalDataSource);
+            // after: restore original data source
+            DatabaseController.setDataSource(originalDataSource);
+        }
     }
 
     @Test
@@ -321,7 +338,7 @@ public final class RouteControllerTest {
         int userId = 2;
 
         DataSource originalDataSource = DatabaseController.getDataSource();
-        DataSource mockDataSource = mockConnectionThrowsException();
+        DataSource mockDataSource = mockThrowsExceptionOnGetConnection();
         DatabaseController.setDataSource(mockDataSource);
 
         // when: getting routes
@@ -347,5 +364,89 @@ public final class RouteControllerTest {
 
         // after: restore original data source
         DatabaseController.setDataSource(originalDataSource);
+    }
+
+    @Test
+    void getRouteContentThrowing() {
+        // mock the data source
+        int routeId = 1;
+        DatabaseController.setDataSource(
+            mockThrowsExceptionOnGetConnection()
+        );
+
+        // when: getting route content
+        String routeContent = getRouteContent(routeId);
+
+        // then: route content should be null
+        assertNull(routeContent);
+
+        // after: restore original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void getRouteContentEmptyResultSet() {
+        // mock the data source
+        int routeId = 1;
+        DatabaseController.setDataSource(mockEmptyResultSet());
+
+        // when: getting route content
+        String routeContent = getRouteContent(routeId);
+
+        // then: route content should be null
+        assertNull(routeContent);
+
+        // after: restore original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void routeExistsEmptyResultSet() {
+        // mock the data source
+        int routeId = 1;
+        DatabaseController.setDataSource(mockEmptyResultSet());
+
+        // when: checking if route exists
+        boolean routeExists = routeExists(routeId);
+
+        // then: route should not exist
+        assertFalse(routeExists);
+
+        // after: restore original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void getRouteByRouteIdEmptyResultSet() {
+        // mock the data source
+        int routeId = 1;
+        DatabaseController.setDataSource(mockEmptyResultSet());
+
+        // when: getting route by route id
+        RouteFull route = getRouteByRouteId(routeId);
+
+        // then: route should be null
+        assertNull(route);
+
+        // after: restore original data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void getRouteByRouteIdThrowing() {
+        // mock the data source
+        int routeId = 1;
+        DatabaseController.setDataSource(
+            mockThrowsExceptionOnGetConnection()
+        );
+
+        // when: getting route by route id
+        RouteFull route = getRouteByRouteId(routeId);
+
+        // then: route should be null
+        assertNull(route);
+
+        // after: restore original data source
+        DatabaseController.setDataSource(getTestDataSource());
     }
 }

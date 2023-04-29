@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.AuthenticationController.deleteUser;
 import static pbrg.webservices.database.AuthenticationController.getUserIDFromUsername;
 import static pbrg.webservices.database.AuthenticationController.userExists;
-import static pbrg.webservices.database.DatabaseTestMethods.mockConnectionThrowsException;
+import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnGetConnection;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
@@ -66,7 +66,7 @@ class RegisterServletTest {
     void failingSignUpFailed() throws IOException {
         // given a failed sign-up
         DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(mockConnectionThrowsException());
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
 
         String usernameKey = "username";
         String emailKey = "email";

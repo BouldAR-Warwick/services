@@ -320,30 +320,6 @@ public final class GymController {
         return gymId;
     }
 
-    ///**
-    // * Get a user's primary gym id.
-    // * @param userId user ID
-    // * @return a gym
-    // */
-    //public static @Nullable Gym getPrimaryGymOfUser(final int userId) {
-    //    Gym gym;
-    //    try (
-    //        Connection connection = getDataSource().getConnection();
-    //        PreparedStatement pst = connection.prepareStatement(
-    //            "SELECT gyms.GID, gyms.GymName, gyms.GymLocation "
-    //                + "FROM gyms "
-    //                + "INNER JOIN user_in_gym ON gyms.GID = user_in_gym.GID "
-    //                + "WHERE user_in_gym.UID = ?"
-    //        )
-    //    ) {
-    //        pst.setInt(1, userId);
-    //        gym = extractGym(pst);
-    //    } catch (SQLException e) {
-    //        return null;
-    //    }
-    //    return gym;
-    //}
-
     /**
      * Get a gym id from the gym name.
      * @param gymName gym name

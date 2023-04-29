@@ -8,37 +8,31 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.AuthenticationController.addUser;
 import static pbrg.webservices.database.AuthenticationController.deleteUser;
 import static pbrg.webservices.database.AuthenticationController.emailExists;
 import static pbrg.webservices.database.AuthenticationController.getUserIDFromEmail;
-import static pbrg.webservices.database.AuthenticationController
-    .getUserIDFromUsername;
+import static pbrg.webservices.database.AuthenticationController.getUserIDFromUsername;
 import static pbrg.webservices.database.AuthenticationController.signUp;
 import static pbrg.webservices.database.AuthenticationController.userExists;
 import static pbrg.webservices.database.AuthenticationController.usernameExists;
+import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnGetConnection;
+import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnConnectionClose;
+import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnExecuteQuery;
+import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnNext;
+import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnSetString;
+import static pbrg.webservices.database.DatabaseTestMethods.mockEmptyResultSet;
+import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnPrepareStatement;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
 import static pbrg.webservices.database.TestDatabase.startTestDatabaseInThread;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import javax.sql.DataSource;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import pbrg.webservices.models.User;
@@ -59,16 +53,16 @@ public final class AuthenticationControllerTest {
         if (usernameExists(TEST_USERNAME)) {
             Integer uid =
                 getUserIDFromUsername(TEST_USERNAME);
-            assert uid != null;
-            boolean deleted = deleteUser(uid);
-            assert deleted;
+            assertNotNull(uid);
+            assertTrue(deleteUser(uid));
+            assertFalse(userExists(uid));
             assertFalse(usernameExists(TEST_USERNAME));
         }
         if (emailExists(TEST_EMAIL)) {
             Integer uid = getUserIDFromEmail(TEST_EMAIL);
-            assert uid != null;
-            boolean deleted = deleteUser(uid);
-            assert deleted;
+            assertNotNull(uid);
+            assertTrue(deleteUser(uid));
+            assertFalse(userExists(uid));
             assertFalse(emailExists(TEST_EMAIL));
         }
     }
@@ -82,6 +76,8 @@ public final class AuthenticationControllerTest {
         clearTestUser();
 
         // create the test user
+        assertFalse(usernameExists(TEST_USERNAME));
+        assertFalse(emailExists(TEST_EMAIL));
         boolean added = signUp(
             TEST_USERNAME, TEST_EMAIL, TEST_PASSWORD
         );
@@ -93,31 +89,6 @@ public final class AuthenticationControllerTest {
         Integer uid = getUserIDFromUsername(TEST_USERNAME);
         assertNotNull(uid);
         return uid;
-    }
-
-    /**
-     * Creates a mock DataSource that throws an SQLException when
-     * getConnection() is called.
-     * @return the mock DataSource
-     * @throws SQLException if an error occurs while creating the mock
-     */
-    static @NotNull DataSource mockEmptyResultSet() throws SQLException {
-        DataSource dataSource = mock(DataSource.class);
-        Connection connection = mock(Connection.class);
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        ResultSet resultSet = mock(ResultSet.class);
-
-        when(dataSource.getConnection()).thenReturn(connection);
-        when(connection.prepareStatement(anyString()))
-            .thenReturn(preparedStatement);
-        when(connection.prepareStatement(
-            anyString(), eq(Statement.RETURN_GENERATED_KEYS))
-        ).thenReturn(preparedStatement);
-        when(preparedStatement.executeQuery()).thenReturn(resultSet);
-        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(false);
-
-        return dataSource;
     }
 
     @BeforeAll
@@ -136,8 +107,14 @@ public final class AuthenticationControllerTest {
         closeTestDatabaseInThread();
     }
 
+    @BeforeEach
+    void ensureTestUserIsValid() {
+        ensureTestUserIsRemoved();
+    }
+
     @AfterEach
     void ensureTestUserIsRemoved() {
+        assertNotNull(TEST_USERNAME);
         assertFalse(usernameExists(TEST_USERNAME));
         assertFalse(emailExists(TEST_EMAIL));
     }
@@ -147,7 +124,8 @@ public final class AuthenticationControllerTest {
         // get constructor
         Constructor<AuthenticationController> constructor;
         try {
-            constructor = AuthenticationController.class.getDeclaredConstructor();
+            constructor = AuthenticationController.class
+                .getDeclaredConstructor();
         } catch (NoSuchMethodException e) {
             fail("DatabaseUtils should have a private constructor");
             throw new RuntimeException(e);
@@ -173,66 +151,50 @@ public final class AuthenticationControllerTest {
         @Test
         void signInValidUser() {
             // given: a user that exists in the system
-            assertDoesNotThrow(() -> {
-                // when: signing up
-                boolean added = signUp(
-                    TEST_USERNAME, TEST_EMAIL, "password"
-                );
-
-                // then: the user is added
-                assertTrue(added);
-            });
-            assertTrue(usernameExists(TEST_USERNAME));
-            assertTrue(emailExists(TEST_EMAIL));
+            int userId = createTestUser();
 
             // when: signing in
-            User testUser =
-                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
+            User testUser = AuthenticationController
+                .signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should retrieve user
             assertNotNull(testUser);
             assertEquals(TEST_USERNAME, testUser.getUsername());
-            Integer testUid = getUserIDFromUsername(TEST_USERNAME);
-            assert testUid != null;
-            assertEquals(testUser.getUid(), testUid);
+            Integer userIdFromUsername = getUserIDFromUsername(TEST_USERNAME);
+            assertNotNull(userIdFromUsername);
+            assertEquals(userId, userIdFromUsername);
+            assertEquals(testUser.getUid(), userId);
 
             // after: remove the test user
-            assertTrue(deleteUser(testUid));
+            assertTrue(deleteUser(userId));
+            assertFalse(userExists(userId));
+            assertFalse(usernameExists(TEST_USERNAME));
+            assertFalse(emailExists(TEST_EMAIL));
         }
 
         @Test
-        void signInConnectionCloseFails() throws SQLException {
-            // mock database objects
-            Connection connection = mock(Connection.class);
-            doThrow(SQLException.class).when(connection).close();
+        void signInConnectionCloseFails() {
+            assertFalse(usernameExists(TEST_USERNAME));
+            assertFalse(emailExists(TEST_EMAIL));
 
-            DataSource mockedDataSource = mock(DataSource.class);
-            when(mockedDataSource.getConnection())
-                .thenReturn(connection);
-
-            // verify
-            Connection mockedConnection = mockedDataSource.getConnection();
-            assertThrows(
-                // then: an exception is thrown
-                SQLException.class,
-
-                // when: closing the connection
-                mockedConnection::close
+            DatabaseController.setDataSource(
+                mockThrowsExceptionOnConnectionClose()
             );
-
-            DataSource originalDataSource = DatabaseController.getDataSource();
-            DatabaseController.setDataSource(mockedDataSource);
 
             assertThrows(
                 // then: an exception is thrown
                 NullPointerException.class,
 
                 // when: signing in
-                () -> AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD)
+                () -> AuthenticationController
+                    .signIn(TEST_USERNAME, TEST_PASSWORD)
             );
 
             // after: reset data source
-            DatabaseController.setDataSource(originalDataSource);
+            DatabaseController.setDataSource(getTestDataSource());
+
+            // after: clean up
+            clearTestUser();
         }
 
         @Test
@@ -253,163 +215,78 @@ public final class AuthenticationControllerTest {
         }
 
         @Test
-        void signInExecuteQueryFails() throws SQLException {
+        void signInExecuteQueryFails() {
             // mock database objects
-
-            // data source -> connection -> prepared statement -> result set
-            PreparedStatement mockedPreparedStatement =
-                mock(PreparedStatement.class);
-            when(mockedPreparedStatement.executeQuery())
-                .thenThrow(new SQLException());
-
-            Connection mockedConnection = mock(Connection.class);
-            when(mockedConnection.prepareStatement(anyString()))
-                .thenReturn(mockedPreparedStatement);
-
-            DataSource mockedDataSource = mock(DataSource.class);
-            when(mockedDataSource.getConnection())
-                .thenReturn(mockedConnection);
-
-            // verify
-            PreparedStatement mockedStatement =
-                mockedDataSource.getConnection().prepareStatement("");
-            assertThrows(
-                // then: an exception is thrown
-                SQLException.class,
-
-                // when: signing in
-                mockedStatement::executeQuery
+            DatabaseController.setDataSource(
+                mockThrowsExceptionOnExecuteQuery()
             );
-
-            DataSource originalDataSource = DatabaseController.getDataSource();
-            DatabaseController.setDataSource(mockedDataSource);
 
             // when: signing in and experience SQLException
-            User user =
-                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
+            User user = AuthenticationController
+                .signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);
 
             // after: reset data source
-            DatabaseController.setDataSource(originalDataSource);
+            DatabaseController.setDataSource(getTestDataSource());
         }
 
         @Test
-        void signInSetStringFails() throws SQLException {
+        void signInSetStringFails() {
             // mock database objects
-
-            // data source -> connection -> prepared statement -> result set
-            PreparedStatement mockedPreparedStatement =
-                mock(PreparedStatement.class);
-            doThrow(new SQLException()).when(mockedPreparedStatement)
-                .setString(anyInt(), anyString());
-
-            Connection mockedConnection = mock(Connection.class);
-            when(mockedConnection.prepareStatement(anyString()))
-                .thenReturn(mockedPreparedStatement);
-
-            DataSource mockedDataSource = mock(DataSource.class);
-            when(mockedDataSource.getConnection())
-                .thenReturn(mockedConnection);
-
-            // validate
-            PreparedStatement preparedStatement =
-                mockedDataSource.getConnection()
-                .prepareStatement("");
-            assertThrows(
-                // then: an exception is thrown
-                SQLException.class,
-
-                // when: signing in
-                () -> preparedStatement.setString(1, "")
+            DatabaseController.setDataSource(
+                mockThrowsExceptionOnSetString()
             );
 
-            DataSource originalDataSource = DatabaseController.getDataSource();
-            DatabaseController.setDataSource(mockedDataSource);
-
             // when: signing in
-            User user =
-                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
+            User user = AuthenticationController
+                .signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);
 
             // after: reset data source
-            DatabaseController.setDataSource(originalDataSource);
+            DatabaseController.setDataSource(getTestDataSource());
         }
 
         @Test
-        void signInPreparedStatementFails() throws SQLException {
+        void signInPreparedStatementFails() {
             // mock database objects
-            Connection mockedConnection = mock(Connection.class);
-            when(mockedConnection.prepareStatement(anyString()))
-                .thenThrow(new SQLException());
-
-            DataSource mockedDataSource = mock(DataSource.class);
-            when(mockedDataSource.getConnection())
-                .thenReturn(mockedConnection);
-
-            DataSource originalDataSource = DatabaseController.getDataSource();
-            DatabaseController.setDataSource(mockedDataSource);
-
-            // when: signing in
-            User user =
-                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
-
-            // then: should not retrieve user
-            assertNull(user);
-
-            // after: reset data source
-            DatabaseController.setDataSource(originalDataSource);
-        }
-
-        @Test
-        void signInResultsSetThrowsException() throws SQLException {
-            // mock database objects
-
-            // data source -> connection -> prepared statement -> result set
-            ResultSet mockedResultSet = mock(ResultSet.class);
-            when(mockedResultSet.next())
-                .thenThrow(new SQLException());
-
-            PreparedStatement mockedPreparedStatement =
-                mock(PreparedStatement.class);
-            when(mockedPreparedStatement.executeQuery())
-                .thenReturn(mockedResultSet);
-
-            Connection mockedConnection = mock(Connection.class);
-            when(mockedConnection.prepareStatement(anyString()))
-                .thenReturn(mockedPreparedStatement);
-
-            DataSource mockedDataSource = mock(DataSource.class);
-            when(mockedDataSource.getConnection())
-                .thenReturn(mockedConnection);
-
-            // verify
-            ResultSet resultSet =
-                mockedDataSource.getConnection().prepareStatement("")
-                .executeQuery();
-            assertThrows(
-                // then: an exception is thrown
-                SQLException.class,
-
-                // when: signing in
-                resultSet::next
+            DatabaseController.setDataSource(
+                mockThrowsExceptionOnPrepareStatement()
             );
 
-            DataSource originalDataSource = DatabaseController.getDataSource();
-            DatabaseController.setDataSource(mockedDataSource);
-
             // when: signing in
-            User user =
-                AuthenticationController.signIn(TEST_USERNAME, TEST_PASSWORD);
+            User user = AuthenticationController
+                .signIn(TEST_USERNAME, TEST_PASSWORD);
 
             // then: should not retrieve user
             assertNull(user);
 
             // after: reset data source
-            DatabaseController.setDataSource(originalDataSource);
+            DatabaseController.setDataSource(getTestDataSource());
+        }
+
+        @Test
+        void signInResultsSetThrowsException() {
+            assertFalse(usernameExists(TEST_USERNAME));
+            assertFalse(emailExists(TEST_EMAIL));
+
+            // mock database objects
+            DatabaseController.setDataSource(
+                mockThrowsExceptionOnNext()
+            );
+
+            // when: signing in
+            User user = AuthenticationController
+                .signIn(TEST_USERNAME, TEST_PASSWORD);
+
+            // then: should not retrieve user
+            assertNull(user);
+
+            // after: reset data source
+            DatabaseController.setDataSource(getTestDataSource());
         }
 
     }
@@ -433,6 +310,7 @@ public final class AuthenticationControllerTest {
         Integer uid = getUserIDFromUsername(TEST_USERNAME);
         assertNotNull(uid);
         assertTrue(deleteUser(uid));
+        assertFalse(userExists(uid));
     }
 
     @Test
@@ -440,15 +318,19 @@ public final class AuthenticationControllerTest {
         // given: an existing user
         String username = "username_existing";
         String email = "email_existing";
-        signUp(
+        assertFalse(usernameExists(username));
+        assertFalse(emailExists(email));
+
+        boolean added = signUp(
             username, email, "password"
         );
-        assert usernameExists(username);
-        assert emailExists(email);
+        assertTrue(added);
+        assertTrue(usernameExists(username));
+        assertTrue(emailExists(email));
 
         // given: a non-existing username, email
-        assert !usernameExists(TEST_USERNAME);
-        assert !emailExists(TEST_EMAIL);
+        assertFalse(usernameExists(TEST_USERNAME));
+        assertFalse(emailExists(TEST_EMAIL));
 
         // when: signing up with the same credentials
         boolean[] invalidRequests = {
@@ -468,17 +350,22 @@ public final class AuthenticationControllerTest {
             )
         };
 
-        for (boolean invalidRequest : invalidRequests) {
+        for (boolean request : invalidRequests) {
             // then: the user is not added
-            assertFalse(invalidRequest);
+            assertFalse(request);
         }
 
-        // after: remove the users
+        // after: ensure test user not created
         assertFalse(usernameExists(TEST_USERNAME));
+        assertFalse(emailExists(TEST_EMAIL));
 
+        // after: remove the existing user
         Integer uid = getUserIDFromUsername(username);
-        assert uid != null;
-        deleteUser(uid);
+        assertNotNull(uid);
+        assertTrue(deleteUser(uid));
+        assertFalse(userExists(uid));
+        assertFalse(usernameExists(username));
+        assertFalse(emailExists(email));
     }
 
     @Test
@@ -490,54 +377,43 @@ public final class AuthenticationControllerTest {
     }
 
     @Test
-    void usernameExistsNoResults() throws SQLException {
+    void usernameExistsNoResults() {
         // given: a data source such that the result set is empty
-        DataSource dataSource = mockEmptyResultSet();
-
-        // use the mocked data source, storing the original
-        DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(dataSource);
+        DatabaseController.setDataSource(mockEmptyResultSet());
 
         // when: checking if the username exists
         // then: should not exist
         assertFalse(usernameExists(TEST_USERNAME));
 
         // after: reset data source
-        DatabaseController.setDataSource(originalDataSource);
+        DatabaseController.setDataSource(getTestDataSource());
     }
 
     @Test
-    void emailExistsNoResults() throws SQLException {
+    void emailExistsNoResults() {
         // given: a data source such that the result set is empty
-        DataSource dataSource = mockEmptyResultSet();
-
-        // use the mocked data source, storing the original
-        DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(dataSource);
+        DatabaseController.setDataSource(mockEmptyResultSet());
 
         // when: checking if the email exists
         // then: should not exist
         assertFalse(emailExists(TEST_EMAIL));
 
         // after: reset data source
-        DatabaseController.setDataSource(originalDataSource);
+        DatabaseController.setDataSource(getTestDataSource());
     }
 
     @Test
-    void userExistsNoResults() throws SQLException {
+    void userExistsNoResults() {
         // given: a data source such that the result set is empty
-        DataSource dataSource = mockEmptyResultSet();
-
-        // use the mocked data source, storing the original
-        DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(dataSource);
+        DatabaseController.setDataSource(mockEmptyResultSet());
+        int userId = -1;
 
         // when: checking if the email exists
         // then: should not exist
-        assertFalse(userExists(-1));
+        assertFalse(userExists(userId));
 
         // after: reset data source
-        DatabaseController.setDataSource(originalDataSource);
+        DatabaseController.setDataSource(getTestDataSource());
     }
 
     @Nested
@@ -556,36 +432,33 @@ public final class AuthenticationControllerTest {
         @Test
         void validEmail() {
             // given: an existing email
+            assertFalse(usernameExists(TEST_USERNAME));
+            assertFalse(emailExists(TEST_EMAIL));
 
             // add the test user
-            boolean added = signUp(
-                TEST_USERNAME, TEST_EMAIL, "password"
-            );
+            boolean added = signUp(TEST_USERNAME, TEST_EMAIL, "password");
             assertTrue(added);
             assertTrue(emailExists(TEST_EMAIL));
 
             // when: getting the user ID from the email
             // then: the user ID is not null
-            Integer uid = getUserIDFromEmail(TEST_EMAIL);
-            assertNotNull(uid);
-            assertEquals(
-                uid,
-                getUserIDFromUsername(TEST_USERNAME)
-            );
+            Integer userId = getUserIDFromEmail(TEST_EMAIL);
+            assertNotNull(userId);
+            Integer userIdFromUsername = getUserIDFromUsername(TEST_USERNAME);
+            assertNotNull(userIdFromUsername);
+            assertEquals(userId, userIdFromUsername);
 
             // after: remove the test user
-            assertTrue(deleteUser(uid));
+            assertTrue(deleteUser(userIdFromUsername));
+            assertFalse(usernameExists(TEST_USERNAME));
+            assertFalse(emailExists(TEST_EMAIL));
         }
     }
 
     @Test
-    void addUserNoResults() throws SQLException {
+    void addUserNoResults() {
         // given: a data source such that the result set is empty
-        DataSource dataSource = mockEmptyResultSet();
-
-        // use the mocked data source, storing the original
-        DataSource originalDataSource = DatabaseController.getDataSource();
-        DatabaseController.setDataSource(dataSource);
+        DatabaseController.setDataSource(mockEmptyResultSet());
 
         // when: checking if the email exists
         // then: should not exist
@@ -593,7 +466,7 @@ public final class AuthenticationControllerTest {
         assertNull(userId);
 
         // after: reset data source
-        DatabaseController.setDataSource(originalDataSource);
+        DatabaseController.setDataSource(getTestDataSource());
     }
 
     @Test
@@ -601,7 +474,77 @@ public final class AuthenticationControllerTest {
         // given: a non-existing user (uid = -1)
         int userId = -1;
 
-        // when: deleting the user, then: the user is not deleted
-        assertFalse(deleteUser(userId));
+        // when: deleting the user
+        boolean deleted = deleteUser(userId);
+
+        // then: the user is not deleted
+        assertFalse(deleted);
+    }
+
+    @Test
+    void userExistsThrowing() {
+        // given: a data source that throws an exception
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
+
+        int userId = -1;
+
+        // when: checking if the user exists
+        boolean userExists = userExists(userId);
+
+        // then: the user does not exist
+        assertFalse(userExists);
+
+        // after: reset data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void getUserIDFromUsernameThrowing() {
+        // given: a data source that throws an exception
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
+        String username = TEST_USERNAME;
+        assertFalse(usernameExists(username));
+
+        // when: getting the user ID from the username
+        Integer userId = getUserIDFromUsername(username);
+
+        // then: the user ID is null
+        assertNull(userId);
+
+        // after: reset data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void getUserIDFromEmailThrowing() {
+        // given: a data source that throws an exception
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
+        String email = TEST_EMAIL;
+        assertFalse(emailExists(email));
+
+        // when: getting the user ID from the email
+        Integer userId = getUserIDFromEmail(email);
+
+        // then: the user ID is null
+        assertNull(userId);
+
+        // after: reset data source
+        DatabaseController.setDataSource(getTestDataSource());
+    }
+
+    @Test
+    void deleteUserThrowing() {
+        // given: a data source that throws an exception
+        DatabaseController.setDataSource(mockThrowsExceptionOnGetConnection());
+        int userId = -1;
+
+        // when: deleting the user
+        boolean deleted = deleteUser(userId);
+
+        // then: the user is not deleted
+        assertFalse(deleted);
+
+        // after: reset data source
+        DatabaseController.setDataSource(getTestDataSource());
     }
 }

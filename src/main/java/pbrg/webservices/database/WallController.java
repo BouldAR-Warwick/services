@@ -94,37 +94,6 @@ public final class WallController {
     }
 
     /**
-     * Get a wall ID from a route ID.
-     * @param routeId route identifier
-     * @return wall identifier, null if an SQL exception occurs
-     */
-    public static @Nullable Integer getWallIdFromRouteId(
-        final int routeId
-    ) {
-        Integer wallId = null;
-        try (
-            Connection connection = getDataSource().getConnection();
-            PreparedStatement pst = connection.prepareStatement(
-                "SELECT routes.WID "
-                    + "FROM routes "
-                    + "WHERE RID = ?"
-            )
-        ) {
-            pst.setInt(1, routeId);
-            ResultSet rs = pst.executeQuery();
-
-            // get JSON list of holds
-            if (rs.next()) {
-                wallId = Integer.parseInt(rs.getString("WID"));
-            }
-        } catch (SQLException e) {
-            return null;
-        }
-
-        return wallId;
-    }
-
-    /**
      * Returns the wall image file name based on the route ID.
      * @param routeId the route ID
      * @return the wall image file name if found, null otherwise
@@ -132,7 +101,7 @@ public final class WallController {
     public static @Nullable String getWallImageFileNameFromRouteId(
         final int routeId
     ) {
-        Integer wallId = getWallIdFromRouteId(routeId);
+        Integer wallId = getWallIdFromRoute(routeId);
         if (wallId == null) {
             return null;
         }
@@ -251,7 +220,7 @@ public final class WallController {
      * @param routeId the route ID
      * @return the wall ID, or null if none found
      */
-    public static Integer getWallIdFromRoute(
+    public static @Nullable Integer getWallIdFromRoute(
         final int routeId
     ) {
         Integer wallId = null;

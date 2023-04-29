@@ -12,13 +12,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 class LogoutServletTest {
 
     @Test
-    void testDoGetCallsDoPost() throws IOException {
+    void testDoGetCallsDoPost() {
         // given a request and response
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getCookies()).thenReturn(null);
