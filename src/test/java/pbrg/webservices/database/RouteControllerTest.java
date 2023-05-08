@@ -10,13 +10,15 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static pbrg.webservices.database.AuthenticationController.userExists;
-import static pbrg.webservices.database.DatabaseTestMethods.mockThrowsExceptionOnGetConnection;
+import static pbrg.webservices.database.DatabaseTestMethods
+    .mockThrowsExceptionOnGetConnection;
 import static pbrg.webservices.database.DatabaseTestMethods.mockEmptyResultSet;
 import static pbrg.webservices.database.DatabaseTestMethods.mockNoAffectedRows;
 import static pbrg.webservices.database.RouteController.addRoute;
 import static pbrg.webservices.database.RouteController.getRouteByRouteId;
 import static pbrg.webservices.database.RouteController.getRouteContent;
-import static pbrg.webservices.database.RouteController.getRoutesInGymMadeByUser;
+import static pbrg.webservices.database.RouteController
+    .getRoutesInGymMadeByUser;
 import static pbrg.webservices.database.RouteController.routeExists;
 import static pbrg.webservices.database.TestDatabase.closeTestDatabaseInThread;
 import static pbrg.webservices.database.TestDatabase.getTestDataSource;
@@ -316,7 +318,10 @@ public final class RouteControllerTest {
         Route route1 = routes.get(0);
         assertEquals(FIRST_ROUTE_CREATOR_ID, route1.getRouteId());
         assertEquals(FIRST_ROUTE_DIFFICULTY, route1.getDifficulty());
-        assertEquals("Route #" + FIRST_ROUTE_CREATOR_ID, route1.getRouteName());
+        assertEquals(
+            "Route #" + FIRST_ROUTE_CREATOR_ID,
+            route1.getRouteName()
+        );
 
         // check second route
         Route route2 = routes.get(1);

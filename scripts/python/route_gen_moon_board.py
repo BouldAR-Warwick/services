@@ -1,33 +1,35 @@
 """Generate a random MoonBoard route for a given grade."""
-from typing import Any, Dict, List
-import random
 import json
-import sys
 import os
+import random
+import sys
+from typing import Any, Dict, List
 
 
 def parse_json_file(filepath: str) -> Dict[str, Any]:
     """Parse a JSON file and return a dictionary of the data."""
-    with open(filepath, 'r', encoding='utf-8') as file:
+    with open(filepath, "r", encoding="utf-8") as file:
         file_as_json = json.load(file)
     return file_as_json
 
 
 # static 2016 MoonBoard normalised-coordinate route
-static_warwick_route = json.dumps([
-    {"x": 0.21353383458646616, "y": 0.844574780058651},
-    {"x": 0.29172932330827067, "y": 0.793743890518084},
-    {"x": 0.29172932330827067, "y": 0.6412512218963832},
-    {"x": 0.5263157894736842, "y": 0.5395894428152492},
-    {"x": 0.3699248120300752, "y": 0.4887585532746823},
-    {"x": 0.7609022556390977, "y": 0.3362658846529814},
-    {"x": 0.6045112781954888, "y": 0.13294232649071358}
-])
+static_warwick_route = json.dumps(
+    [
+        {"x": 0.21353383458646616, "y": 0.844574780058651},
+        {"x": 0.29172932330827067, "y": 0.793743890518084},
+        {"x": 0.29172932330827067, "y": 0.6412512218963832},
+        {"x": 0.5263157894736842, "y": 0.5395894428152492},
+        {"x": 0.3699248120300752, "y": 0.4887585532746823},
+        {"x": 0.7609022556390977, "y": 0.3362658846529814},
+        {"x": 0.6045112781954888, "y": 0.13294232649071358}
+    ]
+)
 
 # storing cached routes for the Warwick MoonBoard
-WARWICK_CACHED_ROUTES_FILENAME = 'warwick-routes-cached-v4-9.json'
+WARWICK_CACHED_ROUTES_FILENAME = "warwick-routes-cached-v4-9.json"
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # ensure we have both arguments
     if len(sys.argv) != 2:
         print("Usage: python3 <route-gen-script>.py <grade>")

@@ -10,7 +10,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static pbrg.webservices.database.AuthenticationController.addUser;
 import static pbrg.webservices.database.AuthenticationController.deleteUser;
-import static pbrg.webservices.database.AuthenticationControllerTest.createTestUser;
+import static pbrg.webservices.database.AuthenticationControllerTest
+    .createTestUser;
 import static pbrg.webservices.database.GymController.addGym;
 import static pbrg.webservices.database.GymController.deleteGym;
 import static pbrg.webservices.database.GymControllerTest.createTestGym;
