@@ -3,17 +3,14 @@ import json
 import os
 import sys
 from typing import List
+
 from PIL import Image, ImageDraw
 
 # radius of the hold circle
 HOLD_RADIUS = 25
 
 
-def plot_holds(
-    wall_image_of_route: Image,
-    route_image_in: Image,
-    holds: List[dict]
-):
+def plot_holds(wall_image_of_route: Image, route_image_in: Image, holds: List[dict]):
     """Plot the holds on the route image."""
     # draw the holds on the route image
     draw = ImageDraw.Draw(route_image_in)
@@ -30,11 +27,11 @@ def plot_holds(
                 x_coordinate - HOLD_RADIUS,
                 y_coordinate - HOLD_RADIUS,
                 x_coordinate + HOLD_RADIUS,
-                y_coordinate + HOLD_RADIUS
+                y_coordinate + HOLD_RADIUS,
             ),
             fill=None,
             outline=(255, 0, 0),
-            width=5
+            width=5,
         )
 
 
@@ -45,8 +42,7 @@ def get_wall_image(
     """Open the wall image file. Exits if the file does not exist."""
     # parse the wall image path
     wall_image_path = os.path.join(
-        wall_image_directory_of_route,
-        wall_image_filename_of_route
+        wall_image_directory_of_route, wall_image_filename_of_route
     )
 
     # ensure file exists
@@ -64,13 +60,10 @@ def create_blank_route_image(wall_image_of_route: Image) -> Image:
 
 
 def create_route_image_filepath(
-    route_id_in: str,
-    wall_image_filename_of_route: str,
-    route_image_directory_in: str
+    route_id_in: str, wall_image_filename_of_route: str, route_image_directory_in: str
 ) -> str:
     """Create the route image path."""
-    route_image_filename = "r" + route_id_in +\
-        "-" + wall_image_filename_of_route
+    route_image_filename = "r" + route_id_in + "-" + wall_image_filename_of_route
     return os.path.join(route_image_directory_in, route_image_filename)
 
 
@@ -86,19 +79,21 @@ if __name__ == "__main__":
 
     # parse the arguments
     assert len(sys.argv[1:]) == 5
-    wall_image_filename, wall_image_directory, route_image_directory,\
-        route_id, holds_json = tuple(sys.argv[1:])
+    (
+        wall_image_filename,
+        wall_image_directory,
+        route_image_directory,
+        route_id,
+        holds_json,
+    ) = tuple(sys.argv[1:])
 
     # get the wall image, create the route image
-    wall_image: Image =\
-        get_wall_image(wall_image_directory, wall_image_filename)
+    wall_image: Image = get_wall_image(wall_image_directory, wall_image_filename)
     route_image: Image = create_blank_route_image(wall_image)
 
     # create the route image path
     route_image_path: str = create_route_image_filepath(
-        route_id,
-        wall_image_filename,
-        route_image_directory
+        route_id, wall_image_filename, route_image_directory
     )
 
     # plot the holds on the wall image

@@ -11,9 +11,9 @@ name: Maven Package
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
   build:
@@ -26,14 +26,14 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '11'
-        distribution: 'temurin'
+        distribution: temurin
         cache: maven
     - name: Set up python 3.9
       uses: actions/setup-python@v4
       with:
         # DCS systems use 3.6.8
         python-version: '3.9'
-        cache: 'pip'
+        cache: pip
         cache-dependency-path: '**/requirements.txt'
     - name: Install Python Dependencies
       run: pip install -r ./scripts/python/requirements.txt

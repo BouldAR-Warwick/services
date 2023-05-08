@@ -3,7 +3,7 @@ name: Measure coverage
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 11
-          distribution: 'temurin'
+          distribution: temurin
           cache: maven
       
       # Python dependency
@@ -24,7 +24,7 @@ jobs:
         with:
           # DCS systems use 3.6.8 - depreciated in setup-python@v4
           python-version: '3.9'
-          cache: 'pip'
+          cache: pip
           cache-dependency-path: '**/requirements.txt'
       - name: Install Python Dependencies
         run: pip install -r ./scripts/python/requirements.txt
