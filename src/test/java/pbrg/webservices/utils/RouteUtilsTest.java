@@ -158,7 +158,7 @@ final class RouteUtilsTest {
 
         File pythonFile = new File(
             fakePath,
-            "plot-holds.py"
+            "plot_holds.py"
         );
         assertFalse(pythonFile.exists());
 

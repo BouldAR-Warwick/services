@@ -435,7 +435,7 @@ public final class RouteControllerTest {
     @Test
     void getRouteByRouteIdThrowing() {
         // mock the data source
-        int routeId = 1;
+        int routeId = -1;
         DatabaseController.setDataSource(
             mockThrowsExceptionOnGetConnection()
         );

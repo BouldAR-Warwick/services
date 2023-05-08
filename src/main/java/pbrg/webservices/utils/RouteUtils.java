@@ -29,10 +29,10 @@ public final class RouteUtils {
     private static String pythonScriptsDir;
 
     /** The file name for the route generation script. */
-    private static String routeGenerationScript = "route-gen-moon-board.py";
+    private static String routeGenerationScript = "route_gen_moon_board.py";
 
     /** The file name for the hold plotting script. */
-    private static String holdPlottingScript = "plot-holds.py";
+    private static String holdPlottingScript = "plot_holds.py";
 
     /** Util class, no instances. */
     private RouteUtils() {
@@ -118,7 +118,7 @@ public final class RouteUtils {
     @Contract("_ -> new")
     public static @NotNull JSONArray generateRouteMoonBoard(final int grade)
         throws IOException {
-        // path is working dir + python-scripts/plot-holds.py
+        // path is working dir + python-scripts/plot_holds.py
         File pythonFile = new File(
             getPythonScriptsDir(), getRouteGenerationScript()
         );
@@ -216,7 +216,7 @@ public final class RouteUtils {
     }
 
     /**
-     * Plot holds on an image using python script plot-holds.py.
+     * Plot holds on an image using python script plot_holds.py.
      * @param routeId route id
      * @param wallImageFileName wall image file name
      * @param wallImageFilePath wall image file path
@@ -231,7 +231,7 @@ public final class RouteUtils {
         @NotNull final String routeImageFilePath,
         @NotNull final JSONArray holdArray
     ) throws IOException {
-        // path is working dir + python-scripts/plot-holds.py
+        // path is working dir + python-scripts/plot_holds.py
         File pythonFile = new File(
             getPythonScriptsDir(), getHoldPlottingScript()
         );
